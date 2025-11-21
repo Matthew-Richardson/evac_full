@@ -420,11 +420,13 @@
     embeddedMap.addEventListener('arcgisViewReadyChange', (event) => {
       mapView = event.target.view;
       mapIsReady = true;
-      console.log('Map view ready');
+      console.log('=== MAP VIEW READY ===');
+      console.log('Spatial reference:', mapView.spatialReference);
       
       // If there's a pending zoom (from URL or dropdown), execute it now
       if (pendingZoomIncident && incidentGroups[pendingZoomIncident]) {
-        setTimeout(() => zoomToIncident(pendingZoomIncident), 500);
+        console.log('Pending zoom found, executing for:', pendingZoomIncident);
+        setTimeout(() => zoomToIncident(pendingZoomIncident), 1000);
       }
     });
     
@@ -433,12 +435,17 @@
       const queryParams = new Query({
         where: "1=1",
         outFields: ["*"],
-        returnGeometry: true
+        returnGeometry: true,
+        returnZ: false,
+        returnM: false,
+        outSpatialReference: { wkid: 102100 } // Request in Web Mercator
       });
       
       try {
         const results = await query.executeQueryJSON(featureLayerUrl, queryParams);
         const features = results.features;
+        
+        console.log(`=== LOADED ${features.length} FEATURES ===`);
         
         // Group features by incident name
         features.forEach((feature) => {
@@ -454,6 +461,9 @@
           }
           incidentGroups[incidentName].push(feature);
         });
+        
+        console.log('Incident groups:', Object.keys(incidentGroups));
+        console.log('Incidents with counts:', Object.entries(incidentGroups).map(([name, feats]) => `${name}: ${feats.length}`));
         
         // Populate dropdown with unique incidents
         incidentSelect.innerHTML = '<option value="">Select an incident...</option>';
@@ -471,15 +481,21 @@
         
         // If URL has an incident, select it in dropdown and prepare to zoom
         if (urlIncident) {
+          console.log(`=== URL INCIDENT: "${urlIncident}" ===`);
           if (incidentGroups[urlIncident]) {
+            console.log(`Found ${incidentGroups[urlIncident].length} features for incident`);
             incidentSelect.value = urlIncident;
             pendingZoomIncident = urlIncident;
             
             // If map is already ready, zoom immediately
             if (mapIsReady) {
-              setTimeout(() => zoomToIncident(urlIncident), 500);
+              console.log('Map already ready, zooming now');
+              setTimeout(() => zoomToIncident(urlIncident), 1000);
+            } else {
+              console.log('Map not ready, will zoom when ready');
             }
           } else {
+            console.warn(`Incident "${urlIncident}" NOT FOUND. Available:`, Object.keys(incidentGroups));
             mapStatus.textContent = `Incident "${urlIncident}" not found in data`;
           }
         }
@@ -492,21 +508,30 @@
     
     // Calculate combined extent for multiple features
     function calculateCombinedExtent(features) {
+      console.log(`=== CALCULATING EXTENT FOR ${features.length} FEATURES ===`);
+      
       let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
       let spatialReference = null;
+      let validFeatures = 0;
       
-      features.forEach(feature => {
+      features.forEach((feature, index) => {
         const geometry = feature.geometry;
-        if (!geometry) return;
+        if (!geometry) {
+          console.warn(`Feature ${index} has no geometry`);
+          return;
+        }
         
         if (!spatialReference) {
           spatialReference = geometry.spatialReference;
+          console.log('Using spatial reference:', spatialReference);
         }
         
         let featureExtent;
         
         if (geometry.extent) {
+          // Geometry already has an extent
           featureExtent = geometry.extent;
+          console.log(`Feature ${index} extent:`, featureExtent);
         } else if (geometry.x !== undefined && geometry.y !== undefined) {
           // Point geometry
           const buffer = 500;
@@ -516,17 +541,31 @@
             xmax: geometry.x + buffer,
             ymax: geometry.y + buffer
           };
-        } else if (geometry.rings || geometry.paths) {
-          // Polygon or polyline
-          const coords = geometry.rings ? geometry.rings.flat() : geometry.paths.flat();
-          const xs = coords.map(c => c[0]);
-          const ys = coords.map(c => c[1]);
+          console.log(`Feature ${index} point (${geometry.x}, ${geometry.y})`);
+        } else if (geometry.rings) {
+          // Polygon geometry
+          const allCoords = geometry.rings.flat();
+          const xs = allCoords.map(c => c[0]);
+          const ys = allCoords.map(c => c[1]);
           featureExtent = {
             xmin: Math.min(...xs),
             ymin: Math.min(...ys),
             xmax: Math.max(...xs),
             ymax: Math.max(...ys)
           };
+          console.log(`Feature ${index} polygon extent:`, featureExtent);
+        } else if (geometry.paths) {
+          // Polyline geometry
+          const allCoords = geometry.paths.flat();
+          const xs = allCoords.map(c => c[0]);
+          const ys = allCoords.map(c => c[1]);
+          featureExtent = {
+            xmin: Math.min(...xs),
+            ymin: Math.min(...ys),
+            xmax: Math.max(...xs),
+            ymax: Math.max(...ys)
+          };
+          console.log(`Feature ${index} polyline extent:`, featureExtent);
         }
         
         if (featureExtent) {
@@ -534,46 +573,73 @@
           ymin = Math.min(ymin, featureExtent.ymin);
           xmax = Math.max(xmax, featureExtent.xmax);
           ymax = Math.max(ymax, featureExtent.ymax);
+          validFeatures++;
         }
       });
       
+      console.log(`Processed ${validFeatures} valid features`);
+      console.log('Combined bounds:', { xmin, ymin, xmax, ymax });
+      
       if (xmin !== Infinity && spatialReference) {
-        return new Extent({
+        const combinedExtent = new Extent({
           xmin: xmin,
           ymin: ymin,
           xmax: xmax,
           ymax: ymax,
           spatialReference: spatialReference
         });
+        console.log('Final extent object:', combinedExtent);
+        return combinedExtent;
       }
       
+      console.error('Could not calculate valid extent');
       return null;
     }
     
     // Zoom to a specific incident
     function zoomToIncident(incidentName) {
+      console.log('=== ZOOM TO INCIDENT ===');
+      console.log('Incident:', incidentName);
+      console.log('Map ready:', mapIsReady);
+      console.log('Map view exists:', !!mapView);
+      
       if (!mapIsReady || !mapView) {
-        console.log('Map not ready yet, will zoom when ready');
+        console.log('Map not ready yet, setting pending zoom');
         pendingZoomIncident = incidentName;
+        mapStatus.textContent = 'Map loading...';
         return;
       }
       
       const features = incidentGroups[incidentName];
+      console.log('Features for incident:', features ? features.length : 0);
       
       if (features && features.length > 0) {
         const combinedExtent = calculateCombinedExtent(features);
         
         if (combinedExtent) {
-          mapView.goTo(combinedExtent.expand(1.2), {
-            duration: 1000,
+          console.log('Zooming to extent:', combinedExtent);
+          const expandedExtent = combinedExtent.expand(1.3);
+          console.log('Expanded extent:', expandedExtent);
+          
+          mapView.goTo(expandedExtent, {
+            duration: 1500,
             easing: "ease-in-out"
+          })
+          .then(() => {
+            console.log('✓ Zoom completed successfully');
+            mapStatus.textContent = `Zoomed to: ${incidentName} (${features.length} feature${features.length > 1 ? 's' : ''})`;
+            pendingZoomIncident = null;
+          })
+          .catch(error => {
+            console.error('✗ Error during zoom:', error);
+            mapStatus.textContent = 'Error zooming to incident';
           });
-          mapStatus.textContent = `Zoomed to: ${incidentName} (${features.length} feature${features.length > 1 ? 's' : ''})`;
-          pendingZoomIncident = null;
         } else {
+          console.error('Could not calculate extent');
           mapStatus.textContent = 'Could not calculate extent for this incident';
         }
       } else {
+        console.error('No features found');
         mapStatus.textContent = 'No features found for this incident';
       }
     }
@@ -581,17 +647,14 @@
     // Zoom to selected incident when dropdown changes
     incidentSelect.addEventListener('change', () => {
       const selectedIncident = incidentSelect.value;
+      console.log('=== DROPDOWN CHANGED ===');
+      console.log('Selected:', selectedIncident);
       
       if (!selectedIncident) {
         return;
       }
       
-      if (mapIsReady) {
-        zoomToIncident(selectedIncident);
-      } else {
-        pendingZoomIncident = selectedIncident;
-        mapStatus.textContent = 'Map loading...';
-      }
+      zoomToIncident(selectedIncident);
     });
     
     // Load incidents when page loads

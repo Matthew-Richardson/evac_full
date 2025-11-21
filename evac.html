@@ -524,84 +524,11 @@
   });
 </script>
 
-          
-          mapView.goTo(expandedExtent, {
-            duration: 1500,
-            easing: "ease-in-out"
-          })
-          .then(() => {
-            console.log('✓ Zoom completed successfully');
-            mapStatus.textContent = `Zoomed to: ${incidentName} (${features.length} feature${features.length > 1 ? 's' : ''})`;
-            pendingZoomIncident = null;
-          })
-          .catch(error => {
-            console.error('✗ Error during zoom:', error);
-            mapStatus.textContent = 'Error zooming to incident';
-          });
-        } else {
-          console.error('Could not calculate extent');
-          mapStatus.textContent = 'Could not calculate extent for this incident';
-        }
-      } else {
-        console.error('No features found');
-        mapStatus.textContent = 'No features found for this incident';
-      }
-    }
-    
-    // Zoom to selected incident when dropdown changes
-    incidentSelect.addEventListener('change', () => {
-      const selectedIncident = incidentSelect.value;
-      console.log('=== DROPDOWN CHANGED ===');
-      console.log('Selected:', selectedIncident);
-      
-      if (!selectedIncident) {
-        return;
-      }
-      
-      zoomToIncident(selectedIncident);
-    });
-    
-    // Test zoom button
-    document.getElementById('testZoomBtn').addEventListener('click', () => {
-      console.log('=== TEST ZOOM BUTTON CLICKED ===');
-      console.log('Map view:', mapView);
-      console.log('Map ready:', mapIsReady);
-      console.log('Incident groups:', Object.keys(incidentGroups));
-      console.log('Selected incident:', incidentSelect.value);
-      
-      if (mapView) {
-        console.log('Current map extent:', mapView.extent);
-        console.log('Current map center:', mapView.center);
-        console.log('Current map zoom:', mapView.zoom);
-        
-        // Try a simple zoom to a fixed location to test if goTo works at all
-        console.log('Testing simple zoom...');
-        mapView.goTo({
-          center: [-107.88, 37.27],
-          zoom: 12
-        }).then(() => {
-          console.log('✓ Simple zoom successful!');
-          mapStatus.textContent = 'Simple zoom test successful';
-        }).catch(err => {
-          console.error('✗ Simple zoom failed:', err);
-          mapStatus.textContent = 'Simple zoom test failed';
-        });
-      } else {
-        console.error('Map view not available!');
-        alert('Map view not available. Check console.');
-      }
-      
-      if (incidentSelect.value) {
-        setTimeout(() => {
-          console.log('Now trying incident zoom...');
-          zoomToIncident(incidentSelect.value);
-        }, 2000);
-      }
-    });
-    
-    // Load incidents when page loads
-    loadIncidents();
-  });
+<script>
+  // Get incident from URL parameters
+  const params = new URLSearchParams(window.location.search);
+  const rawIncident = params.get('incident');
+  const INCIDENT = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
 
   // ========== EVACUATION INFORMATION ==========
   // Constants
@@ -627,9 +554,6 @@
 
   const ARCGIS_URL = 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query';
   const STATUS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec';
-
-  // Get incident from URL parameters (reuse from above)
-  const INCIDENT = urlIncident;
 
   /**
    * Escapes special characters in a string for use in SQL-like queries

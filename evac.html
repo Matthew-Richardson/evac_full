@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evacuation Info</title>
 
-  <!-- Add script to load the embeddable map component -->
-  <script type="module" src="https://js.arcgis.com/4.34/embeddable-components/"></script>
-  <link rel="stylesheet" href="https://js.arcgis.com/4.34/@arcgis/core/assets/esri/themes/light/main.css">
-  <script src="https://js.arcgis.com/4.34/"></script>
+  <!-- ArcGIS Maps SDK for JavaScript -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.31/"></script>
 
   <style>
     body {
@@ -66,12 +65,10 @@
     }
 
     .map-wrapper {
-      display: flex;
-      justify-content: center;
       margin-bottom: 12px;
     }
 
-    #embeddedMap {
+    #viewDiv {
       border-radius: 8px;
       box-shadow: 0 0 4px rgba(0,0,0,0.3);
       border: 1px solid rgba(0,0,0,0.2);
@@ -81,7 +78,7 @@
     }
 
     @media (max-width: 600px) {
-      #embeddedMap {
+      #viewDiv {
         height: 400px;
       }
     }
@@ -352,17 +349,11 @@
     <select id="incidentSelect">
       <option value="">Loading incidents...</option>
     </select>
-    <button id="testZoomBtn" style="padding: 8px 12px; margin-left: 10px; background: #0079c1; color: white; border: none; cursor: pointer; border-radius: 4px;">Test Zoom</button>
     <span id="mapStatus" class="map-status"></span>
   </div>
   
   <div class="map-wrapper">
-    <arcgis-embedded-map 
-      id="embeddedMap"
-      item-id="58a8bb313db64271a55e7960cb839f64" 
-      theme="light"
-      portal-url="https://lpcgis.maps.arcgis.com">
-    </arcgis-embedded-map>
+    <div id="viewDiv"></div>
   </div>
 </div>
 
@@ -394,314 +385,145 @@
   <div id="incident-panel">Loading incident status…</div>
 </div>
 
+
 <script>
-  // Get incident from URL parameters first
+  // Get incident from URL parameters
   const params = new URLSearchParams(window.location.search);
   const rawIncident = params.get('incident');
   const urlIncident = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
 
   // ========== MAP INITIALIZATION ==========
   require([
-    "esri/rest/query",
-    "esri/rest/support/Query",
-    "esri/geometry/Extent",
-    "esri/core/reactiveUtils"
-  ], function(query, Query, Extent, reactiveUtils) {
+    "esri/WebMap",
+    "esri/views/MapView",
+    "esri/layers/FeatureLayer"
+  ], function(WebMap, MapView, FeatureLayer) {
     
-    const featureLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
+    const webmapId = "58a8bb313db64271a55e7960cb839f64";
+    const incidentLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
+    const incidentFieldName = "incident";
+    
     const incidentSelect = document.getElementById('incidentSelect');
     const mapStatus = document.getElementById('mapStatus');
-    const embeddedMap = document.getElementById('embeddedMap');
     
-    let incidentGroups = {}; // Store features grouped by incident
-    let mapView = null;
-    let mapIsReady = false;
-    let pendingZoomIncident = null;
-    
-    // Fallback: Check for view periodically with more detailed logging
-    let viewCheckAttempts = 0;
-    const checkForView = setInterval(() => {
-      viewCheckAttempts++;
-      console.log(`Polling attempt ${viewCheckAttempts}: checking for view...`);
-      console.log('embeddedMap:', embeddedMap);
-      console.log('embeddedMap.view:', embeddedMap.view);
-      
-      if (!mapView) {
-        // Try different properties
-        const possibleView = embeddedMap.view || 
-                            embeddedMap.mapView || 
-                            embeddedMap._view ||
-                            (embeddedMap.shadowRoot && embeddedMap.shadowRoot.querySelector('arcgis-map')?.view);
-        
-        if (possibleView) {
-          console.log('✓ Found map view via polling:', possibleView);
-          mapView = possibleView;
-          mapIsReady = true;
-          clearInterval(checkForView);
-          
-          console.log('Map view spatial reference:', mapView.spatialReference);
-          
-          if (pendingZoomIncident && incidentGroups[pendingZoomIncident]) {
-            console.log('Executing pending zoom after polling found view');
-            setTimeout(() => zoomToIncident(pendingZoomIncident), 1000);
-          }
-        }
-      }
-      
-      if (viewCheckAttempts > 20) {
-        console.error('✗ Failed to find map view after 20 attempts');
-        console.log('embeddedMap properties:', Object.keys(embeddedMap));
-        mapStatus.textContent = 'Error: Could not access map view';
-        clearInterval(checkForView);
-      }
-    }, 500);
-    
-    // Wait for the embedded map to load
-    embeddedMap.addEventListener('arcgisViewReadyChange', (event) => {
-      console.log('=== arcgisViewReadyChange EVENT ===');
-      console.log('Event:', event);
-      console.log('Event detail:', event.detail);
-      console.log('Event target:', event.target);
-      console.log('Event target view:', event.target.view);
-      
-      // Try different ways to access the view
-      mapView = event.target.view || event.detail?.view || embeddedMap.view;
-      
-      if (!mapView) {
-        console.error('Could not access map view from event!');
-        console.log('Trying to access embeddedMap.view directly...');
-        // Try again after a short delay
-        setTimeout(() => {
-          mapView = embeddedMap.view;
-          if (mapView) {
-            console.log('✓ Got map view from embeddedMap.view');
-            onMapReady();
-          } else {
-            console.error('✗ Still cannot access map view');
-          }
-        }, 500);
-        return;
-      }
-      
-      console.log('✓ Map view obtained:', mapView);
-      onMapReady();
+    const webmap = new WebMap({
+      portalItem: { id: webmapId }
     });
     
-    // Also try using reactiveUtils to watch for the view
-    reactiveUtils.when(
-      () => embeddedMap.view != null,
-      () => {
-        console.log('=== reactiveUtils detected view ready ===');
-        if (!mapView) {
-          mapView = embeddedMap.view;
-          console.log('Got map view via reactiveUtils:', mapView);
-          onMapReady();
-        }
-      }
-    );
+    const view = new MapView({
+      container: "viewDiv",
+      map: webmap
+    });
     
-    function onMapReady() {
-      mapIsReady = true;
-      console.log('=== MAP VIEW READY ===');
-      console.log('Spatial reference:', mapView?.spatialReference);
+    const incidentLayer = new FeatureLayer({
+      url: incidentLayerUrl,
+      outFields: ["*"]
+    });
+    
+    webmap.add(incidentLayer);
+    
+    // Zoom to a specific incident
+    function zoomToIncident(incidentVal) {
+      if (!incidentVal) return;
       
-      // If there's a pending zoom (from URL or dropdown), execute it now
-      if (pendingZoomIncident && incidentGroups[pendingZoomIncident]) {
-        console.log('Pending zoom found, executing for:', pendingZoomIncident);
-        setTimeout(() => zoomToIncident(pendingZoomIncident), 1000);
-      }
+      mapStatus.textContent = "Zooming…";
+      
+      const safeVal = incidentVal.replace(/'/g, "''");
+      const whereClause = `${incidentFieldName} = '${safeVal}'`;
+      
+      incidentLayer.queryExtent({ where: whereClause })
+        .then((result) => {
+          if (result.extent) {
+            return view.goTo(result.extent.expand(1.2));
+          } else {
+            mapStatus.textContent = "No features for this incident.";
+          }
+        })
+        .then(() => {
+          mapStatus.textContent = `Zoomed to ${incidentVal}`;
+        })
+        .catch((err) => {
+          console.error(err);
+          mapStatus.textContent = "Zoom error.";
+        });
     }
     
-    // Query the feature layer for incidents
-    async function loadIncidents() {
-      const queryParams = new Query({
-        where: "1=1",
-        outFields: ["*"],
-        returnGeometry: true,
-        returnZ: false,
-        returnM: false,
-        outSpatialReference: { wkid: 102100 } // Request in Web Mercator
-      });
-      
-      try {
-        const results = await query.executeQueryJSON(featureLayerUrl, queryParams);
-        const features = results.features;
+    // Populate dropdown after map + layer load
+    view.when()
+      .then(() => incidentLayer.when())
+      .then(() => {
+        mapStatus.textContent = "Loading incidents…";
         
-        console.log(`=== LOADED ${features.length} FEATURES ===`);
-        
-        // Group features by incident name
-        features.forEach((feature) => {
-          const incidentName = feature.attributes.incident || 
-                             feature.attributes.Incident || 
-                             feature.attributes.INCIDENT ||
-                             feature.attributes.Name ||
-                             feature.attributes.NAME ||
-                             'Unknown';
-          
-          if (!incidentGroups[incidentName]) {
-            incidentGroups[incidentName] = [];
-          }
-          incidentGroups[incidentName].push(feature);
+        return incidentLayer.queryFeatures({
+          where: "1=1",
+          outFields: [incidentFieldName],
+          returnDistinctValues: true,
+          orderByFields: [incidentFieldName]
         });
+      })
+      .then((featureSet) => {
+        const features = featureSet.features || [];
         
-        console.log('Incident groups:', Object.keys(incidentGroups));
-        console.log('Incidents with counts:', Object.entries(incidentGroups).map(([name, feats]) => `${name}: ${feats.length}`));
+        // Clear dropdown
+        incidentSelect.innerHTML = "";
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "Select an incident…";
+        incidentSelect.appendChild(defaultOption);
         
-        // Populate dropdown with unique incidents
-        incidentSelect.innerHTML = '<option value="">Select an incident...</option>';
-        
-        const incidentNames = Object.keys(incidentGroups).sort();
-        incidentNames.forEach((incidentName) => {
-          const option = document.createElement('option');
-          option.value = incidentName;
-          const featureCount = incidentGroups[incidentName].length;
-          option.textContent = `${incidentName} (${featureCount} feature${featureCount > 1 ? 's' : ''})`;
+        // Add distinct incident names
+        features.forEach((f) => {
+          const val = f.attributes[incidentFieldName];
+          if (!val) return;
+          
+          const option = document.createElement("option");
+          option.value = val;
+          option.textContent = val;
           incidentSelect.appendChild(option);
         });
         
-        mapStatus.textContent = `${incidentNames.length} unique incident(s) loaded`;
+        mapStatus.textContent = `Loaded ${features.length} incident(s).`;
         
-        // If URL has an incident, select it in dropdown and prepare to zoom
+        // After dropdown is built, check URL for ?incident=
         if (urlIncident) {
-          console.log(`=== URL INCIDENT: "${urlIncident}" ===`);
-          if (incidentGroups[urlIncident]) {
-            console.log(`Found ${incidentGroups[urlIncident].length} features for incident`);
-            incidentSelect.value = urlIncident;
-            pendingZoomIncident = urlIncident;
-            
-            // If map is already ready, zoom immediately
-            if (mapIsReady) {
-              console.log('Map already ready, zooming now');
-              setTimeout(() => zoomToIncident(urlIncident), 1000);
-            } else {
-              console.log('Map not ready, will zoom when ready');
+          const urlNorm = urlIncident.toLowerCase().trim();
+          let matchedValue = null;
+          
+          // Try to find a matching option (case-insensitive)
+          for (let i = 0; i < incidentSelect.options.length; i++) {
+            const opt = incidentSelect.options[i];
+            const optNorm = opt.value.toLowerCase().trim();
+            if (optNorm === urlNorm) {
+              matchedValue = opt.value;
+              break;
             }
+          }
+          
+          if (matchedValue) {
+            // Set dropdown and zoom
+            incidentSelect.value = matchedValue;
+            zoomToIncident(matchedValue);
           } else {
-            console.warn(`Incident "${urlIncident}" NOT FOUND. Available:`, Object.keys(incidentGroups));
-            mapStatus.textContent = `Incident "${urlIncident}" not found in data`;
+            // Fallback: still try to zoom, even if it's not in the list
+            zoomToIncident(urlIncident);
           }
         }
-      } catch (error) {
-        console.error('Error loading incidents:', error);
-        mapStatus.textContent = 'Error loading incidents';
-        incidentSelect.innerHTML = '<option value="">Error loading incidents</option>';
-      }
-    }
-    
-    // Calculate combined extent for multiple features
-    function calculateCombinedExtent(features) {
-      console.log(`=== CALCULATING EXTENT FOR ${features.length} FEATURES ===`);
-      
-      let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
-      let spatialReference = null;
-      let validFeatures = 0;
-      
-      features.forEach((feature, index) => {
-        const geometry = feature.geometry;
-        if (!geometry) {
-          console.warn(`Feature ${index} has no geometry`);
-          return;
-        }
-        
-        if (!spatialReference) {
-          spatialReference = geometry.spatialReference;
-          console.log('Using spatial reference:', spatialReference);
-        }
-        
-        let featureExtent;
-        
-        if (geometry.extent) {
-          // Geometry already has an extent
-          featureExtent = geometry.extent;
-          console.log(`Feature ${index} extent:`, featureExtent);
-        } else if (geometry.x !== undefined && geometry.y !== undefined) {
-          // Point geometry
-          const buffer = 500;
-          featureExtent = {
-            xmin: geometry.x - buffer,
-            ymin: geometry.y - buffer,
-            xmax: geometry.x + buffer,
-            ymax: geometry.y + buffer
-          };
-          console.log(`Feature ${index} point (${geometry.x}, ${geometry.y})`);
-        } else if (geometry.rings) {
-          // Polygon geometry
-          const allCoords = geometry.rings.flat();
-          const xs = allCoords.map(c => c[0]);
-          const ys = allCoords.map(c => c[1]);
-          featureExtent = {
-            xmin: Math.min(...xs),
-            ymin: Math.min(...ys),
-            xmax: Math.max(...xs),
-            ymax: Math.max(...ys)
-          };
-          console.log(`Feature ${index} polygon extent:`, featureExtent);
-        } else if (geometry.paths) {
-          // Polyline geometry
-          const allCoords = geometry.paths.flat();
-          const xs = allCoords.map(c => c[0]);
-          const ys = allCoords.map(c => c[1]);
-          featureExtent = {
-            xmin: Math.min(...xs),
-            ymin: Math.min(...ys),
-            xmax: Math.max(...xs),
-            ymax: Math.max(...ys)
-          };
-          console.log(`Feature ${index} polyline extent:`, featureExtent);
-        }
-        
-        if (featureExtent) {
-          xmin = Math.min(xmin, featureExtent.xmin);
-          ymin = Math.min(ymin, featureExtent.ymin);
-          xmax = Math.max(xmax, featureExtent.xmax);
-          ymax = Math.max(ymax, featureExtent.ymax);
-          validFeatures++;
-        }
+      })
+      .catch((err) => {
+        console.error(err);
+        mapStatus.textContent = "Error loading incidents.";
+        incidentSelect.innerHTML = "<option>Error loading incidents</option>";
       });
-      
-      console.log(`Processed ${validFeatures} valid features`);
-      console.log('Combined bounds:', { xmin, ymin, xmax, ymax });
-      
-      if (xmin !== Infinity && spatialReference) {
-        const combinedExtent = new Extent({
-          xmin: xmin,
-          ymin: ymin,
-          xmax: xmax,
-          ymax: ymax,
-          spatialReference: spatialReference
-        });
-        console.log('Final extent object:', combinedExtent);
-        return combinedExtent;
-      }
-      
-      console.error('Could not calculate valid extent');
-      return null;
-    }
     
-    // Zoom to a specific incident
-    function zoomToIncident(incidentName) {
-      console.log('=== ZOOM TO INCIDENT ===');
-      console.log('Incident:', incidentName);
-      console.log('Map ready:', mapIsReady);
-      console.log('Map view exists:', !!mapView);
-      
-      if (!mapIsReady || !mapView) {
-        console.log('Map not ready yet, setting pending zoom');
-        pendingZoomIncident = incidentName;
-        mapStatus.textContent = 'Map loading...';
-        return;
-      }
-      
-      const features = incidentGroups[incidentName];
-      console.log('Features for incident:', features ? features.length : 0);
-      
-      if (features && features.length > 0) {
-        const combinedExtent = calculateCombinedExtent(features);
-        
-        if (combinedExtent) {
-          console.log('Zooming to extent:', combinedExtent);
-          const expandedExtent = combinedExtent.expand(1.3);
-          console.log('Expanded extent:', expandedExtent);
+    // Dropdown change handler
+    incidentSelect.addEventListener("change", function() {
+      const incidentVal = this.value;
+      if (!incidentVal) return;
+      zoomToIncident(incidentVal);
+    });
+  });
+</script>
+
           
           mapView.goTo(expandedExtent, {
             duration: 1500,

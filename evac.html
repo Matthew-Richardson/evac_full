@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evacuation Info</title>
 
-  <!-- ArcGIS Maps SDK for JavaScript -->
-  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
-  <script src="https://js.arcgis.com/4.31/"></script>
+  <!-- ArcGIS Maps SDK for JavaScript 4.34 + components -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.34/"></script>
+  <script type="module" src="https://js.arcgis.com/map-components/4.34/"></script>
 
   <style>
     body {
@@ -38,7 +39,6 @@
       .logo-container {
         padding: 15px 8px 8px 8px;
       }
-      
       .logo-container img {
         max-width: 220px;
       }
@@ -126,7 +126,7 @@
       margin-bottom: 12px;
     }
 
-    #viewDiv {
+    arcgis-map {
       border-radius: 8px;
       box-shadow: 0 0 4px rgba(0,0,0,0.3);
       border: 1px solid rgba(0,0,0,0.2);
@@ -136,7 +136,7 @@
     }
 
     @media (max-width: 600px) {
-      #viewDiv {
+      arcgis-map {
         height: 400px;
       }
     }
@@ -391,7 +391,6 @@
       text-decoration: underline;
       font-weight: 600;
     }
-    
     .incident-panel a:hover {
       text-decoration: underline;
       opacity: 0.85;
@@ -414,9 +413,20 @@
     </div>
     <div id="mapStatus" class="map-status"></div>
   </div>
-  
+
   <div class="map-wrapper">
-    <div id="viewDiv"></div>
+    <!-- Webmap with ALL layers + Search -->
+    <arcgis-map
+      id="incidentMap"
+      item-id="58a8bb313db64271a55e7960cb839f64"
+      portal-url="https://lpcgis.maps.arcgis.com"
+      theme="light"
+      scroll-disabled="true"
+      style="width:100%;height:100%;"
+    >
+      <!-- Address / place search in the map -->
+      <arcgis-search position="top-right"></arcgis-search>
+    </arcgis-map>
   </div>
 </div>
 
@@ -449,153 +459,159 @@
 </div>
 
 <script>
-  // Get incident from URL parameters
+  // Get incident from URL parameters (used by both map + text)
   const params = new URLSearchParams(window.location.search);
   const rawIncident = params.get('incident');
   const urlIncident = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
 
-  // ========== MAP INITIALIZATION ==========
-  require([
-    "esri/config",
-    "esri/WebMap",
-    "esri/views/MapView",
-    "esri/layers/FeatureLayer",
-    "esri/widgets/Search"
-  ], function(esriConfig, WebMap, MapView, FeatureLayer, Search) {
+  // Simple SQL escape for incident value
+  function escapeForQuery(str) {
+    return str.replace(/'/g, "''");
+  }
+</script>
 
-    const portalUrl = "https://lpcgis.maps.arcgis.com";
-    const webmapId = "58a8bb313db64271a55e7960cb839f64";
-    const incidentLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
-    const incidentFieldName = "incident";
+<!-- MAP INCIDENT MENU + ZOOM LOGIC (uses REST + arcgis-map) -->
+<script type="module">
+  const incidentLayerUrl =
+    "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
+  const incidentFieldName = "incident";
 
-    const incidentMenu = document.getElementById('incidentMenu');
-    const mapStatus = document.getElementById('mapStatus');
+  const incidentMenu = document.getElementById("incidentMenu");
+  const mapStatus = document.getElementById("mapStatus");
+  const mapElement = document.getElementById("incidentMap");
 
-    // Point JS API at your org portal
-    esriConfig.portalUrl = portalUrl;
+  async function zoomToIncident(incidentVal) {
+    if (!incidentVal) return;
+    mapStatus.textContent = "Zooming…";
 
-    // Load full webmap (all layers & symbology)
-    const webmap = new WebMap({
-      portalItem: {
-        id: webmapId,
-        portal: { url: portalUrl }
+    const escaped = escapeForQuery(incidentVal);
+    const queryParams = new URLSearchParams({
+      where: `${incidentFieldName}='${escaped}'`,
+      outFields: incidentFieldName,
+      returnGeometry: "true",
+      outSR: "102100",
+      f: "json"
+    });
+
+    try {
+      const res = await fetch(incidentLayerUrl + "/query?" + queryParams.toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (!data.features || !data.features.length) {
+        mapStatus.textContent = "No features for this incident.";
+        return;
       }
-    });
 
-    const view = new MapView({
-      container: "viewDiv",
-      map: webmap
-    });
+      // Compute extent from polygon features
+      let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
 
-    // Add Search widget (address/place search) to the map
-    const searchWidget = new Search({
-      view: view,
-      includeDefaultSources: true,
-      allPlaceholder: "Search by address or place"
-    });
-    view.ui.add(searchWidget, "top-right");
+      data.features.forEach(f => {
+        const g = f.geometry;
+        if (!g) return;
 
-    // Separate FeatureLayer used *only* for querying/zooming incidents
-    const incidentLayer = new FeatureLayer({
-      url: incidentLayerUrl,
-      outFields: ["*"]
-    });
-    webmap.add(incidentLayer);
-
-    // Zoom helper
-    function zoomToIncident(incidentVal) {
-      if (!incidentVal) return;
-
-      mapStatus.textContent = "Zooming…";
-
-      const safeVal = incidentVal.replace(/'/g, "''");
-      const whereClause = `${incidentFieldName} = '${safeVal}'`;
-
-      incidentLayer.queryExtent({ where: whereClause })
-        .then((result) => {
-          if (result.extent) {
-            return view.goTo(result.extent.expand(1.2));
-          } else {
-            mapStatus.textContent = "No features for this incident.";
-          }
-        })
-        .then(() => {
-          mapStatus.textContent = `Zoomed to ${incidentVal}`;
-        })
-        .catch((err) => {
-          console.error(err);
-          mapStatus.textContent = "Zoom error.";
-        });
-    }
-
-    // Build incident menu and handle auto-zoom
-    view.when()
-      .then(() => incidentLayer.when())
-      .then(() => {
-        mapStatus.textContent = "Loading incidents…";
-
-        return incidentLayer.queryFeatures({
-          where: "1=1",
-          outFields: [incidentFieldName],
-          returnDistinctValues: true,
-          orderByFields: [incidentFieldName]
-        });
-      })
-      .then((featureSet) => {
-        const features = featureSet.features || [];
-
-        const incidentNames = features
-          .map(f => f.attributes[incidentFieldName])
-          .filter(val => val)
-          .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
-        // Clear menu
-        incidentMenu.innerHTML = "";
-
-        // Add incident buttons
-        incidentNames.forEach((val) => {
-          const btn = document.createElement('a');
-          btn.className = 'incident-btn';
-          btn.textContent = val;
-          btn.href = '?incident=' + encodeURIComponent(val);
-
-          if (urlIncident && urlIncident.toLowerCase() === val.toLowerCase()) {
-            btn.classList.add('active');
-          }
-
-          incidentMenu.appendChild(btn);
-        });
-
-        mapStatus.textContent = `${incidentNames.length} incident(s) available`;
-
-        // Auto-zoom from ?incident=
-        if (urlIncident) {
-          const urlNorm = urlIncident.toLowerCase().trim();
-          let matchedValue = null;
-
-          incidentNames.forEach((val) => {
-            if (val.toLowerCase().trim() === urlNorm) {
-              matchedValue = val;
-            }
+        // Polygons (rings)
+        if (g.rings) {
+          g.rings.forEach(ring => {
+            ring.forEach(([x, y]) => {
+              xmin = Math.min(xmin, x);
+              ymin = Math.min(ymin, y);
+              xmax = Math.max(xmax, x);
+              ymax = Math.max(ymax, y);
+            });
           });
-
-          if (matchedValue) {
-            zoomToIncident(matchedValue);
-          } else {
-            zoomToIncident(urlIncident);
-          }
         }
-      })
-      .catch((err) => {
-        console.error(err);
-        mapStatus.textContent = "Error loading incidents.";
-        incidentMenu.innerHTML = '<div class="incident-btn loading">Error loading incidents</div>';
+        // Points fallback
+        else if (typeof g.x === "number" && typeof g.y === "number") {
+          xmin = Math.min(xmin, g.x);
+          ymin = Math.min(ymin, g.y);
+          xmax = Math.max(xmax, g.x);
+          ymax = Math.max(ymax, g.y);
+        }
       });
-  });
+
+      if (!isFinite(xmin)) {
+        mapStatus.textContent = "Zoom error.";
+        return;
+      }
+
+      const extent = {
+        xmin,
+        ymin,
+        xmax,
+        ymax,
+        spatialReference: { wkid: 102100 }
+      };
+
+      // Wait for map component & view to be ready, then goTo
+      await mapElement.componentOnReady();
+      const view = mapElement.view;
+      await view.goTo(extent, { padding: 40 });
+      mapStatus.textContent = `Zoomed to ${incidentVal}`;
+    } catch (err) {
+      console.error(err);
+      mapStatus.textContent = "Zoom error.";
+    }
+  }
+
+  async function buildIncidentMenu() {
+    try {
+      mapStatus.textContent = "Loading incidents…";
+
+      const queryParams = new URLSearchParams({
+        where: "1=1",
+        outFields: incidentFieldName,
+        returnDistinctValues: "true",
+        orderByFields: incidentFieldName,
+        f: "json"
+      });
+
+      const res = await fetch(incidentLayerUrl + "/query?" + queryParams.toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      const incidentNames = (data.features || [])
+        .map(f => f.attributes && f.attributes[incidentFieldName])
+        .filter(v => v)
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+      incidentMenu.innerHTML = "";
+
+      incidentNames.forEach(val => {
+        const btn = document.createElement("a");
+        btn.className = "incident-btn";
+        btn.textContent = val;
+        btn.href = "?incident=" + encodeURIComponent(val);
+
+        if (urlIncident && urlIncident.toLowerCase() === val.toLowerCase()) {
+          btn.classList.add("active");
+        }
+
+        incidentMenu.appendChild(btn);
+      });
+
+      mapStatus.textContent = `${incidentNames.length} incident(s) available`;
+
+      // Auto-zoom if incident present in URL
+      if (urlIncident) {
+        const matched =
+          incidentNames.find(v => v.toLowerCase() === urlIncident.toLowerCase()) || urlIncident;
+        zoomToIncident(matched);
+      }
+    } catch (err) {
+      console.error(err);
+      mapStatus.textContent = "Error loading incidents.";
+      incidentMenu.innerHTML =
+        '<div class="incident-btn loading">Error loading incidents</div>';
+    }
+  }
+
+  buildIncidentMenu();
 </script>
 
 <script>
   // ========== EVACUATION INFORMATION ==========
+
   const INCIDENT = urlIncident;
 
   const STATUS_LABELS = {
@@ -618,12 +634,10 @@
     GO: 'Go'
   };
 
-  const ARCGIS_URL = 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query';
-  const STATUS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec';
-
-  function escapeForQuery(str) {
-    return str.replace(/'/g, "''");
-  }
+  const ARCGIS_URL =
+    'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query';
+  const STATUS_BASE_URL =
+    'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec';
 
   function showHelp() {
     const helpEvacHtml = `
@@ -779,7 +793,8 @@
       return;
     }
 
-    const url = STATUS_BASE_URL + '?incident=' + encodeURIComponent(incidentName);
+    const url =
+      STATUS_BASE_URL + '?incident=' + encodeURIComponent(incidentName);
 
     fetch(url)
       .then(r => {

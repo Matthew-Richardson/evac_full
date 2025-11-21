@@ -407,13 +407,25 @@
     const mapStatus = document.getElementById('mapStatus');
     const embeddedMap = document.getElementById('embeddedMap');
     
+    // Get incident from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const rawIncident = params.get('incident');
+    const urlIncident = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
+    
     let incidentGroups = {}; // Store features grouped by incident
     let mapView = null;
+    let mapIsReady = false;
     
     // Wait for the embedded map to load
     embeddedMap.addEventListener('arcgisViewReadyChange', (event) => {
       mapView = event.target.view;
+      mapIsReady = true;
       console.log('Map view ready');
+      
+      // If URL has an incident and incidents are already loaded, zoom to it
+      if (urlIncident && incidentGroups[urlIncident]) {
+        zoomToIncident(urlIncident);
+      }
     });
     
     // Query the feature layer for incidents
@@ -456,6 +468,18 @@
         });
         
         mapStatus.textContent = `${incidentNames.length} unique incident(s) loaded`;
+        
+        // If URL has an incident, select it in dropdown and zoom if map is ready
+        if (urlIncident) {
+          if (incidentGroups[urlIncident]) {
+            incidentSelect.value = urlIncident;
+            if (mapIsReady) {
+              zoomToIncident(urlIncident);
+            }
+          } else {
+            mapStatus.textContent = `Incident "${urlIncident}" not found in data`;
+          }
+        }
       } catch (error) {
         console.error('Error loading incidents:', error);
         mapStatus.textContent = 'Error loading incidents';
@@ -523,7 +547,30 @@
       return null;
     }
     
-    // Zoom to selected incident automatically when dropdown changes
+    // Zoom to a specific incident
+    function zoomToIncident(incidentName) {
+      if (!mapIsReady || !mapView) {
+        console.log('Map not ready yet, will zoom when ready');
+        return;
+      }
+      
+      const features = incidentGroups[incidentName];
+      
+      if (features && features.length > 0) {
+        const combinedExtent = calculateCombinedExtent(features);
+        
+        if (combinedExtent) {
+          mapView.goTo(combinedExtent.expand(1.2));
+          mapStatus.textContent = `Zoomed to: ${incidentName} (${features.length} feature${features.length > 1 ? 's' : ''})`;
+        } else {
+          mapStatus.textContent = 'Could not calculate extent for this incident';
+        }
+      } else {
+        mapStatus.textContent = 'No features found for this incident';
+      }
+    }
+    
+    // Zoom to selected incident when dropdown changes
     incidentSelect.addEventListener('change', () => {
       const selectedIncident = incidentSelect.value;
       
@@ -531,25 +578,7 @@
         return;
       }
       
-      if (!mapView) {
-        mapStatus.textContent = 'Map is still loading, please wait...';
-        return;
-      }
-      
-      const features = incidentGroups[selectedIncident];
-      
-      if (features && features.length > 0) {
-        const combinedExtent = calculateCombinedExtent(features);
-        
-        if (combinedExtent) {
-          mapView.goTo(combinedExtent.expand(1.2));
-          mapStatus.textContent = `Zoomed to: ${selectedIncident} (${features.length} feature${features.length > 1 ? 's' : ''})`;
-        } else {
-          mapStatus.textContent = 'Could not calculate extent for this incident';
-        }
-      } else {
-        mapStatus.textContent = 'No features found for this incident';
-      }
+      zoomToIncident(selectedIncident);
     });
     
     // Load incidents when page loads

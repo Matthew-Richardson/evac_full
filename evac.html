@@ -20,6 +20,30 @@
       align-items: center;
     }
 
+    /* LOGO */
+    .logo-container {
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+      padding: 20px 8px 10px 8px;
+    }
+
+    .logo-container img {
+      max-width: 300px;
+      width: 100%;
+      height: auto;
+    }
+
+    @media (max-width: 600px) {
+      .logo-container {
+        padding: 15px 8px 8px 8px;
+      }
+      
+      .logo-container img {
+        max-width: 220px;
+      }
+    }
+
     /* MAP CONTAINER */
     .map-container {
       max-width: 900px;
@@ -376,6 +400,11 @@
 </head>
 <body>
 
+<!-- LOGO -->
+<div class="logo-container">
+  <img src="https://www.lpcgov.org/_assets_/images/logo.png" alt="La Plata County">
+</div>
+
 <!-- INCIDENT MAP -->
 <div class="map-container">
   <div class="map-controls">
@@ -497,14 +526,17 @@
       .then((featureSet) => {
         const features = featureSet.features || [];
         
+        // Extract and sort incident names
+        const incidentNames = features
+          .map(f => f.attributes[incidentFieldName])
+          .filter(val => val) // Remove null/undefined
+          .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())); // Sort alphabetically, case-insensitive
+        
         // Clear menu
         incidentMenu.innerHTML = "";
         
         // Add incident buttons
-        features.forEach((f) => {
-          const val = f.attributes[incidentFieldName];
-          if (!val) return;
-          
+        incidentNames.forEach((val) => {
           const btn = document.createElement('a');
           btn.className = 'incident-btn';
           btn.textContent = val;
@@ -518,7 +550,7 @@
           incidentMenu.appendChild(btn);
         });
         
-        mapStatus.textContent = `${features.length} incident(s) available`;
+        mapStatus.textContent = `${incidentNames.length} incident(s) available`;
         
         // After menu is built, check URL for ?incident= and zoom
         if (urlIncident) {
@@ -526,9 +558,8 @@
           let matchedValue = null;
           
           // Try to find a matching incident
-          features.forEach((f) => {
-            const val = f.attributes[incidentFieldName];
-            if (val && val.toLowerCase().trim() === urlNorm) {
+          incidentNames.forEach((val) => {
+            if (val.toLowerCase().trim() === urlNorm) {
               matchedValue = val;
             }
           });

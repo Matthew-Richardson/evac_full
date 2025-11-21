@@ -458,18 +458,28 @@
   require([
     "esri/WebMap",
     "esri/views/MapView",
-    "esri/layers/FeatureLayer"
-  ], function(WebMap, MapView, FeatureLayer) {
+    "esri/layers/FeatureLayer",
+    "esri/config",
+    "esri/widgets/Search",
+    "esri/widgets/Expand"
+  ], function(WebMap, MapView, FeatureLayer, esriConfig, Search, Expand) {
     
+    const portalUrl = "https://lpcgis.maps.arcgis.com";
     const webmapId = "58a8bb313db64271a55e7960cb839f64";
     const incidentLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
     const incidentFieldName = "incident";
     
     const incidentMenu = document.getElementById('incidentMenu');
     const mapStatus = document.getElementById('mapStatus');
+
+    // Point the JS API at your org portal
+    esriConfig.portalUrl = portalUrl;
     
     const webmap = new WebMap({
-      portalItem: { id: webmapId }
+      portalItem: {
+        id: webmapId,
+        portal: { url: portalUrl }
+      }
     });
     
     const view = new MapView({
@@ -477,12 +487,32 @@
       map: webmap
     });
     
+    // Layer used for querying incident extents (webmap still draws its own layers)
     const incidentLayer = new FeatureLayer({
       url: incidentLayerUrl,
       outFields: ["*"]
     });
     
     webmap.add(incidentLayer);
+
+    // --- Address Search widget ---
+    view.when().then(() => {
+      const searchWidget = new Search({
+        view: view,
+        includeDefaultSources: true, // World geocoder + any org locators
+        popupEnabled: true
+      });
+
+      // Optional: wrap in an Expand for better mobile UX
+      const searchExpand = new Expand({
+        view: view,
+        content: searchWidget,
+        expanded: true,
+        expandTooltip: "Search by address"
+      });
+
+      view.ui.add(searchExpand, "top-right");
+    });
     
     // Zoom to a specific incident
     function zoomToIncident(incidentVal) {

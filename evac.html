@@ -359,8 +359,7 @@
     <arcgis-embedded-map 
       id="embeddedMap"
       item-id="58a8bb313db64271a55e7960cb839f64" 
-      theme="light" 
-      extent="-11973237.453925481,4500736.54396148,-11972624.763370631,4501161.724931316,102100" 
+      theme="light"
       portal-url="https://lpcgis.maps.arcgis.com">
     </arcgis-embedded-map>
   </div>
@@ -395,6 +394,11 @@
 </div>
 
 <script>
+  // Get incident from URL parameters first
+  const params = new URLSearchParams(window.location.search);
+  const rawIncident = params.get('incident');
+  const urlIncident = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
+
   // ========== MAP INITIALIZATION ==========
   require([
     "esri/rest/query",
@@ -407,14 +411,10 @@
     const mapStatus = document.getElementById('mapStatus');
     const embeddedMap = document.getElementById('embeddedMap');
     
-    // Get incident from URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const rawIncident = params.get('incident');
-    const urlIncident = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
-    
     let incidentGroups = {}; // Store features grouped by incident
     let mapView = null;
     let mapIsReady = false;
+    let pendingZoomIncident = null;
     
     // Wait for the embedded map to load
     embeddedMap.addEventListener('arcgisViewReadyChange', (event) => {
@@ -422,9 +422,9 @@
       mapIsReady = true;
       console.log('Map view ready');
       
-      // If URL has an incident and incidents are already loaded, zoom to it
-      if (urlIncident && incidentGroups[urlIncident]) {
-        zoomToIncident(urlIncident);
+      // If there's a pending zoom (from URL or dropdown), execute it now
+      if (pendingZoomIncident && incidentGroups[pendingZoomIncident]) {
+        setTimeout(() => zoomToIncident(pendingZoomIncident), 500);
       }
     });
     
@@ -469,12 +469,15 @@
         
         mapStatus.textContent = `${incidentNames.length} unique incident(s) loaded`;
         
-        // If URL has an incident, select it in dropdown and zoom if map is ready
+        // If URL has an incident, select it in dropdown and prepare to zoom
         if (urlIncident) {
           if (incidentGroups[urlIncident]) {
             incidentSelect.value = urlIncident;
+            pendingZoomIncident = urlIncident;
+            
+            // If map is already ready, zoom immediately
             if (mapIsReady) {
-              zoomToIncident(urlIncident);
+              setTimeout(() => zoomToIncident(urlIncident), 500);
             }
           } else {
             mapStatus.textContent = `Incident "${urlIncident}" not found in data`;
@@ -551,6 +554,7 @@
     function zoomToIncident(incidentName) {
       if (!mapIsReady || !mapView) {
         console.log('Map not ready yet, will zoom when ready');
+        pendingZoomIncident = incidentName;
         return;
       }
       
@@ -560,8 +564,12 @@
         const combinedExtent = calculateCombinedExtent(features);
         
         if (combinedExtent) {
-          mapView.goTo(combinedExtent.expand(1.2));
+          mapView.goTo(combinedExtent.expand(1.2), {
+            duration: 1000,
+            easing: "ease-in-out"
+          });
           mapStatus.textContent = `Zoomed to: ${incidentName} (${features.length} feature${features.length > 1 ? 's' : ''})`;
+          pendingZoomIncident = null;
         } else {
           mapStatus.textContent = 'Could not calculate extent for this incident';
         }
@@ -578,7 +586,12 @@
         return;
       }
       
-      zoomToIncident(selectedIncident);
+      if (mapIsReady) {
+        zoomToIncident(selectedIncident);
+      } else {
+        pendingZoomIncident = selectedIncident;
+        mapStatus.textContent = 'Map loading...';
+      }
     });
     
     // Load incidents when page loads
@@ -610,10 +623,8 @@
   const ARCGIS_URL = 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query';
   const STATUS_BASE_URL = 'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec';
 
-  // Get incident from URL parameters
-  const params = new URLSearchParams(window.location.search);
-  const rawIncident = params.get('incident');
-  const INCIDENT = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
+  // Get incident from URL parameters (reuse from above)
+  const INCIDENT = urlIncident;
 
   /**
    * Escapes special characters in a string for use in SQL-like queries

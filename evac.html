@@ -1,171 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Evacuation Info</title>
+  <meta charset="utf-8" />
+  <title>Incident Map & Evacuation Info</title>
 
-  <!-- ArcGIS Maps SDK for JavaScript 4.34 + components -->
-  <link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/light/main.css" />
-  <script src="https://js.arcgis.com/4.34/"></script>
-  <script type="module" src="https://js.arcgis.com/map-components/4.34/"></script>
+  <!-- ArcGIS Maps SDK -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.31/"></script>
 
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
+      width: 100%;
       font-family: Arial, sans-serif;
-      background: transparent;
+      background: #f5f5f7;
+    }
+
+    /* ======= PAGE SHELL ======= */
+    .page-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* ======= HEADER (LOGO + CALL CENTER) ======= */
+    .page-header {
+      width: 100%;
+      padding: 16px 8px 8px 8px;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 6px;
     }
 
-    /* LOGO */
-    .logo-container {
-      max-width: 900px;
-      width: 100%;
-      text-align: center;
-      padding: 20px 8px 10px 8px;
-    }
-
-    .logo-container img {
-      max-width: 300px;
-      width: 100%;
+    .page-header img {
+      max-width: 220px;
+      width: 55%;
       height: auto;
+      display: block;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
     }
 
-    @media (max-width: 600px) {
-      .logo-container {
-        padding: 15px 8px 8px 8px;
+    @media (min-width: 768px) {
+      .page-header img {
+        width: 220px;
       }
-      .logo-container img {
-        max-width: 220px;
-      }
     }
 
-    /* MAP CONTAINER */
-    .map-container {
-      max-width: 900px;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px 8px;
-    }
-
-    .map-controls {
-      margin-bottom: 10px;
-    }
-
-    .map-controls-label {
-      font-weight: bold;
+    .call-center {
       font-size: 14px;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-
-    .incident-menu {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 8px;
-    }
-
-    .incident-btn {
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      background: white;
-      border: 2px solid #ddd;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
       color: #333;
-      text-decoration: none;
-      display: inline-block;
     }
 
-    .incident-btn:hover {
-      background: #f5f5f5;
-      border-color: #0079c1;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .incident-btn.active {
-      background: #0079c1;
-      color: white;
-      border-color: #0079c1;
+    .call-center strong {
       font-weight: 600;
     }
 
-    .incident-btn.loading {
-      opacity: 0.6;
-      cursor: not-allowed;
+    .call-center a {
+      color: #0b4da2;
+      text-decoration: none;
+      font-weight: 600;
     }
 
-    @media (max-width: 600px) {
-      .incident-btn {
-        padding: 8px 12px;
-        font-size: 13px;
-        flex: 1 1 calc(50% - 8px);
-        min-width: 120px;
-      }
+    .call-center a:hover {
+      text-decoration: underline;
     }
 
-    .map-status {
-      text-align: center;
-      color: #444;
-      font-size: 12px;
-      font-style: italic;
-      opacity: 0.75;
-      margin-top: 8px;
-    }
-
+    /* ======= MAP + INCIDENT MENU ======= */
     .map-wrapper {
-      margin-bottom: 12px;
-    }
-
-    arcgis-map {
-      border-radius: 8px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.2);
-      max-width: 100%;
-      height: 600px;
-      width: 100%;
-    }
-
-    @media (max-width: 600px) {
-      arcgis-map {
-        height: 400px;
-      }
-    }
-
-    .legend {
       max-width: 900px;
       width: 100%;
-      padding: 12px 8px 4px 8px;
+      margin: 8px auto 0 auto;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .map-card {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.18);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+      overflow: hidden;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      box-sizing: border-box;
+      gap: 8px;
+    }
+
+    .map-card-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .info-link {
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #0b4da2;
+      background: #ffffff;
+      color: #0b4da2;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .info-link:hover {
+      background: #0b4da2;
+      color: #ffffff;
+      box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
+    }
+
+    @media (max-width: 480px) {
+      .map-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .info-link {
+        align-self: stretch;
+        text-align: center;
+      }
+    }
+
+    .incident-strip {
+      padding: 8px 14px 10px 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      box-sizing: border-box;
+    }
+
+    .incident-strip-label {
       font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #b3261e;
+    }
+
+    .incident-count-badge {
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: #b3261e;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .incident-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .incident-button {
+      width: 100%;
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: #f7f7f7;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .incident-button:hover {
+      background: #eef4ff;
+      border-color: #c4d7ff;
+    }
+
+    .incident-button.active {
+      background: #dbe8ff;
+      border-color: #4a83ff;
+      font-weight: 600;
+      box-shadow: 0 0 0 1px rgba(74,131,255,0.5);
+    }
+
+    #viewDiv {
+      width: 100%;
+      height: 420px;
+    }
+
+    /* Map Key inside map card */
+    .map-key-merged {
+      padding: 12px 14px 14px 14px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      background: #fafafa;
       text-align: center;
     }
-    .legend-title {
+
+    .map-key-merged .legend-title {
       font-weight: bold;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 13px;
     }
-    .legend-items {
+
+    .map-key-merged .legend-items {
       display: inline-flex;
       gap: 18px;
       flex-wrap: wrap;
       justify-content: center;
     }
-    .legend-item {
+
+    .map-key-merged .legend-item {
       display: flex;
       align-items: center;
       gap: 6px;
+      font-size: 12px;
       white-space: nowrap;
     }
 
-    /* Road closure icon (red circle w/ white bar) */
+    @media (max-width: 480px) {
+      .map-key-merged .legend-items {
+        gap: 12px;
+      }
+    }
+
+    /* Legend icons */
     .legend-icon-road {
       position: relative;
       width: 18px;
@@ -186,7 +257,6 @@
       border-radius: 2px;
     }
 
-    /* Info icon */
     .legend-icon-info {
       width: 18px;
       height: 18px;
@@ -200,16 +270,15 @@
       align-items: center;
     }
 
-    /* Warning icon (yellow diamond with !) */
     .legend-icon-warning {
+      position: relative;
       width: 18px;
       height: 18px;
       background: #f6e05e;
       transform: rotate(45deg);
       border: 1px solid #c7b100;
-      box-sizing: border-box;
-      position: relative;
       display: inline-block;
+      box-sizing: border-box;
     }
     .legend-icon-warning::after {
       content: "!";
@@ -223,6 +292,12 @@
       line-height: 1;
     }
 
+    /* ----- STATUS CARDS BELOW MAP ----- */
+    main {
+      display: block;
+      width: 100%;
+    }
+
     .evac-row {
       display: flex;
       gap: 12px;
@@ -232,14 +307,7 @@
       padding: 8px;
       flex-wrap: wrap;
       justify-content: center;
-    }
-
-    @media (max-width: 600px) {
-      .evac-row {
-        flex-direction: column;
-        padding: 6px;
-        gap: 8px;
-      }
+      margin: 8px auto;
     }
 
     .evac-box {
@@ -249,38 +317,24 @@
       box-sizing: border-box;
       flex: 1;
       min-width: 260px;
-      display: flex;
-      flex-direction: column;
       border: 1px solid rgba(0,0,0,0.2);
+      background: #ffffff;
     }
 
-    @media (max-width: 600px) {
-      .evac-box {
-        padding: 10px;
-        min-width: 0;
-      }
-    }
-
-    /* Subtle highlight for SET */
     .evac-box-set {
       border: 2px solid rgba(180, 150, 0, 0.9);
-      box-shadow: 0 0 8px rgba(180, 150, 0, 0.4);
+      box-shadow: 0 0 8px rgba(180,150,0,0.4);
     }
 
-    /* Soft glow + subtle pulse for GO */
     .evac-box-go {
-      border: 2px solid rgba(0, 120, 0, 0.9);
-      box-shadow: 0 0 12px rgba(0, 120, 0, 0.5);
+      border: 2px solid rgba(0,120,0,0.9);
+      box-shadow: 0 0 12px rgba(0,120,0,0.5);
       animation: goPulse 2.5s ease-in-out infinite alternate;
     }
 
     @keyframes goPulse {
-      from {
-        box-shadow: 0 0 8px rgba(0, 120, 0, 0.35);
-      }
-      to {
-        box-shadow: 0 0 18px rgba(0, 160, 0, 0.7);
-      }
+      from { box-shadow: 0 0 8px rgba(0,120,0,0.35); }
+      to   { box-shadow: 0 0 18px rgba(0,160,0,0.7); }
     }
 
     .evac-title {
@@ -289,25 +343,11 @@
       margin-bottom: 8px;
     }
 
-    @media (max-width: 600px) {
-      .evac-title {
-        font-size: 16px;
-        margin-bottom: 6px;
-      }
-    }
-
     .evac-body {
       font-size: 14px;
       line-height: 1.4;
-      flex: 1;
       display: flex;
       flex-direction: column;
-    }
-
-    @media (max-width: 600px) {
-      .evac-body {
-        font-size: 13px;
-      }
     }
 
     .evac-zones {
@@ -317,36 +357,12 @@
       margin-top: 10px;
     }
 
-    @media (max-width: 600px) {
-      .evac-zones {
-        gap: 4px;
-        margin-top: 6px;
-      }
-    }
-
     .zone-chip,
     .no-zones-chip {
       font-weight: bold;
       background: rgba(0,0,0,0.1);
       padding: 4px 8px;
       border-radius: 6px;
-      white-space: normal;
-      max-width: 100%;
-      cursor: default;
-    }
-
-    .zone-chip:hover,
-    .no-zones-chip:hover {
-      background: rgba(0,0,0,0.1);
-      text-decoration: none;
-    }
-
-    @media (max-width: 600px) {
-      .zone-chip,
-      .no-zones-chip {
-        padding: 3px 6px;
-        font-size: 12px;
-      }
     }
 
     .evac-note {
@@ -356,19 +372,12 @@
       font-weight: bold;
     }
 
-    @media (max-width: 600px) {
-      .evac-note {
-        margin-top: 8px;
-        font-size: 13px;
-      }
-    }
-
-    /* INCIDENT STATUS PANEL */
     .incident-panel {
       max-width: 900px;
       width: 100%;
       box-sizing: border-box;
-      padding: 0 8px 12px 8px;
+      padding: 0 8px 16px 8px;
+      margin: 0 auto 16px auto;
     }
 
     .status-timestamp {
@@ -385,448 +394,433 @@
       white-space: nowrap;
     }
 
-    /* Accessible link styling */
     .incident-panel a {
       color: #0b4da2;
-      text-decoration: underline;
       font-weight: 600;
-    }
-    .incident-panel a:hover {
       text-decoration: underline;
-      opacity: 0.85;
     }
   </style>
 </head>
+
 <body>
+  <div class="page-shell">
+    <!-- Header (Logo + Call Center) -->
+    <header class="page-header">
+      <img
+        src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
+        alt="La Plata County Logo"
+      />
+      <div class="call-center">
+        <strong>Call Center:</strong>
+        <a href="tel:9703858700">970-385-8700</a>
+      </div>
+    </header>
 
-<!-- LOGO -->
-<div class="logo-container">
-  <img src="https://www.lpcgov.org/_assets_/images/logo.png" alt="La Plata County">
-</div>
+    <!-- MAP + INCIDENT MENU -->
+    <div class="map-wrapper">
+      <div class="map-card">
+        <div class="map-card-header">
+          <div class="map-card-title">Evacuation Map</div>
+          <button id="infoButton" class="info-link">
+            Evacuation Information
+          </button>
+        </div>
 
-<!-- INCIDENT MAP -->
-<div class="map-container">
-  <div class="map-controls">
-    <div class="map-controls-label">Select Incident:</div>
-    <div id="incidentMenu" class="incident-menu">
-      <div class="incident-btn loading">Loading incidents...</div>
+        <div class="incident-strip">
+          <div class="incident-strip-label">
+            Active incidents
+            <span id="incidentCountBadge" class="incident-count-badge">0</span>
+          </div>
+          <div id="incidentList" class="incident-list"></div>
+        </div>
+
+        <div id="viewDiv"></div>
+
+        <!-- Map Key merged into card -->
+        <div class="map-key-merged">
+          <div class="legend-title">Map Key</div>
+          <div class="legend-items">
+            <div class="legend-item">
+              <span class="legend-icon-road"></span>
+              <span>Road closure</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-info">i</span>
+              <span>Information</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-icon-warning"></span>
+              <span>Special warning</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-    <div id="mapStatus" class="map-status"></div>
+
+    <!-- SET/GO + STATUS SECTION -->
+    <main>
+      <div id="evacRow" class="evac-row">
+        Loading evacuation information…
+      </div>
+
+      <div class="incident-panel">
+        <div id="incident-panel">Loading incident status…</div>
+      </div>
+    </main>
   </div>
 
-  <div class="map-wrapper">
-    <!-- Webmap with ALL layers + Search -->
-    <arcgis-map
-      id="incidentMap"
-      item-id="58a8bb313db64271a55e7960cb839f64"
-      portal-url="https://lpcgis.maps.arcgis.com"
-      theme="light"
-      scroll-disabled="true"
-      style="width:100%;height:100%;"
-    >
-      <!-- Address / place search in the map -->
-      <arcgis-search position="top-right"></arcgis-search>
-    </arcgis-map>
-  </div>
-</div>
+  <script>
+    /* ---------- SHARED CONFIG ---------- */
+    const webmapId = "58a8bb313db64271a55e7960cb839f64";
+    const incidentLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
+    const incidentFieldName = "incident";
 
-<div class="legend">
-  <div class="legend-title">Map Key</div>
-  <div class="legend-items">
-    <div class="legend-item">
-      <span class="legend-icon-road"></span>
-      <span>Road closure</span>
-    </div>
-    <div class="legend-item">
-      <span class="legend-icon-info">i</span>
-      <span>Information</span>
-    </div>
-    <div class="legend-item">
-      <span class="legend-icon-warning"></span>
-      <span>Special warning</span>
-    </div>
-  </div>
-</div>
-
-<!-- SET / GO ZONE BOXES -->
-<div id="evacRow" class="evac-row">
-  Loading evacuation information…
-</div>
-
-<!-- INCIDENT STATUS / EVAC INFO PANEL FROM GOOGLE SHEET -->
-<div class="incident-panel">
-  <div id="incident-panel">Loading incident status…</div>
-</div>
-
-<script>
-  // Get incident from URL parameters (used by both map + text)
-  const params = new URLSearchParams(window.location.search);
-  const rawIncident = params.get('incident');
-  const urlIncident = rawIncident && rawIncident.trim() ? rawIncident.trim() : null;
-
-  // Simple SQL escape for incident value
-  function escapeForQuery(str) {
-    return str.replace(/'/g, "''");
-  }
-</script>
-
-<!-- MAP INCIDENT MENU + ZOOM LOGIC (uses REST + arcgis-map) -->
-<script type="module">
-  const incidentLayerUrl =
-    "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
-  const incidentFieldName = "incident";
-
-  const incidentMenu = document.getElementById("incidentMenu");
-  const mapStatus = document.getElementById("mapStatus");
-  const mapElement = document.getElementById("incidentMap");
-
-  async function zoomToIncident(incidentVal) {
-    if (!incidentVal) return;
-    mapStatus.textContent = "Zooming…";
-
-    const escaped = escapeForQuery(incidentVal);
-    const queryParams = new URLSearchParams({
-      where: `${incidentFieldName}='${escaped}'`,
-      outFields: incidentFieldName,
-      returnGeometry: "true",
-      outSR: "102100",
-      f: "json"
-    });
-
-    try {
-      const res = await fetch(incidentLayerUrl + "/query?" + queryParams.toString());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      if (!data.features || !data.features.length) {
-        mapStatus.textContent = "No features for this incident.";
-        return;
+    function getIncidentFromUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        return (params.get("incident") || params.get("Incident") || "").trim();
+      } catch {
+        return "";
       }
-
-      // Compute extent from polygon features
-      let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
-
-      data.features.forEach(f => {
-        const g = f.geometry;
-        if (!g) return;
-
-        // Polygons (rings)
-        if (g.rings) {
-          g.rings.forEach(ring => {
-            ring.forEach(([x, y]) => {
-              xmin = Math.min(xmin, x);
-              ymin = Math.min(ymin, y);
-              xmax = Math.max(xmax, x);
-              ymax = Math.max(ymax, y);
-            });
-          });
-        }
-        // Points fallback
-        else if (typeof g.x === "number" && typeof g.y === "number") {
-          xmin = Math.min(xmin, g.x);
-          ymin = Math.min(ymin, g.y);
-          xmax = Math.max(xmax, g.x);
-          ymax = Math.max(ymax, g.y);
-        }
-      });
-
-      if (!isFinite(xmin)) {
-        mapStatus.textContent = "Zoom error.";
-        return;
-      }
-
-      const extent = {
-        xmin,
-        ymin,
-        xmax,
-        ymax,
-        spatialReference: { wkid: 102100 }
-      };
-
-      // Wait for map component & view to be ready, then goTo
-      await mapElement.componentOnReady();
-      const view = mapElement.view;
-      await view.goTo(extent, { padding: 40 });
-      mapStatus.textContent = `Zoomed to ${incidentVal}`;
-    } catch (err) {
-      console.error(err);
-      mapStatus.textContent = "Zoom error.";
     }
-  }
 
-  async function buildIncidentMenu() {
-    try {
-      mapStatus.textContent = "Loading incidents…";
+    const INCIDENT = (() => {
+      const inc = getIncidentFromUrl();
+      return inc && inc.trim() ? inc.trim() : null;
+    })();
+
+    /* ---------- STATUS / ZONE LOGIC ---------- */
+    const STATUS_LABELS = {
+      SET: "SET - Pre-Evacuation",
+      GO: "GO - Evacuate Now",
+    };
+
+    const STATUS_COLORS = {
+      SET: "#fff36a",
+      GO: "#41f56e",
+    };
+
+    const STATUS_TEXT = {
+      SET: "Voluntary Evacuation;<br>Evacuation orders are likely",
+      GO: "<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.",
+    };
+
+    const STATUS_VALUES = {
+      SET: "Set",
+      GO: "Go",
+    };
+
+    const ARCGIS_URL =
+      "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query";
+    const STATUS_BASE_URL =
+      "https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec";
+
+    function escapeForQuery(str) {
+      return str.replace(/'/g, "''");
+    }
+
+    function showHelp() {
+      const helpEvacHtml = `
+        <div class="evac-box" style="background:#f3f4f6;">
+          <div class="evac-title">How to use this page</div>
+          <div class="evac-body">
+            <div>
+              This evacuation information requires an <strong>incident name</strong> in the URL.
+            </div>
+            <div style="margin-top:8px;">
+              Use this format:
+              <br>
+              <code>?incident=YourIncidentName</code>
+            </div>
+            <div style="margin-top:8px;">
+              Example:
+              <br>
+              <code>?incident=East%20Canyon</code>
+            </div>
+            <div style="margin-top:8px;">
+              The incident name must match the name used in the map and Google Sheet.
+            </div>
+          </div>
+        </div>
+      `;
+
+      const helpStatusHtml = `
+        <div class="evac-box" style="background:#f3f4f6;">
+          <div class="evac-title">Incident status</div>
+          <div class="evac-body">
+            <div>No incident was specified.</div>
+            <div style="margin-top:8px;">
+              Append <code>?incident=YourIncidentName</code> to the URL
+              (for example: <code>?incident=East%20Canyon</code>).
+            </div>
+          </div>
+        </div>
+      `;
+
+      const row = document.getElementById("evacRow");
+      if (row) row.innerHTML = helpEvacHtml;
+
+      const panel = document.getElementById("incident-panel");
+      if (panel) panel.innerHTML = helpStatusHtml;
+    }
+
+    function buildBox(statusCode, features) {
+      const label = STATUS_LABELS[statusCode];
+      const bg = STATUS_COLORS[statusCode];
+      const note = STATUS_TEXT[statusCode];
+
+      let zonesHTML;
+      if (!features || features.length === 0) {
+        zonesHTML = `
+          <div class="evac-zones">
+            <div class="no-zones-chip">No ${statusCode} zones</div>
+          </div>`;
+      } else {
+        const chips = features
+          .map((f) => {
+            const zn = f.attributes.zonename;
+            return `<div class="zone-chip">${zn}</div>`;
+          })
+          .join("");
+        zonesHTML = `<div class="evac-zones">${chips}</div>`;
+      }
+
+      const extraClass =
+        statusCode === "GO"
+          ? " evac-box-go"
+          : statusCode === "SET"
+          ? " evac-box-set"
+          : "";
+
+      return `
+        <div class="evac-box${extraClass}" style="background:${bg};">
+          <div class="evac-title">${label}</div>
+          <div class="evac-body">
+            <div>
+              The following zones are under ${statusCode} status for
+              <strong>${INCIDENT || "this incident"}</strong>.
+            </div>
+            ${zonesHTML}
+            <div class="evac-note">${note}</div>
+          </div>
+        </div>`;
+    }
+
+    function showError(message) {
+      document.getElementById("evacRow").innerHTML = `
+        <div class="evac-box" style="background:#fff36a;">
+          <div class="evac-title">Error</div>
+          <div class="evac-body">${message}</div>
+        </div>`;
+    }
+
+    function loadEvacuationZones() {
+      if (!INCIDENT) {
+        showHelp();
+        return;
+      }
+
+      const escapedIncident = escapeForQuery(INCIDENT);
+      const where = `incident='${escapedIncident}' AND STATUS IN ('${STATUS_VALUES.SET}','${STATUS_VALUES.GO}')`;
 
       const queryParams = new URLSearchParams({
-        where: "1=1",
-        outFields: incidentFieldName,
-        returnDistinctValues: "true",
-        orderByFields: incidentFieldName,
-        f: "json"
+        where,
+        outFields: "*",
+        f: "json",
+        returnGeometry: "false",
       });
 
-      const res = await fetch(incidentLayerUrl + "/query?" + queryParams.toString());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      const incidentNames = (data.features || [])
-        .map(f => f.attributes && f.attributes[incidentFieldName])
-        .filter(v => v)
-        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
-      incidentMenu.innerHTML = "";
-
-      incidentNames.forEach(val => {
-        const btn = document.createElement("a");
-        btn.className = "incident-btn";
-        btn.textContent = val;
-        btn.href = "?incident=" + encodeURIComponent(val);
-
-        if (urlIncident && urlIncident.toLowerCase() === val.toLowerCase()) {
-          btn.classList.add("active");
-        }
-
-        incidentMenu.appendChild(btn);
-      });
-
-      mapStatus.textContent = `${incidentNames.length} incident(s) available`;
-
-      // Auto-zoom if incident present in URL
-      if (urlIncident) {
-        const matched =
-          incidentNames.find(v => v.toLowerCase() === urlIncident.toLowerCase()) || urlIncident;
-        zoomToIncident(matched);
-      }
-    } catch (err) {
-      console.error(err);
-      mapStatus.textContent = "Error loading incidents.";
-      incidentMenu.innerHTML =
-        '<div class="incident-btn loading">Error loading incidents</div>';
-    }
-  }
-
-  buildIncidentMenu();
-</script>
-
-<script>
-  // ========== EVACUATION INFORMATION ==========
-
-  const INCIDENT = urlIncident;
-
-  const STATUS_LABELS = {
-    SET: 'SET - Pre-Evacuation',
-    GO: 'GO - Evacuate Now'
-  };
-
-  const STATUS_COLORS = {
-    SET: '#fff36a',
-    GO: '#41f56e'
-  };
-
-  const STATUS_TEXT = {
-    SET: 'Voluntary Evacuation;<br>Evacuation orders are likely',
-    GO: '<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.'
-  };
-
-  const STATUS_VALUES = {
-    SET: 'Set',
-    GO: 'Go'
-  };
-
-  const ARCGIS_URL =
-    'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query';
-  const STATUS_BASE_URL =
-    'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec';
-
-  function showHelp() {
-    const helpEvacHtml = `
-      <div class="evac-box" style="background:#f3f4f6;">
-        <div class="evac-title">How to use this page</div>
-        <div class="evac-body">
-          <div>
-            This evacuation information page requires an <strong>incident name</strong> in the URL.
-          </div>
-          <div style="margin-top:8px;">
-            Use this format:
-            <br>
-            <code>https://matthew-richardson.github.io/evactext/evac.html?incident=YourIncidentName</code>
-          </div>
-          <div style="margin-top:8px;">
-            Example:
-            <br>
-            <code>https://matthew-richardson.github.io/evactext/evac.html?incident=East%20Canyon</code>
-          </div>
-          <div style="margin-top:8px;">
-            The incident name must match the name used in the map and Google Sheet.
-          </div>
-        </div>
-      </div>
-    `;
-
-    const helpStatusHtml = `
-      <div class="evac-box" style="background:#f3f4f6;">
-        <div class="evac-title">Incident status</div>
-        <div class="evac-body">
-          <div>No incident was specified.</div>
-          <div style="margin-top:8px;">
-            Append <code>?incident=YourIncidentName</code> to the URL
-            (for example: <code>?incident=East%20Canyon</code>).
-          </div>
-        </div>
-      </div>
-    `;
-
-    const row = document.getElementById('evacRow');
-    if (row) row.innerHTML = helpEvacHtml;
-
-    const panel = document.getElementById('incident-panel');
-    if (panel) panel.innerHTML = helpStatusHtml;
-  }
-
-  function buildBox(statusCode, features) {
-    const label = STATUS_LABELS[statusCode];
-    const bg = STATUS_COLORS[statusCode];
-    const note = STATUS_TEXT[statusCode];
-
-    let zonesHTML;
-    if (!features || features.length === 0) {
-      zonesHTML = `
-        <div class="evac-zones">
-          <div class="no-zones-chip">No ${statusCode} zones</div>
-        </div>`;
-    } else {
-      const chips = features
-        .map(f => {
-          const zn = f.attributes.zonename;
-          return `<div class="zone-chip">${zn}</div>`;
+      fetch(ARCGIS_URL + "?" + queryParams.toString())
+        .then((r) => {
+          if (!r.ok) {
+            throw new Error(`HTTP error! status: ${r.status}`);
+          }
+          return r.json();
         })
-        .join('');
-      zonesHTML = `<div class="evac-zones">${chips}</div>`;
+        .then((data) => {
+          const row = document.getElementById("evacRow");
+
+          if (!data.features || data.features.length === 0) {
+            row.innerHTML = `
+              <div class="evac-box" style="background:#fff36a;">
+                <div class="evac-title">No data</div>
+                <div class="evac-body">
+                  No zones found for <strong>${INCIDENT}</strong>.
+                </div>
+              </div>`;
+            return;
+          }
+
+          const setFeatures = data.features.filter(
+            (f) => f.attributes.STATUS === STATUS_VALUES.SET
+          );
+          const goFeatures = data.features.filter(
+            (f) => f.attributes.STATUS === STATUS_VALUES.GO
+          );
+
+          row.innerHTML =
+            buildBox("SET", setFeatures) + buildBox("GO", goFeatures);
+        })
+        .catch((err) => {
+          console.error("Error loading evacuation zones:", err);
+          showError(`Failed to load evacuation data: ${err.message}`);
+        });
     }
 
-    const extraClass =
-      statusCode === 'GO'
-        ? ' evac-box-go'
-        : statusCode === 'SET'
-        ? ' evac-box-set'
-        : '';
+    function loadIncidentStatus(incidentName) {
+      if (!incidentName) {
+        return;
+      }
 
-    return `
-      <div class="evac-box${extraClass}" style="background:${bg};">
-        <div class="evac-title">${label}</div>
-        <div class="evac-body">
-          <div>
-            The following zones are under ${statusCode} status for
-            <strong>${INCIDENT}</strong>.
-          </div>
-          ${zonesHTML}
-          <div class="evac-note">${note}</div>
-        </div>
-      </div>`;
-  }
+      const url =
+        STATUS_BASE_URL + "?incident=" + encodeURIComponent(incidentName);
 
-  function showError(message) {
-    document.getElementById('evacRow').innerHTML = `
-      <div class="evac-box" style="background:#fff36a;">
-        <div class="evac-title">Error</div>
-        <div class="evac-body">${message}</div>
-      </div>`;
-  }
+      fetch(url)
+        .then((r) => {
+          if (!r.ok) {
+            throw new Error(`HTTP error! status: ${r.status}`);
+          }
+          return r.text();
+        })
+        .then((html) => {
+          const panel = document.getElementById("incident-panel");
+          panel.innerHTML = html;
 
-  function loadEvacuationZones() {
-    if (!INCIDENT) {
-      showHelp();
-      return;
+          const stamp = document.createElement("div");
+          stamp.className = "status-timestamp";
+          const now = new Date();
+          stamp.innerHTML = `
+            Last loaded: ${now.toLocaleString()}
+            &nbsp;•&nbsp;
+            <span class="source-label">Source: La Plata County Office of Emergency Management</span>
+          `;
+          panel.appendChild(stamp);
+        })
+        .catch((err) => {
+          console.error("Error loading incident status:", err);
+          document.getElementById("incident-panel").innerHTML =
+            "<div>Error loading incident status.</div>";
+        });
     }
 
-    const escapedIncident = escapeForQuery(INCIDENT);
-    const where = `incident='${escapedIncident}' AND STATUS IN ('${STATUS_VALUES.SET}','${STATUS_VALUES.GO}')`;
+    // Kick off SET/GO + status
+    loadEvacuationZones();
+    loadIncidentStatus(INCIDENT);
 
-    const queryParams = new URLSearchParams({
-      where,
-      outFields: '*',
-      f: 'json',
-      returnGeometry: 'false'
-    });
+    /* ---------- MAP & INCIDENT LIST LOGIC ---------- */
+    require(
+      ["esri/WebMap", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/widgets/Search"],
+      function (WebMap, MapView, FeatureLayer, Search) {
+        const infoButton = document.getElementById("infoButton");
+        const listEl = document.getElementById("incidentList");
+        const countBadge = document.getElementById("incidentCountBadge");
 
-    fetch(ARCGIS_URL + '?' + queryParams.toString())
-      .then(r => {
-        if (!r.ok) {
-          throw new Error(`HTTP error! status: ${r.status}`);
+        infoButton.addEventListener("click", () => {
+          // Update this to your real evac info page on ReadyLaPlata when ready
+          // window.location.href = "https://readylaplata.org/evacuation-info";
+          window.location.href = "info.html";
+        });
+
+        const webmap = new WebMap({
+          portalItem: { id: webmapId },
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: webmap,
+        });
+
+        const incidentLayer = new FeatureLayer({
+          url: incidentLayerUrl,
+          outFields: ["*"],
+          visible: false,
+          listMode: "hide",
+        });
+        webmap.add(incidentLayer);
+
+        function zoomToIncident(name) {
+          const safe = name.replace(/'/g, "''");
+          const where = `${incidentFieldName} = '${safe}'`;
+
+          return incidentLayer
+            .queryExtent({ where })
+            .then((res) => {
+              if (res.extent) {
+                return view.goTo(res.extent.expand(1.2));
+              }
+            })
+            .catch(console.error);
         }
-        return r.json();
-      })
-      .then(data => {
-        const row = document.getElementById('evacRow');
 
-        if (!data.features || data.features.length === 0) {
-          row.innerHTML = `
-            <div class="evac-box" style="background:#fff36a;">
-              <div class="evac-title">No data</div>
-              <div class="evac-body">
-                No zones found for <strong>${INCIDENT}</strong>.
-              </div>
-            </div>`;
-          return;
-        }
+        view
+          .when()
+          .then(() => {
+            const search = new Search({
+              view,
+              includeDefaultSources: true,
+            });
+            view.ui.add(search, "top-right");
 
-        const setFeatures = data.features.filter(
-          f => f.attributes.STATUS === STATUS_VALUES.SET
-        );
-        const goFeatures = data.features.filter(
-          f => f.attributes.STATUS === STATUS_VALUES.GO
-        );
+            return incidentLayer.when();
+          })
+          .then(() => {
+            return incidentLayer.queryFeatures({
+              where: "1=1",
+              outFields: [incidentFieldName],
+              returnDistinctValues: true,
+              orderByFields: [incidentFieldName],
+            });
+          })
+          .then((fs) => {
+            const features = fs.features || [];
 
-        row.innerHTML =
-          buildBox('SET', setFeatures) +
-          buildBox('GO', goFeatures);
-      })
-      .catch(err => {
-        console.error('Error loading evacuation zones:', err);
-        showError(`Failed to load evacuation data: ${err.message}`);
-      });
-  }
+            if (countBadge) {
+              countBadge.textContent = features.length;
+            }
 
-  function loadIncidentStatus(incidentName) {
-    if (!incidentName) {
-      return;
-    }
+            features.forEach((f) => {
+              const name = f.attributes[incidentFieldName];
+              if (!name) return;
 
-    const url =
-      STATUS_BASE_URL + '?incident=' + encodeURIComponent(incidentName);
+              const btn = document.createElement("button");
+              btn.className = "incident-button";
+              btn.textContent = name;
+              btn.setAttribute("data-incident", name);
 
-    fetch(url)
-      .then(r => {
-        if (!r.ok) {
-          throw new Error(`HTTP error! status: ${r.status}`);
-        }
-        return r.text();
-      })
-      .then(html => {
-        const panel = document.getElementById('incident-panel');
-        panel.innerHTML = html;
+              btn.addEventListener("click", () => {
+                const url = new URL(window.location.href);
+                url.searchParams.set("incident", name);
+                window.location.href = url.toString();
+              });
 
-        const stamp = document.createElement('div');
-        stamp.className = 'status-timestamp';
-        const now = new Date();
-        stamp.innerHTML = `
-          Last loaded: ${now.toLocaleString()}
-          &nbsp;•&nbsp;
-          <span class="source-label">Source: La Plata County Office of Emergency Management</span>
-        `;
-        panel.appendChild(stamp);
-      })
-      .catch(err => {
-        console.error('Error loading incident status:', err);
-        document.getElementById('incident-panel').innerHTML =
-          '<div>Error loading incident status.</div>';
-      });
-  }
+              listEl.appendChild(btn);
+            });
 
-  loadEvacuationZones();
-  loadIncidentStatus(INCIDENT);
-</script>
-
+            if (INCIDENT) {
+              const items = Array.from(
+                listEl.querySelectorAll(".incident-button")
+              );
+              const match = items.find(
+                (el) =>
+                  (el.getAttribute("data-incident") || "").toLowerCase() ===
+                  INCIDENT.toLowerCase()
+              );
+              if (match) {
+                match.classList.add("active");
+                zoomToIncident(INCIDENT);
+                match.scrollIntoView({ block: "nearest" });
+              }
+            }
+          })
+          .catch((err) => {
+            console.error("Error loading incidents:", err);
+            if (countBadge) {
+              countBadge.textContent = "0";
+            }
+          });
+      }
+    );
+  </script>
 </body>
 </html>

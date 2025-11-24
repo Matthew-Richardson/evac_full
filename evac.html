@@ -37,17 +37,26 @@
       gap: 10px;
     }
 
-    .page-header img {
+    /* Prominent logo with subtle drop shadow, no white background */
+    .header-logo {
       max-width: 260px;
       width: 70%;
       height: auto;
       display: block;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
     }
 
+    /* Call center as a pill-shaped chip with light shadow */
     .call-center {
       font-size: 18px;
       color: #333;
+      background: #ffffff;
+      padding: 6px 16px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .call-center strong {
@@ -64,9 +73,23 @@
       text-decoration: underline;
     }
 
+    /* Desktop logo size */
     @media (min-width: 768px) {
-      .page-header img {
+      .header-logo {
         width: 260px;
+      }
+    }
+
+    /* >>> MOBILE BOOST: bigger logo + call center on small screens <<< */
+    @media (max-width: 600px) {
+      .header-logo {
+        width: 86%;
+        max-width: 320px;
+      }
+
+      .call-center {
+        font-size: 22px;
+        padding: 12px 26px;
       }
     }
 
@@ -378,7 +401,6 @@
 
     /* ===== STATUS HTML OVERRIDES (Google Sheet output) ===== */
 
-    /* Make all text in the status HTML bigger & override inline styles */
     .status-html {
       font-size: 22px !important;
       line-height: 1.8 !important;
@@ -389,24 +411,22 @@
       line-height: inherit !important;
     }
 
-    /* Turn big blue header bars into pill-style labels instead of full-width stripes */
     .status-html h1,
     .status-html h2,
     .status-html h3,
     .status-html .status-header,
     .status-html .card-header {
-      background: #e8f0ff !important;   /* softer blue */
+      background: #e8f0ff !important;
       color: #0b4da2 !important;
       padding: 10px 16px !important;
       margin: 8px 0 4px 0 !important;
       font-weight: 700 !important;
       font-size: 24px !important;
-      border-radius: 999px !important;   /* pill */
-      display: inline-block !important;  /* no full-width bar */
+      border-radius: 999px !important;
+      display: inline-block !important;
       box-sizing: border-box !important;
     }
 
-    /* Card containers in status HTML (if present) */
     .status-html .status-card,
     .status-html .card,
     .status-html .card-container {
@@ -439,7 +459,6 @@
       text-decoration: underline;
     }
 
-    /* For very small screens, allow boxes to stack nicely */
     @media (max-width: 600px) {
       .evac-row {
         flex-direction: column;
@@ -461,6 +480,7 @@
       <img
         src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
         alt="La Plata County Logo"
+        class="header-logo"
       />
       <div class="call-center">
         <strong>Call Center:</strong>

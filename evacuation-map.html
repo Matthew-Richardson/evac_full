@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Incident Zoom Map</title>
+
+  <!-- ArcGIS Maps SDK -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.31/"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    /* MENU BAR ABOVE MAP */
+    #incidentBar {
+      width: 100%;
+      padding: 12px 0;
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #incidentMenuWrapper {
+      display: flex;
+      flex-direction: column;
+      width: 260px;
+      max-height: 400px;
+    }
+
+    #incidentList {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      margin-top: 8px;
+      padding-right: 4px;
+    }
+
+    .pill-button {
+      padding: 8px 14px;
+      font-size: 14px;
+      background: #f7f7f7;
+      border: 1px solid #ccc;
+      border-radius: 50px;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+      transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .pill-button:hover {
+      background: #eef4ff;
+      border-color: #7faeff;
+    }
+
+    .pill-button.active {
+      background: #dbe8ff;
+      border-color: #4a83ff;
+      font-weight: bold;
+      box-shadow: 0 0 0 1px rgba(74, 131, 255, 0.5);
+    }
+
+    #viewDiv {
+      height: calc(100% - 80px);
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- MENU ABOVE MAP -->
+  <div id="incidentBar">
+    <div id="incidentMenuWrapper">
+
+      <!-- Static info page button -->
+      <button id="infoButton" class="pill-button">
+        Evacuation Information
+      </button>
+
+      <!-- Scrollable list of incidents -->
+      <div id="incidentList"></div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="viewDiv"></div>
+
+  <script>
+    const webmapId = "58a8bb313db64271a55e7960cb839f64";
+    const incidentLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
+    const incidentFieldName = "incident";
+
+    // Current URL parameter incident=
+    function getIncidentFromUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        return (params.get("incident") || params.get("Incident") || "").trim();
+      } catch {
+        return "";
+      }
+    }
+
+    require([
+      "esri/WebMap",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Search"
+    ], function(WebMap, MapView, FeatureLayer, Search) {
+
+      const infoButton = document.getElementById("infoButton");
+      const listEl = document.getElementById("incidentList");
+
+      let currentActiveItem = null;
+
+      // When clicking the static info button → go to info.html
+      infoButton.addEventListener("click", () => {
+        window.location.href = "info.html";
+      });
+
+      // Webmap
+      const webmap = new WebMap({
+        portalItem: { id: webmapId }
+      });
+
+      // View
+      const view = new MapView({
+        container: "viewDiv",
+        map: webmap
+      });
+
+      // Layer
+      const incidentLayer = new FeatureLayer({
+        url: incidentLayerUrl,
+        outFields: ["*"],
+        visible: false,
+        listMode: "hide"
+      });
+      webmap.add(incidentLayer);
+
+      // Highlight active button
+      function setActive(item) {
+        if (currentActiveItem) currentActiveItem.classList.remove("active");
+        item.classList.add("active");
+        currentActiveItem = item;
+      }
+
+      // Zoom to selected incident
+      function zoomToIncident(name) {
+        const safe = name.replace(/'/g, "''");
+        const where = `${incidentFieldName} = '${safe}'`;
+
+        return incidentLayer.queryExtent({ where })
+          .then(res => {
+            if (res.extent) {
+              return view.goTo(res.extent.expand(1.2));
+            }
+          })
+          .catch(console.error);
+      }
+
+      view.when()
+        .then(() => {
+          const search = new Search({ view, includeDefaultSources: true });
+          view.ui.add(search, "top-right");
+
+          return incidentLayer.when();
+        })
+        .then(() => {
+          return incidentLayer.queryFeatures({
+            where: "1=1",
+            outFields: [incidentFieldName],
+            returnDistinctValues: true,
+            orderByFields: [incidentFieldName]
+          });
+        })
+        .then(fs => {
+          const features = fs.features || [];
+
+          // Create incident buttons
+          features.forEach(f => {
+            const name = f.attributes[incidentFieldName];
+            if (!name) return;
+
+            const btn = document.createElement("button");
+            btn.className = "pill-button";
+            btn.textContent = name;
+
+            btn.addEventListener("click", () => {
+              setActive(btn);
+              zoomToIncident(name);
+            });
+
+            listEl.appendChild(btn);
+          });
+
+          // Auto-select via URL
+          const urlIncident = getIncidentFromUrl();
+          if (urlIncident) {
+            const items = [...listEl.querySelectorAll(".pill-button")];
+            const match = items.find(
+              el => el.textContent.toLowerCase() === urlIncident.toLowerCase()
+            );
+            if (match) {
+              setActive(match);
+              zoomToIncident(match.textContent);
+            }
+          }
+        })
+        .catch(console.error);
+    });
+  </script>
+</body>
+</html>

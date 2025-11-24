@@ -16,7 +16,7 @@
       width: 100%;
       font-family: Arial, sans-serif;
       background: #f5f5f7;
-      font-size: 18px; /* Bigger base */
+      font-size: 18px;
     }
 
     .page-shell {
@@ -376,6 +376,49 @@
       line-height: 1.6;
     }
 
+    /* ===== STATUS HTML OVERRIDES (Google Sheet output) ===== */
+
+    /* Make all text in the status HTML bigger & override inline styles */
+    .status-html {
+      font-size: 22px !important;
+      line-height: 1.8 !important;
+    }
+
+    .status-html * {
+      font-size: inherit !important;
+      line-height: inherit !important;
+    }
+
+    /* Turn big blue header bars into pill-style labels instead of full-width stripes */
+    .status-html h1,
+    .status-html h2,
+    .status-html h3,
+    .status-html .status-header,
+    .status-html .card-header {
+      background: #e8f0ff !important;   /* softer blue */
+      color: #0b4da2 !important;
+      padding: 10px 16px !important;
+      margin: 8px 0 4px 0 !important;
+      font-weight: 700 !important;
+      font-size: 24px !important;
+      border-radius: 999px !important;   /* pill */
+      display: inline-block !important;  /* no full-width bar */
+      box-sizing: border-box !important;
+    }
+
+    /* Card containers in status HTML (if present) */
+    .status-html .status-card,
+    .status-html .card,
+    .status-html .card-container {
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.18) !important;
+      border: 1px solid rgba(0,0,0,0.15) !important;
+      margin: 12px 0 !important;
+      padding: 12px 16px !important;
+      background: #ffffff !important;
+    }
+
     .status-timestamp {
       font-size: 16px;
       margin-top: 10px;
@@ -403,6 +446,9 @@
       }
       .evac-box {
         min-width: 0;
+      }
+      .status-html {
+        font-size: 24px !important;
       }
     }
   </style>
@@ -691,7 +737,9 @@
         })
         .then((html) => {
           const panel = document.getElementById("incident-panel");
-          panel.innerHTML = html;
+
+          // Wrap returned HTML so we can control styling
+          panel.innerHTML = `<div class="status-html">${html}</div>`;
 
           const stamp = document.createElement("div");
           stamp.className = "status-timestamp";
@@ -723,7 +771,7 @@
         const countBadge = document.getElementById("incidentCountBadge");
 
         infoButton.addEventListener("click", () => {
-          // Update this to your real evac info page on ReadyLaPlata when ready
+          // Update this to your real evac info page when ready
           // window.location.href = "https://readylaplata.org/evacuation-info";
           window.location.href = "info.html";
         });

@@ -16,9 +16,9 @@
       width: 100%;
       font-family: Arial, sans-serif;
       background: #f5f5f7;
+      font-size: 18px; /* Bigger base */
     }
 
-    /* ======= PAGE SHELL ======= */
     .page-shell {
       min-height: 100vh;
       display: flex;
@@ -29,35 +29,35 @@
     /* ======= HEADER (LOGO + CALL CENTER) ======= */
     .page-header {
       width: 100%;
-      padding: 16px 8px 8px 8px;
+      padding: 24px 12px 12px 12px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
     }
 
     .page-header img {
-      max-width: 220px;
-      width: 55%;
+      max-width: 260px;
+      width: 70%;
       height: auto;
       display: block;
       filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
     }
 
     .call-center {
-      font-size: 14px;
+      font-size: 18px;
       color: #333;
     }
 
     .call-center strong {
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .call-center a {
       color: #0b4da2;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .call-center a:hover {
@@ -66,7 +66,7 @@
 
     @media (min-width: 768px) {
       .page-header img {
-        width: 220px;
+        width: 260px;
       }
     }
 
@@ -74,16 +74,16 @@
     .map-wrapper {
       max-width: 900px;
       width: 100%;
-      margin: 8px auto 0 auto;
-      padding: 8px;
+      margin: 12px auto 0 auto;
+      padding: 12px;
       box-sizing: border-box;
     }
 
     .map-card {
       width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,0.18);
-      box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.2);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
       overflow: hidden;
       background: #ffffff;
       display: flex;
@@ -94,20 +94,20 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
+      padding: 14px 18px;
       border-bottom: 1px solid rgba(0,0,0,0.08);
       box-sizing: border-box;
-      gap: 8px;
+      gap: 10px;
     }
 
     .map-card-title {
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 22px;
+      font-weight: 700;
     }
 
     .info-link {
-      font-size: 13px;
-      padding: 6px 12px;
+      font-size: 18px;
+      padding: 10px 20px;
       border-radius: 999px;
       border: 1px solid #0b4da2;
       background: #ffffff;
@@ -123,41 +123,40 @@
       box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
       .map-card-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
       .info-link {
-        align-self: stretch;
         text-align: center;
       }
     }
 
     .incident-strip {
-      padding: 8px 14px 10px 14px;
+      padding: 12px 18px 14px 18px;
       border-bottom: 1px solid rgba(0,0,0,0.05);
       box-sizing: border-box;
     }
 
     .incident-strip-label {
-      font-size: 12px;
-      font-weight: bold;
+      font-size: 18px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-bottom: 8px;
       color: #b3261e;
     }
 
     .incident-count-badge {
-      padding: 1px 8px;
+      padding: 4px 12px;
       border-radius: 999px;
       background: #b3261e;
       color: #ffffff;
-      font-size: 11px;
+      font-size: 16px;
       font-weight: 700;
       line-height: 1.4;
     }
@@ -165,24 +164,24 @@
     .incident-list {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      max-height: 220px;
+      gap: 6px;
+      max-height: 260px;
       overflow-y: auto;
     }
 
     .incident-button {
       width: 100%;
       text-align: left;
-      padding: 7px 10px;
-      font-size: 14px;
-      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 18px;
+      border-radius: 8px;
       border: 1px solid transparent;
       background: #f7f7f7;
       cursor: pointer;
       overflow: hidden;
       text-overflow: ellipsis;
       transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-      line-height: 1.4;
+      line-height: 1.6;
     }
 
     .incident-button:hover {
@@ -193,32 +192,32 @@
     .incident-button.active {
       background: #dbe8ff;
       border-color: #4a83ff;
-      font-weight: 600;
-      box-shadow: 0 0 0 1px rgba(74,131,255,0.5);
+      font-weight: 700;
+      box-shadow: 0 0 0 2px rgba(74,131,255,0.5);
     }
 
     #viewDiv {
       width: 100%;
-      height: 420px;
+      height: 460px;
     }
 
     /* Map Key inside map card */
     .map-key-merged {
-      padding: 12px 14px 14px 14px;
+      padding: 16px 18px 18px 18px;
       border-top: 1px solid rgba(0,0,0,0.08);
       background: #fafafa;
       text-align: center;
     }
 
     .map-key-merged .legend-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 18px;
     }
 
     .map-key-merged .legend-items {
       display: inline-flex;
-      gap: 18px;
+      gap: 20px;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -226,15 +225,15 @@
     .map-key-merged .legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 16px;
       white-space: nowrap;
     }
 
     .legend-icon-road {
       position: relative;
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: #d60000;
       display: inline-block;
@@ -243,8 +242,8 @@
       content: "";
       position: absolute;
       top: 50%;
-      left: 3px;
-      width: 12px;
+      left: 4px;
+      width: 14px;
       height: 4px;
       background: #ffffff;
       transform: translateY(-50%);
@@ -252,13 +251,13 @@
     }
 
     .legend-icon-info {
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: #0078d4;
       color: white;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 14px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -266,8 +265,8 @@
 
     .legend-icon-warning {
       position: relative;
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       background: #f6e05e;
       transform: rotate(45deg);
       border: 1px solid #c7b100;
@@ -282,7 +281,7 @@
       transform: translate(-50%, -60%) rotate(-45deg);
       color: #000;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 16px;
       line-height: 1;
     }
 
@@ -294,52 +293,52 @@
 
     .evac-row {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       max-width: 900px;
       width: 100%;
       box-sizing: border-box;
-      padding: 8px;
+      padding: 12px;
       flex-wrap: wrap;
       justify-content: center;
-      margin: 8px auto;
+      margin: 12px auto;
     }
 
     .evac-box {
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
       box-sizing: border-box;
       flex: 1;
-      min-width: 260px;
+      min-width: 280px;
       border: 1px solid rgba(0,0,0,0.2);
       background: #ffffff;
     }
 
     .evac-box-set {
-      border: 2px solid rgba(180, 150, 0, 0.9);
-      box-shadow: 0 0 8px rgba(180,150,0,0.4);
+      border: 3px solid rgba(180, 150, 0, 0.9);
+      box-shadow: 0 0 12px rgba(180,150,0,0.5);
     }
 
     .evac-box-go {
-      border: 2px solid rgba(0,120,0,0.9);
-      box-shadow: 0 0 12px rgba(0,120,0,0.5);
+      border: 3px solid rgba(0,120,0,0.9);
+      box-shadow: 0 0 16px rgba(0,120,0,0.6);
       animation: goPulse 2.5s ease-in-out infinite alternate;
     }
 
     @keyframes goPulse {
-      from { box-shadow: 0 0 8px rgba(0,120,0,0.35); }
-      to   { box-shadow: 0 0 18px rgba(0,160,0,0.7); }
+      from { box-shadow: 0 0 10px rgba(0,120,0,0.4); }
+      to   { box-shadow: 0 0 22px rgba(0,160,0,0.8); }
     }
 
     .evac-title {
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 10px;
     }
 
     .evac-body {
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 18px;
+      line-height: 1.6;
       display: flex;
       flex-direction: column;
     }
@@ -347,114 +346,63 @@
     .evac-zones {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 12px;
     }
 
     .zone-chip,
     .no-zones-chip {
-      font-weight: bold;
-      background: rgba(0,0,0,0.1);
-      padding: 4px 8px;
-      border-radius: 6px;
+      font-weight: 700;
+      background: rgba(0,0,0,0.08);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 18px;
     }
 
     .evac-note {
-      margin-top: 12px;
-      font-size: 14px;
+      margin-top: 14px;
+      font-size: 18px;
       font-style: italic;
-      font-weight: bold;
+      font-weight: 700;
     }
 
     .incident-panel {
       max-width: 900px;
       width: 100%;
       box-sizing: border-box;
-      padding: 0 8px 16px 8px;
-      margin: 0 auto 16px auto;
+      padding: 0 12px 20px 12px;
+      margin: 0 auto 20px auto;
+      font-size: 18px;
+      line-height: 1.6;
     }
 
     .status-timestamp {
-      font-size: 11px;
-      margin-top: 6px;
+      font-size: 16px;
+      margin-top: 10px;
       color: #444;
-      opacity: 0.75;
+      opacity: 0.8;
       text-align: center;
     }
 
     .source-label {
       font-style: italic;
-      opacity: 0.85;
+      opacity: 0.9;
       white-space: nowrap;
     }
 
     .incident-panel a {
       color: #0b4da2;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: underline;
     }
 
-    /* ===== MOBILE READABILITY / TAP TARGET BOOST ===== */
+    /* For very small screens, allow boxes to stack nicely */
     @media (max-width: 600px) {
-      .call-center {
-        font-size: 15px;
+      .evac-row {
+        flex-direction: column;
       }
-
-      .map-card-title {
-        font-size: 18px;
-      }
-
-      .info-link {
-        font-size: 15px;
-        padding: 8px 16px;
-      }
-
-      .incident-strip-label {
-        font-size: 13px;
-      }
-
-      .incident-count-badge {
-        font-size: 12px;
-        padding: 2px 10px;
-      }
-
-      .incident-button {
-        font-size: 15px;
-        padding: 10px 14px;   /* taller tap target */
-      }
-
-      .map-key-merged .legend-title {
-        font-size: 14px;
-      }
-
-      .map-key-merged .legend-item {
-        font-size: 13px;
-      }
-
       .evac-box {
-        padding: 14px;
-      }
-
-      .evac-title {
-        font-size: 19px;
-      }
-
-      .evac-body {
-        font-size: 15px;
-      }
-
-      .zone-chip,
-      .no-zones-chip {
-        font-size: 14px;
-        padding: 5px 9px;
-      }
-
-      .evac-note {
-        font-size: 15px;
-      }
-
-      .status-timestamp {
-        font-size: 12px;
+        min-width: 0;
       }
     }
   </style>

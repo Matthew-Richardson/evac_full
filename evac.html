@@ -140,8 +140,9 @@
 
     /* ======= INCIDENT BAR + MENU ======= */
     .incident-strip {
-      padding: 12px 18px 14px 18px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      padding: 12px 18px 10px 18px;
+      /* moved separation to .map-divider instead of here */
+      border-bottom: none;
       box-sizing: border-box;
     }
 
@@ -176,7 +177,7 @@
       line-height: 1.4;
     }
 
-    /* Info button: desktop = icon + short text, mobile = icon only */
+    /* Info button: desktop = home icon + full text, mobile = home icon only */
     .info-link {
       font-size: 16px;
       padding: 8px 14px;
@@ -199,10 +200,8 @@
       box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
     }
 
-    /* Just a simple "i", no pill/circle around it */
-    .info-icon {
-      font-size: 16px;
-      font-weight: 700;
+    .info-icon-home {
+      font-size: 18px;
       line-height: 1;
     }
 
@@ -221,6 +220,9 @@
       .info-label {
         display: none;
       }
+      .info-icon-home {
+        font-size: 20px;
+      }
     }
 
     .incident-list {
@@ -229,6 +231,13 @@
       gap: 6px;
       max-height: 260px;
       overflow-y: auto;
+    }
+
+    /* Natural break between menu and map */
+    .map-divider {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0,0,0,0.08);
     }
 
     /* Incident buttons: centered + slightly larger text */
@@ -245,14 +254,16 @@
       text-overflow: ellipsis;
       transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
       line-height: 1.5;
+      color: #000; /* non-active text black */
     }
 
     /* Compact style for inactive items when there are multiple incidents */
     .incident-button.compact {
       padding: 8px 14px;
       font-size: 17px;
-      opacity: 0.85;
       background: #fafafa;
+      color: #000; /* ensure compact items still black text */
+      opacity: 1;
     }
 
     .incident-button:hover {
@@ -266,6 +277,7 @@
       font-weight: 700;
       box-shadow: 0 0 0 2px rgba(74,131,255,0.5);
       opacity: 1;
+      color: #000;
     }
 
     /* Map: full card width */
@@ -562,11 +574,15 @@
               type="button"
               aria-label="Evacuation Information Homepage"
             >
-              <span class="info-icon">i</span>
-              <span class="info-label">Evac Info</span>
+              <span class="info-icon-home">🏠</span>
+              <span class="info-label">Evacuation Information Homepage</span>
             </button>
           </div>
+
           <div id="incidentList" class="incident-list"></div>
+
+          <!-- natural break before map -->
+          <div class="map-divider"></div>
         </div>
 
         <div id="viewDiv"></div>
@@ -847,8 +863,14 @@
 
     /* ---------- MAP & INCIDENT LIST LOGIC ---------- */
     require(
-      ["esri/WebMap", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/widgets/Search"],
-      function (WebMap, MapView, FeatureLayer, Search) {
+      [
+        "esri/WebMap",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Search",
+        "esri/widgets/Fullscreen"
+      ],
+      function (WebMap, MapView, FeatureLayer, Search, Fullscreen) {
         const infoButton = document.getElementById("infoButton");
         const listEl = document.getElementById("incidentList");
         const countBadge = document.getElementById("incidentCountBadge");
@@ -898,6 +920,12 @@
               includeDefaultSources: true,
             });
             view.ui.add(search, "top-right");
+
+            // Fullscreen widget for map
+            const fullscreen = new Fullscreen({
+              view: view
+            });
+            view.ui.add(fullscreen, "top-right");
 
             return incidentLayer.when();
           })

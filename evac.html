@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <!-- Viewport so media queries work correctly on iPhone -->
+
+  <!-- Mobile viewport so media queries and scaling work correctly -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Incident Map & Evacuation Info</title>
 
@@ -19,13 +20,13 @@
       font-family: Arial, sans-serif;
       background: #f5f5f7;
       font-size: 18px;
-      overflow-x: hidden; /* prevent right-side overflow on mobile */
+      overflow-x: hidden; /* prevent horizontal scroll / cutoff on iPhone */
     }
 
-    /* Global 15%-ish reduction on small screens */
+    /* Slight global downscale on small screens (~15%) */
     @media (max-width: 600px) {
       html, body {
-        font-size: 15px; /* ~17% smaller than 18px, close to your 15% ask */
+        font-size: 15px;
       }
     }
 
@@ -36,63 +37,11 @@
       align-items: stretch;
     }
 
-    /* ======= HEADER (LOGO + CALL CENTER) ======= */
-    .page-header {
-      width: 100%;
-      padding: 24px 12px 12px 12px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .page-header img {
-      max-width: 260px;
-      width: 70%;
-      height: auto;
-      display: block;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
-    }
-
-    /* Call center styled as a pill/card */
-    .call-center {
-      font-size: 18px;
-      color: #333;
-      background: #ffffff;
-      padding: 6px 16px;
-      border-radius: 999px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .call-center strong {
-      font-weight: 700;
-    }
-
-    .call-center a {
-      color: #0b4da2;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .call-center a:hover {
-      text-decoration: underline;
-    }
-
-    @media (min-width: 768px) {
-      .page-header img {
-        width: 260px;
-      }
-    }
-
-    /* ======= MAP + INCIDENT MENU ======= */
+    /* ======= MAP WRAPPER & CARD ======= */
     .map-wrapper {
       max-width: 900px;
       width: 100%;
-      margin: 12px auto 0 auto;
+      margin: 16px auto 0 auto;
       padding: 12px;
       box-sizing: border-box;
     }
@@ -108,25 +57,120 @@
       flex-direction: column;
     }
 
-    .map-card-header {
+    /* ======= BRAND BLOCK INSIDE CARD (LOGO + TITLE + CALL CENTER) ======= */
+    .card-brand {
+      padding: 18px 18px 10px 18px;
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-logo {
+      max-width: 260px;
+      width: 70%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+    }
+
+    @media (max-width: 600px) {
+      .header-logo {
+        width: 73%;
+        max-width: 275px;
+      }
+    }
+
+    /* Subtle title (Option A – light gray) */
+    .site-title {
+      text-align: center;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      color: #6e6e6e;
+      opacity: 0.85;
+    }
+
+    /* Call center as a cleaner info card */
+    .call-center {
+      background: #f5f7ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(11, 77, 162, 0.18);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: #333;
+    }
+
+    .call-center strong {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.85;
+    }
+
+    .call-center a {
+      color: #0b4da2;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .call-center a:hover {
+      text-decoration: underline;
+    }
+
+    /* ======= INCIDENT BAR + MENU ======= */
+    .incident-strip {
+      padding: 12px 18px 14px 18px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      box-sizing: border-box;
+    }
+
+    /* Top row: Active incidents + button aligned */
+    .incident-strip-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 18px;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      box-sizing: border-box;
-      gap: 10px;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
     }
 
-    .map-card-title {
-      font-size: 22px;
+    .incident-strip-label {
+      font-size: 18px;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #b3261e;
+    }
+
+    .incident-count-badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #b3261e;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.4;
     }
 
     .info-link {
-      font-size: 18px;
-      padding: 10px 20px;
-      border-radius: 999px;
+      font-size: 16px;
+      padding: 8px 16px;
+      border-radius: 8px;
       border: 1px solid #0b4da2;
       background: #ffffff;
       color: #0b4da2;
@@ -142,41 +186,13 @@
     }
 
     @media (max-width: 600px) {
-      .map-card-header {
+      .incident-strip-top {
         flex-direction: column;
         align-items: stretch;
       }
       .info-link {
         text-align: center;
       }
-    }
-
-    .incident-strip {
-      padding: 12px 18px 14px 18px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      box-sizing: border-box;
-    }
-
-    .incident-strip-label {
-      font-size: 18px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      color: #b3261e;
-    }
-
-    .incident-count-badge {
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: #b3261e;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.4;
     }
 
     .incident-list {
@@ -187,19 +203,28 @@
       overflow-y: auto;
     }
 
+    /* Incident buttons: centered + slightly larger text */
     .incident-button {
       width: 100%;
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 18px;
+      text-align: center;
+      padding: 14px 16px;
+      font-size: 20px;
       border-radius: 8px;
       border: 1px solid transparent;
       background: #f7f7f7;
       cursor: pointer;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-      line-height: 1.6;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+      line-height: 1.5;
+    }
+
+    /* Compact style for inactive items when there are multiple incidents */
+    .incident-button.compact {
+      padding: 8px 14px;
+      font-size: 17px;
+      opacity: 0.85;
+      background: #fafafa;
     }
 
     .incident-button:hover {
@@ -212,11 +237,14 @@
       border-color: #4a83ff;
       font-weight: 700;
       box-shadow: 0 0 0 2px rgba(74,131,255,0.5);
+      opacity: 1;
     }
 
+    /* Map: full card width */
     #viewDiv {
       width: 100%;
       height: 460px;
+      box-sizing: border-box;
     }
 
     /* Map Key inside map card */
@@ -373,7 +401,7 @@
       font-weight: 700;
       background: rgba(0,0,0,0.08);
       padding: 6px 12px;
-      border-radius: 8px;
+      border-radius: 8px; /* match incident button rounding */
       font-size: 18px;
     }
 
@@ -411,14 +439,14 @@
     .status-html h3,
     .status-html .status-header,
     .status-html .card-header {
-      background: #e8f0ff !important;   /* softer blue */
+      background: #e8f0ff !important;
       color: #0b4da2 !important;
       padding: 10px 16px !important;
       margin: 8px 0 4px 0 !important;
       font-weight: 700 !important;
       font-size: 24px !important;
-      border-radius: 999px !important;   /* pill */
-      display: inline-block !important;  /* no full-width bar */
+      border-radius: 999px !important;  /* keep these as pill labels */
+      display: inline-block !important;
       box-sizing: border-box !important;
     }
 
@@ -434,7 +462,6 @@
       background: #ffffff !important;
     }
 
-    /* ✅ Fixed to avoid overflow / cutoff on iPhone */
     .status-timestamp {
       font-size: 16px;
       margin-top: 10px;
@@ -448,7 +475,7 @@
     .source-label {
       font-style: italic;
       opacity: 0.9;
-      white-space: normal;  /* was nowrap, which caused key/text to push layout */
+      white-space: normal;  /* allow wrapping, avoid pushing layout wide */
       display: inline-block;
     }
 
@@ -458,7 +485,6 @@
       text-decoration: underline;
     }
 
-    /* For very small screens, allow boxes to stack nicely */
     @media (max-width: 600px) {
       .evac-row {
         flex-direction: column;
@@ -475,32 +501,36 @@
 
 <body>
   <div class="page-shell">
-    <!-- Header (Logo + Call Center) -->
-    <header class="page-header">
-      <img
-        src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
-        alt="La Plata County Logo"
-      />
-      <div class="call-center">
-        <strong>Call Center:</strong>
-        <a href="tel:9703858700">970-385-8700</a>
-      </div>
-    </header>
 
-    <!-- MAP + INCIDENT MENU -->
+    <!-- MAP + BRAND + INCIDENT MENU -->
     <div class="map-wrapper">
       <div class="map-card">
-        <div class="map-card-header">
-          <div class="map-card-title">Evacuation Map</div>
-          <button id="infoButton" class="info-link">
-            Evacuation Information
-          </button>
+
+        <!-- Brand block inside the card -->
+        <div class="card-brand">
+          <img
+            src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
+            alt="La Plata County Logo"
+            class="header-logo"
+          />
+          <div class="site-title">
+            ReadyLaPlata — La Plata County Evacuation Viewer
+          </div>
+          <div class="call-center">
+            <strong>Call Center</strong>
+            <a href="tel:9703858700">970-385-8700</a>
+          </div>
         </div>
 
         <div class="incident-strip">
-          <div class="incident-strip-label">
-            Active incidents
-            <span id="incidentCountBadge" class="incident-count-badge">0</span>
+          <div class="incident-strip-top">
+            <div class="incident-strip-label">
+              Active incidents
+              <span id="incidentCountBadge" class="incident-count-badge">0</span>
+            </div>
+            <button id="infoButton" class="info-link">
+              Evacuation Information Homepage
+            </button>
           </div>
           <div id="incidentList" class="incident-list"></div>
         </div>
@@ -848,18 +878,46 @@
           .then((fs) => {
             const features = fs.features || [];
 
-            if (countBadge) {
-              countBadge.textContent = features.length;
-            }
-
+            // Collect incident names
+            const incidentNames = [];
             features.forEach((f) => {
               const name = f.attributes[incidentFieldName];
-              if (!name) return;
+              if (name) incidentNames.push(name);
+            });
 
+            if (countBadge) {
+              countBadge.textContent = incidentNames.length;
+            }
+
+            // Sort so the selected incident (if any) is first, others alphabetical
+            if (INCIDENT) {
+              const target = INCIDENT.toLowerCase();
+              incidentNames.sort((a, b) => {
+                const al = a.toLowerCase();
+                const bl = b.toLowerCase();
+                if (al === target && bl !== target) return -1;
+                if (bl === target && al !== target) return 1;
+                return al.localeCompare(bl);
+              });
+            } else {
+              incidentNames.sort((a, b) =>
+                a.toLowerCase().localeCompare(b.toLowerCase())
+              );
+            }
+
+            const totalIncidents = incidentNames.length;
+
+            // Build buttons: "Incident — Evac Map"
+            incidentNames.forEach((name) => {
               const btn = document.createElement("button");
               btn.className = "incident-button";
-              btn.textContent = name;
+              btn.textContent = `${name} — Evac Map`;
               btn.setAttribute("data-incident", name);
+
+              // If there is more than 1 incident, make non-active items compact by default
+              if (totalIncidents > 1) {
+                btn.classList.add("compact");
+              }
 
               btn.addEventListener("click", () => {
                 const url = new URL(window.location.href);
@@ -870,6 +928,7 @@
               listEl.appendChild(btn);
             });
 
+            // Mark active incident, zoom to it, and restore full size
             if (INCIDENT) {
               const items = Array.from(
                 listEl.querySelectorAll(".incident-button")
@@ -881,8 +940,9 @@
               );
               if (match) {
                 match.classList.add("active");
+                match.classList.remove("compact");
                 zoomToIncident(INCIDENT);
-                match.scrollIntoView({ block: "nearest" });
+                // No need to scrollIntoView; if sorted it will already be at the top
               }
             }
           })

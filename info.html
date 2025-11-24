@@ -169,8 +169,9 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 260px;
+      max-height: 180px;
       overflow-y: auto;
+      font-size: 17px;
     }
 
     .map-divider {
@@ -181,29 +182,40 @@
 
     .incident-button {
       width: 100%;
-      text-align: center;
-      padding: 14px 16px;
-      font-size: 20px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      background: #f7f7f7;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 18px;
+      border-radius: 14px;
+      border: 1px solid #c4d7ff;
+      background: #f7f7ff;
       cursor: pointer;
       overflow: hidden;
       text-overflow: ellipsis;
       transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
       line-height: 1.5;
       color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .incident-button::after {
+      content: "›";
+      font-size: 20px;
+      opacity: 0.7;
     }
 
     .incident-button.compact {
       padding: 8px 14px;
       font-size: 17px;
-      background: #fafafa;
+      background: #f0f3ff;
     }
 
     .incident-button:hover {
       background: #eef4ff;
-      border-color: #c4d7ff;
+      border-color: #4a83ff;
+      box-shadow: 0 0 0 1px rgba(74,131,255,0.4);
     }
 
     /* ------- HOMEPAGE CONTENT ------- */
@@ -237,12 +249,17 @@
 
     .home-card {
       border-radius: 14px;
-      border: 2px solid #222;
+      border: 1px solid #222;
       margin-bottom: 14px;
       padding: 14px 18px;
       box-sizing: border-box;
       box-shadow: 0 1px 4px rgba(0,0,0,0.2);
       background: #ffffff;
+    }
+
+    .home-card-info,
+    .home-card-codered {
+      border-width: 2px;
     }
 
     .home-card-info {
@@ -258,6 +275,7 @@
     .home-card-set {
       background: #fff36a;
       border-color: #d2b700;
+      color: #222;
     }
 
     .home-card-go {
@@ -270,23 +288,23 @@
       border-color: #3b78c2;
     }
 
-    .home-title-strong {
+    .home-card-title {
+      margin: 0 0 6px 0;
+      font-size: 20px;
       font-weight: 700;
-    }
-
-    .home-title-line {
-      font-size: 19px;
-      margin-bottom: 6px;
+      text-align: center;
     }
 
     .home-small {
       font-size: 16px;
+      max-width: 780px;
+      margin: 0 auto;
     }
 
     .home-ready-heading {
       font-size: 24px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin: 0 0 8px 0;
       text-align: center;
     }
 
@@ -300,6 +318,45 @@
       font-size: 20px;
       margin-bottom: 4px;
       text-align: center;
+    }
+
+    /* pill-style action buttons */
+    .primary-pill,
+    .secondary-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      margin-top: 4px;
+      margin-right: 6px;
+    }
+
+    .primary-pill {
+      background: #0b4da2;
+      border: 1px solid #0b4da2;
+    }
+
+    .secondary-pill {
+      background: #ffffff;
+      border: 1px solid #0b4da2;
+    }
+
+    /* override generic link styling so pills look correct */
+    .incident-panel a.primary-pill {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+
+    .incident-panel a.secondary-pill {
+      color: #0b4da2 !important;
+      text-decoration: none !important;
+    }
+
+    .primary-pill:hover,
+    .secondary-pill:hover {
+      box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
     }
 
     @media (max-width: 600px) {
@@ -331,7 +388,7 @@
           </div>
         </div>
 
-        <!-- incident menu (no home/back button) -->
+        <!-- incident menu -->
         <div class="incident-strip">
           <div class="incident-strip-top">
             <div class="incident-strip-label">
@@ -352,50 +409,52 @@
         <div class="home-wrapper">
           <!-- top blue info card -->
           <div class="home-card home-card-info">
-            <div class="home-title-line">
-              <span class="home-title-strong">
-                La Plata County Office of Emergency Management (LPCOEM)
-              </span>
-              &nbsp;uses the Ready, Set, Go! system to establish evacuation zones.
-            </div>
+            <h2 class="home-card-title">
+              La Plata County Office of Emergency Management (LPCOEM)
+            </h2>
             <div class="home-small">
+              LPCOEM uses the Ready, Set, Go! system to establish evacuation zones.
               <strong>Click the incident map above</strong> to confirm your zone.
-              During an incident your zone name and area may change.
+              During an incident, your zone name and area may change.
             </div>
           </div>
 
           <!-- red READY card -->
           <div class="home-card home-card-ready">
-            <div class="home-ready-heading">
-              Be <span>READY</span>, Stay <span>SAFE</span>
-            </div>
+            <h2 class="home-card-title">
+              Be READY, Stay SAFE
+            </h2>
             <div class="home-small">
-              <p><strong>Stay Informed:</strong>
-                <a href="https://public.coderedweb.com/CNE/en-US/4A6A53EDDC0E"
-                   target="_blank" rel="noopener">
-                  CodeRED signup
+              <p>
+                <strong>Stay Informed:</strong>
+                <a class="primary-pill"
+                   href="#"
+                   title="CodeRED signup (link coming soon)">
+                  Open CodeRED signup
                 </a>
-                or
-                <a href="sms:99411?&body=LPCOEM">
-                  text 'LPCOEM' to 99411
-                </a>.
-                Ensure Gov’t Alerts are enabled on your cell phone, and use apps like Watch Duty.
+                <a class="secondary-pill" href="sms:99411?&body=LPCOEM">
+                  Text 'LPCOEM' to 99411
+                </a>
               </p>
-              <p><strong>Arrangements:</strong>
-                 Make a plan and practice your evacuation; People, Pets, Photos, Papers and Pills.
+              <p>
+                <strong>Arrangements:</strong>
+                Make a plan and practice your evacuation; People, Pets, Photos, Papers and Pills.
               </p>
-              <p><strong>Fire Ready:</strong>
-                 Fire mitigation and last-minute safety measures; have a “Go Kit” with protective clothing and masks.
+              <p>
+                <strong>Fire Ready:</strong>
+                Complete fire mitigation and last-minute safety measures; have a “Go Kit”
+                with protective clothing and masks.
               </p>
-              <p><strong>Evacuate:</strong>
-                 Don’t hesitate or ignore evacuation orders. Know multiple ways out.
+              <p>
+                <strong>Evacuate:</strong>
+                Don’t hesitate or ignore evacuation orders. Know multiple ways out.
               </p>
             </div>
           </div>
 
           <!-- yellow SET card (full-width) -->
           <div class="home-card home-card-set">
-            <div class="home-set-title">SET - Pre-Evacuation</div>
+            <h2 class="home-set-title">SET - Pre-Evacuation</h2>
             <div class="home-small" style="text-align:center;">
               Voluntary evacuation;<br/>
               evacuation orders are likely.
@@ -404,7 +463,7 @@
 
           <!-- green GO card (full-width) -->
           <div class="home-card home-card-go">
-            <div class="home-go-title">GO - Evacuate Now</div>
+            <h2 class="home-go-title">GO - Evacuate Now</h2>
             <div class="home-small" style="text-align:center;">
               <strong>LEAVE NOW.</strong> Immediate threat to life.<br/>
               This area is closed to public access.
@@ -413,19 +472,22 @@
 
           <!-- bottom blue CodeRED card -->
           <div class="home-card home-card-codered">
-            <div class="home-title-line home-title-strong" style="margin-bottom:10px;">
-              La Plata County’s emergency notification system is called CodeRED.
-            </div>
+            <h2 class="home-card-title">
+              CodeRED Emergency Notifications
+            </h2>
             <div class="home-small">
-              If you live in La Plata County, you may register up to five cell or internet
-              phone numbers with your physical street address so you receive emergency
-              notifications even when you’re not at home or don’t have a landline.
-            </div>
-            <div class="home-small" style="margin-top:10px;">
-              Mobile signup:
-              <a href="sms:99411?&body=LPCOEM">
-                Text 'LPCOEM' to 99411
-              </a>.
+              <p>
+                La Plata County’s emergency notification system is called CodeRED.
+                If you live in La Plata County, you may register up to five cell or
+                internet phone numbers with your physical street address so you receive
+                emergency notifications even when you’re not at home or don’t have a landline.
+              </p>
+              <p style="margin-top:10px;">
+                Mobile signup:
+                <a class="secondary-pill" href="sms:99411?&body=LPCOEM">
+                  Text 'LPCOEM' to 99411
+                </a>
+              </p>
             </div>
           </div>
         </div>

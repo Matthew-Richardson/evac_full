@@ -45,12 +45,6 @@
       filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
     }
 
-    @media (min-width: 768px) {
-      .page-header img {
-        width: 220px;
-      }
-    }
-
     .call-center {
       font-size: 14px;
       color: #333;
@@ -68,6 +62,12 @@
 
     .call-center a:hover {
       text-decoration: underline;
+    }
+
+    @media (min-width: 768px) {
+      .page-header img {
+        width: 220px;
+      }
     }
 
     /* ======= MAP + INCIDENT MENU ======= */
@@ -182,6 +182,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+      line-height: 1.4;
     }
 
     .incident-button:hover {
@@ -230,13 +231,6 @@
       white-space: nowrap;
     }
 
-    @media (max-width: 480px) {
-      .map-key-merged .legend-items {
-        gap: 12px;
-      }
-    }
-
-    /* Legend icons */
     .legend-icon-road {
       position: relative;
       width: 18px;
@@ -345,7 +339,7 @@
 
     .evac-body {
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.5;
       display: flex;
       flex-direction: column;
     }
@@ -398,6 +392,70 @@
       color: #0b4da2;
       font-weight: 600;
       text-decoration: underline;
+    }
+
+    /* ===== MOBILE READABILITY / TAP TARGET BOOST ===== */
+    @media (max-width: 600px) {
+      .call-center {
+        font-size: 15px;
+      }
+
+      .map-card-title {
+        font-size: 18px;
+      }
+
+      .info-link {
+        font-size: 15px;
+        padding: 8px 16px;
+      }
+
+      .incident-strip-label {
+        font-size: 13px;
+      }
+
+      .incident-count-badge {
+        font-size: 12px;
+        padding: 2px 10px;
+      }
+
+      .incident-button {
+        font-size: 15px;
+        padding: 10px 14px;   /* taller tap target */
+      }
+
+      .map-key-merged .legend-title {
+        font-size: 14px;
+      }
+
+      .map-key-merged .legend-item {
+        font-size: 13px;
+      }
+
+      .evac-box {
+        padding: 14px;
+      }
+
+      .evac-title {
+        font-size: 19px;
+      }
+
+      .evac-body {
+        font-size: 15px;
+      }
+
+      .zone-chip,
+      .no-zones-chip {
+        font-size: 14px;
+        padding: 5px 9px;
+      }
+
+      .evac-note {
+        font-size: 15px;
+      }
+
+      .status-timestamp {
+        font-size: 12px;
+      }
     }
   </style>
 </head>

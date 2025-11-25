@@ -399,7 +399,7 @@
       color: #000000;
     }
 
-    /* ===== Smaller status boxes (~20% smaller) ===== */
+    /* Smaller SET/GO boxes */
     .evac-box {
       padding: 14px;
       border-radius: 8px;
@@ -430,12 +430,12 @@
 
     .evac-title {
       font-weight: 700;
-      font-size: 18px; /* was 22px */
+      font-size: 18px;
       margin-bottom: 8px;
     }
 
     .evac-body {
-      font-size: 15px; /* was 18px */
+      font-size: 15px;
       line-height: 1.5;
       display: flex;
       flex-direction: column;
@@ -455,12 +455,12 @@
       background: rgba(0,0,0,0.08);
       padding: 4px 10px;
       border-radius: 8px;
-      font-size: 15px; /* was 18px */
+      font-size: 15px;
     }
 
     .evac-note {
       margin-top: 10px;
-      font-size: 15px; /* was 18px */
+      font-size: 15px;
       font-style: italic;
       font-weight: 700;
     }
@@ -476,9 +476,10 @@
       color: #000000;
     }
 
+    /* ===== Status HTML from Google Sheet – now matches SET/GO body size ===== */
     .status-html {
-      font-size: 22px !important;
-      line-height: 1.8 !important;
+      font-size: 15px !important;   /* match evac-body */
+      line-height: 1.6 !important;
       color: #000000;
     }
 
@@ -498,7 +499,7 @@
       padding: 10px 16px !important;
       margin: 8px 0 4px 0 !important;
       font-weight: 700 !important;
-      font-size: 24px !important;
+      font-size: 18px !important;  /* smaller, closer to evac-title */
       border-radius: 999px !important;
       display: inline-block !important;
       box-sizing: border-box !important;
@@ -517,7 +518,7 @@
     }
 
     .status-timestamp {
-      font-size: 16px;
+      font-size: 14px;
       margin-top: 10px;
       color: #444;
       opacity: 0.8;
@@ -546,9 +547,7 @@
       .evac-box {
         min-width: 0;
       }
-      .status-html {
-        font-size: 24px !important;
-      }
+      /* no extra font bump for status-html on mobile */
     }
   </style>
 </head>

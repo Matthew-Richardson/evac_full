@@ -139,55 +139,91 @@
   </div>
 
   <script>
-    const INCIDENT_MAP_URL = "evac.html";
-    const incidentLayerUrl =
-      "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query";
-    const incidentFieldName = "incident";
+  const INCIDENT_MAP_URL = "evac.html";
+  const incidentLayerUrl =
+    "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query";
+  const incidentFieldName = "incident";
 
-    const chipsEl = document.getElementById("incidentChips");
-    const countBadge = document.getElementById("incidentCountBadge");
-    const noIncidentsMsg = document.getElementById("noIncidentsMsg");
+  const chipsEl = document.getElementById("incidentChips");
+  const countBadge = document.getElementById("incidentCountBadge");
+  const noIncidentsMsg = document.getElementById("noIncidentsMsg");
 
-    function loadIncidentMenu() {
-      const params = new URLSearchParams({
-        where: "1=1",
-        outFields: incidentFieldName,
-        returnDistinctValues: "true",
-        f: "json"
+  function loadIncidentMenu() {
+    const params = new URLSearchParams({
+      where: "1=1",
+      outFields: incidentFieldName,
+      returnDistinctValues: "true", // still ask server
+      f: "json"
+    });
+
+    // Clear any existing chips in case this gets called again
+    chipsEl.innerHTML = "";
+    noIncidentsMsg.style.display = "none";
+
+    fetch(incidentLayerUrl + "?" + params.toString())
+      .then(r => {
+        if (!r.ok) {
+          throw new Error(`HTTP error ${r.status}`);
+        }
+        return r.json();
+      })
+      .then(data => {
+        const features = data.features || [];
+
+        // 🔹 Deduplicate by incident name (case-insensitive, trimmed)
+        const seen = new Set();
+        const names = [];
+
+        features.forEach(f => {
+          const raw = f.attributes && f.attributes[incidentFieldName];
+          if (!raw) return;
+
+          const name = String(raw).trim();
+          if (!name) return;
+
+          const key = name.toLowerCase();
+          if (seen.has(key)) return;
+
+          seen.add(key);
+          names.push(name);
+        });
+
+        // Case-insensitive sort for display
+        names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+        // Update count badge with unique incidents
+        countBadge.textContent = names.length;
+
+        if (!names.length) {
+          noIncidentsMsg.style.display = "block";
+          return;
+        }
+
+        // Build chips
+        names.forEach(name => {
+          const chip = document.createElement("button");
+          chip.className = "incident-chip";
+          chip.innerHTML =
+            `<span class="incident-chip-dot"></span><span>${name}</span>`;
+
+          chip.onclick = () => {
+            const url = new URL(INCIDENT_MAP_URL, window.location.href);
+            url.searchParams.set("incident", name);
+            window.location.href = url.toString();
+          };
+
+          chipsEl.appendChild(chip);
+        });
+      })
+      .catch(err => {
+        console.error("Error loading incidents:", err);
+        countBadge.textContent = "0";
+        noIncidentsMsg.style.display = "block";
       });
+  }
 
-      fetch(incidentLayerUrl + "?" + params.toString())
-        .then(r => r.json())
-        .then(data => {
-          const names = (data.features || [])
-            .map(f => f.attributes?.[incidentFieldName])
-            .filter(Boolean)
-            .sort((a,b)=>a.localeCompare(b));
-
-          countBadge.textContent = names.length;
-
-          if (!names.length) {
-            noIncidentsMsg.style.display = "block";
-            return;
-          }
-
-          names.forEach(name => {
-            const chip = document.createElement("button");
-            chip.className = "incident-chip";
-            chip.innerHTML =
-              `<span class="incident-chip-dot"></span><span>${name}</span>`;
-            chip.onclick = () => {
-              const url = new URL(INCIDENT_MAP_URL, window.location.href);
-              url.searchParams.set("incident", name);
-              window.location.href = url.toString();
-            };
-            chipsEl.appendChild(chip);
-          });
-        })
-    }
-
-    loadIncidentMenu();
-  </script>
+  loadIncidentMenu();
+</script>
 
 </body>
 </html>

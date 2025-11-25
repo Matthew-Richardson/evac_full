@@ -670,32 +670,36 @@ main {
   margin: 2px 0 6px 2px;
   font-weight: 400 !important;
 
+/* ========== SCROLL INDICATOR (OPTION A) ========== */
+
 .scroll-indicator {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  pointer-events: none;
+  pointer-events: none; /* avoids blocking map */
+  transition: opacity 0.4s ease;
 }
 
 .scroll-arrow {
-  font-size: 26px;
+  font-size: 30px;
   color: #333;
-  opacity: 0.7;
-  animation: bounce 1.6s infinite;
+  opacity: 0.75;
+  animation: scrollBounce 1.6s infinite;
+  user-select: none;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); opacity: 0.6; }
-  50% { transform: translateY(6px); opacity: 1; }
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50%      { transform: translateY(7px); opacity: 1; }
 }
 
-/* Hide the arrow automatically once the user scrolls */
+/* Hide indicator once user scrolls */
 body.scrolled .scroll-indicator {
   opacity: 0;
-  transition: opacity 0.4s ease;
 }
+
 
 }
 

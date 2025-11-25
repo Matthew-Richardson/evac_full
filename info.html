@@ -138,7 +138,7 @@
     </main>
   </div>
 
-  <!-- Simple scroll hint (visual only, disappears on scroll) -->
+  <!-- Simple scroll hint (visual only) -->
   <div class="scroll-hint" id="scrollHint">
     <div class="scroll-hint-button">
       <span class="scroll-hint-text">Scroll</span>
@@ -156,15 +156,6 @@
   const countBadge = document.getElementById("incidentCountBadge");
   const noIncidentsMsg = document.getElementById("noIncidentsMsg");
 
-  // Toggle body.scrolled (used to hide scroll-hint)
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 10) {
-      document.body.classList.add("scrolled");
-    } else {
-      document.body.classList.remove("scrolled");
-    }
-  });
-
   function getIncidentFromUrl() {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -178,6 +169,30 @@
     const inc = getIncidentFromUrl();
     return inc && inc.trim() ? inc.trim() : null;
   })();
+
+  // Hide scroll hint only near bottom of page
+  window.addEventListener("scroll", () => {
+    const scrollPos =
+      window.scrollY ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+    const windowHeight =
+      window.innerHeight ||
+      document.documentElement.clientHeight ||
+      document.body.clientHeight;
+    const docHeight =
+      document.documentElement.scrollHeight ||
+      document.body.scrollHeight;
+
+    const atBottom = scrollPos + windowHeight >= docHeight - 8;
+
+    if (atBottom) {
+      document.body.classList.add("scrolled");
+    } else {
+      document.body.classList.remove("scrolled");
+    }
+  });
 
   function loadIncidentMenu() {
     const params = new URLSearchParams({

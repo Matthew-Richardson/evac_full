@@ -7,6 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Incident Map & Evacuation Info</title>
 
+  <link rel="preconnect" href="https://js.arcgis.com">
+  <link rel="preconnect" href="https://services2.arcgis.com">
+  <link rel="preconnect" href="https://script.google.com">
+
   <!-- Shared styles -->
   <link rel="stylesheet" href="shared-styles.css" />
 
@@ -344,6 +348,7 @@
         "esri/layers/FeatureLayer",
         "esri/widgets/Search",
         "esri/widgets/Fullscreen"
+        "esru/tasks/Locator"
       ],
       function (WebMap, MapView, FeatureLayer, Search, Fullscreen) {
         const infoButton = document.getElementById("infoButton");
@@ -387,21 +392,30 @@
         }
 
         view
-          .when()
-          .then(() => {
-            const search = new Search({
-              view,
-              includeDefaultSources: true,
-            });
-            view.ui.add(search, "top-right");
+      .when()
+      .then(() => {
+        const search = new Search({
+          view,
+          includeDefaultSources: false,   // 👈 no extra sources
+          sources: [
+            {
+              locator: new Locator({
+                url: "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+              }),
+              singleLineFieldName: "SingleLine",
+              placeholder: "Search address"
+            }
+          ]
+        });
+        view.ui.add(search, "top-right");
 
-            const fullscreen = new Fullscreen({
-              view: view
-            });
-            view.ui.add(fullscreen, "top-right");
+        const fullscreen = new Fullscreen({
+          view: view
+        });
+        view.ui.add(fullscreen, "top-right");
 
-            return incidentLayer.when();
-          })
+        return incidentLayer.when();
+      })
           .then(() => {
             return incidentLayer.queryFeatures({
               where: "1=1",

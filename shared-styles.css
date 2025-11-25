@@ -712,11 +712,11 @@ main {
   line-height: 1;
 }
 
-/* fade away after user scrolls */
+/* dim slightly after scroll, but keep it clickable */
 body.scrolled .scroll-hint {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-50%) translateY(4px);
+  opacity: 0.4;                 /* still visible but softer */
+  pointer-events: auto;         /* <-- keep it clickable */
+  transform: translateX(-50%);  /* no extra Y shift */
 }
 
 @media (max-width: 600px) {

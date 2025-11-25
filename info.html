@@ -170,40 +170,21 @@
     return inc && inc.trim() ? inc.trim() : null;
   })();
 
-  function updateScrollHint() {
-    const scrollPos =
+  // Scroll hint: visible on load, disappears once the user scrolls a bit
+  function handleScrollHint() {
+    const scrollTop =
       window.scrollY ||
       document.documentElement.scrollTop ||
       document.body.scrollTop ||
       0;
-    const windowHeight =
-      window.innerHeight ||
-      document.documentElement.clientHeight ||
-      document.body.clientHeight;
-    const docHeight =
-      document.documentElement.scrollHeight ||
-      document.body.scrollHeight;
 
-    const maxScroll = docHeight - windowHeight;
-
-    // If not scrollable, hide the hint
-    if (maxScroll <= 0) {
+    if (scrollTop > 5) {
       document.body.classList.add("scrolled");
-      return;
-    }
-
-    const atBottom = scrollPos >= maxScroll - 8;
-
-    if (atBottom) {
-      document.body.classList.add("scrolled");
-    } else {
-      document.body.classList.remove("scrolled");
+      window.removeEventListener("scroll", handleScrollHint);
     }
   }
 
-  window.addEventListener("scroll", updateScrollHint);
-  window.addEventListener("resize", updateScrollHint);
-  document.addEventListener("DOMContentLoaded", updateScrollHint);
+  window.addEventListener("scroll", handleScrollHint);
 
   function loadIncidentMenu() {
     const params = new URLSearchParams({

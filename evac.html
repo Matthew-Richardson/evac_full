@@ -21,9 +21,9 @@
       background: #f5f5f7;
       font-size: 18px;
       overflow-x: hidden; /* prevent horizontal scroll / cutoff on iPhone */
+      color: #000000;
     }
 
-    /* Slight global downscale on small screens (~15%) */
     @media (max-width: 600px) {
       html, body {
         font-size: 15px;
@@ -57,11 +57,11 @@
       flex-direction: column;
     }
 
-    /* ======= BRAND BLOCK INSIDE CARD (LOGO + TITLE + CALL CENTER) ======= */
+    /* ======= BRAND BLOCK (LOGO + TITLE + CALL CENTER) ======= */
     .card-brand {
       padding: 18px 18px 10px 18px;
       box-sizing: border-box;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
+      /* border-bottom removed so we can use a shared inset divider */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -83,7 +83,6 @@
       }
     }
 
-    /* Subtle title */
     .site-title {
       text-align: center;
       margin-top: 4px;
@@ -94,7 +93,7 @@
       color: #6e6e6e;
       opacity: 0.85;
       line-height: 1.3;
-      white-space: normal; /* allow wrapping so it doesn’t get cut off */
+      white-space: normal;
     }
 
     @media (max-width: 600px) {
@@ -105,7 +104,6 @@
       }
     }
 
-    /* Call center as a cleaner info card */
     .call-center {
       background: #f5f7ff;
       padding: 8px 16px;
@@ -138,32 +136,45 @@
       text-decoration: underline;
     }
 
-    /* ======= INCIDENT BAR + MENU ======= */
-    .incident-strip {
-      padding: 12px 18px 10px 18px;
-      border-bottom: none;
-      box-sizing: border-box;
+    /* Shared inset divider line (used below header + below menu) */
+    .card-divider {
+      margin: 8px 14px 0 14px; /* in from card edges */
+      border-top: 1px solid rgba(0,0,0,0.08);
     }
 
-    /* Top row: Active incidents + info button aligned */
+    /* ======= INCIDENT BAR + CHIPS ======= */
+    .incident-strip {
+      padding: 10px 18px 10px 18px;
+      box-sizing: border-box;
+      border-bottom: none;
+    }
+
     .incident-strip-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-bottom: 4px;
       flex-wrap: nowrap;
     }
 
-    .incident-strip-label {
-      font-size: 18px;
+    .incident-bar-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    /* "Active incidents" label + red badge */
+    .incident-label {
+      font-size: 16px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       color: #b3261e;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .incident-count-badge {
@@ -171,16 +182,16 @@
       border-radius: 999px;
       background: #b3261e;
       color: #ffffff;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       line-height: 1.4;
     }
 
-    /* Info button: desktop = home icon + full text, mobile = home icon only */
+    /* Homepage button – match rounding to chips */
     .info-link {
-      font-size: 16px;
-      padding: 8px 14px;
-      border-radius: 999px;
+      font-size: 15px;
+      padding: 6px 12px;
+      border-radius: 14px;
       border: 1px solid #0b4da2;
       background: #ffffff;
       color: #0b4da2;
@@ -205,16 +216,12 @@
     }
 
     .info-label {
-      font-size: 15px;
+      font-size: 14px;
     }
 
-    /* On mobile: icon only to avoid colliding with the menu text */
     @media (max-width: 600px) {
-      .incident-strip-top {
-        gap: 8px;
-      }
       .info-link {
-        padding: 6px 10px;
+        padding: 4px 10px;
       }
       .info-label {
         display: none;
@@ -224,59 +231,67 @@
       }
     }
 
-    .incident-list {
+    /* Chip row */
+    .incident-chips {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 260px;
-      overflow-y: auto;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
     }
 
-    /* Natural break between menu and map */
-    .map-divider {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(0,0,0,0.08);
+    @media (max-width: 600px) {
+      .incident-chips {
+        flex-wrap: wrap;
+      }
     }
 
-    /* Incident buttons: centered + slightly larger text */
-    .incident-button {
-      width: 100%;
-      text-align: center;
-      padding: 14px 16px;
-      font-size: 20px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      background: #f7f7f7;
+    .incident-chip {
+      border-radius: 999px;
+      padding: 6px 12px;
+      border: 1px solid #d0d0d0;
+      background: #ffffff;
+      font-size: 17px; /* bumped up */
       cursor: pointer;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
-      line-height: 1.5;
-      color: #000; /* non-active text black */
-    }
-
-    /* Compact style for inactive items when there are multiple incidents */
-    .incident-button.compact {
-      padding: 8px 14px;
-      font-size: 17px;
-      background: #fafafa;
-      color: #000; /* ensure compact items still black text */
-      opacity: 1;
-    }
-
-    .incident-button:hover {
-      background: #eef4ff;
-      border-color: #c4d7ff;
-    }
-
-    .incident-button.active {
-      background: #dbe8ff;
-      border-color: #4a83ff;
-      font-weight: 700;
-      box-shadow: 0 0 0 2px rgba(74,131,255,0.5);
-      opacity: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       color: #000;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      white-space: nowrap;
+      font-weight: 400;
+    }
+
+    .incident-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #0b4da2;
+      opacity: 0.9;
+    }
+
+    .incident-chip:hover {
+      background: #f5f7ff;
+      border-color: #b5c8ff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+
+    .incident-chip.active {
+      background: #0b4da2;
+      border-color: #0b4da2;
+      color: #ffffff;
+      box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
+      font-weight: 700; /* active bold */
+    }
+
+    .incident-chip.active .incident-chip-dot {
+      background: #ffffff;
+    }
+
+    .incident-none {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
     }
 
     /* Map: full card width */
@@ -292,6 +307,7 @@
       border-top: 1px solid rgba(0,0,0,0.08);
       background: #fafafa;
       text-align: center;
+      color: #000000; /* ensure legend text is dark */
     }
 
     .map-key-merged .legend-title {
@@ -313,6 +329,11 @@
       gap: 8px;
       font-size: 16px;
       white-space: nowrap;
+      color: #000000;
+    }
+
+    .map-key-merged .legend-item span {
+      color: #000000;
     }
 
     .legend-icon-road {
@@ -386,6 +407,7 @@
       flex-wrap: wrap;
       justify-content: center;
       margin: 12px auto;
+      color: #000000;
     }
 
     .evac-box {
@@ -397,6 +419,7 @@
       min-width: 280px;
       border: 1px solid rgba(0,0,0,0.2);
       background: #ffffff;
+      color: #000000;
     }
 
     .evac-box-set {
@@ -426,6 +449,7 @@
       line-height: 1.6;
       display: flex;
       flex-direction: column;
+      color: #000000;
     }
 
     .evac-zones {
@@ -459,18 +483,19 @@
       margin: 0 auto 20px auto;
       font-size: 18px;
       line-height: 1.6;
+      color: #000000;
     }
-
-    /* ===== STATUS HTML OVERRIDES (Google Sheet output) ===== */
 
     .status-html {
       font-size: 22px !important;
       line-height: 1.8 !important;
+      color: #000000;
     }
 
     .status-html * {
       font-size: inherit !important;
       line-height: inherit !important;
+      color: inherit !important;
     }
 
     .status-html h1,
@@ -561,28 +586,37 @@
           </div>
         </div>
 
+        <!-- Inset divider below header -->
+        <div class="card-divider"></div>
+
+        <!-- Compact incident bar + chips -->
         <div class="incident-strip">
           <div class="incident-strip-top">
-            <div class="incident-strip-label">
-              Active incidents
-              <span id="incidentCountBadge" class="incident-count-badge">0</span>
+            <div class="incident-bar-left">
+              <span class="incident-label">
+                Active incidents
+                <span id="incidentCountBadge" class="incident-count-badge">0</span>
+              </span>
             </div>
             <button
               id="infoButton"
               class="info-link"
               type="button"
-              aria-label="Evacuation Information Homepage"
+              aria-label="Evacuation Information"
             >
-              <span class="info-icon-home" aria-hidden="true">🏠</span>
-              <span class="info-label">Evacuation Information Homepage</span>
+              <span class="info-icon-home">🏠</span>
+              <span class="info-label">Evacuation Information</span>
             </button>
           </div>
 
-          <div id="incidentList" class="incident-list"></div>
-
-          <!-- natural break before map -->
-          <div class="map-divider"></div>
+          <div id="incidentChips" class="incident-chips"></div>
+          <div id="noIncidentsMsg" class="incident-none" style="display:none;">
+            No active incidents are listed.
+          </div>
         </div>
+
+        <!-- Inset divider below menu -->
+        <div class="card-divider"></div>
 
         <div id="viewDiv"></div>
 
@@ -623,7 +657,8 @@
   <script>
     /* ---------- SHARED CONFIG ---------- */
     const webmapId = "58a8bb313db64271a55e7960cb839f64";
-    const incidentLayerUrl = "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
+    const incidentLayerUrl =
+      "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
     const incidentFieldName = "incident";
 
     function getIncidentFromUrl() {
@@ -836,7 +871,6 @@
         .then((html) => {
           const panel = document.getElementById("incident-panel");
 
-          // Wrap returned HTML so we can control styling
           panel.innerHTML = `<div class="status-html">${html}</div>`;
 
           const stamp = document.createElement("div");
@@ -860,7 +894,7 @@
     loadEvacuationZones();
     loadIncidentStatus(INCIDENT);
 
-    /* ---------- MAP & INCIDENT LIST LOGIC ---------- */
+    /* ---------- MAP & INCIDENT CHIPS LOGIC ---------- */
     require(
       [
         "esri/WebMap",
@@ -871,12 +905,12 @@
       ],
       function (WebMap, MapView, FeatureLayer, Search, Fullscreen) {
         const infoButton = document.getElementById("infoButton");
-        const listEl = document.getElementById("incidentList");
+        const chipsEl = document.getElementById("incidentChips");
         const countBadge = document.getElementById("incidentCountBadge");
+        const noIncidentsMsg = document.getElementById("noIncidentsMsg");
 
         infoButton.addEventListener("click", () => {
-          // Update this to your real evac info page when ready
-          // window.location.href = "https://readylaplata.org/evacuation-info";
+          // Link to your info homepage
           window.location.href = "info.html";
         });
 
@@ -920,7 +954,6 @@
             });
             view.ui.add(search, "top-right");
 
-            // Native ArcGIS fullscreen widget
             const fullscreen = new Fullscreen({
               view: view
             });
@@ -939,7 +972,6 @@
           .then((fs) => {
             const features = fs.features || [];
 
-            // Collect incident names
             const incidentNames = [];
             features.forEach((f) => {
               const name = f.attributes[incidentFieldName];
@@ -950,7 +982,14 @@
               countBadge.textContent = incidentNames.length;
             }
 
-            // Sort so the selected incident (if any) is first, others alphabetical
+            if (!incidentNames.length) {
+              if (noIncidentsMsg) noIncidentsMsg.style.display = "block";
+              return;
+            } else {
+              if (noIncidentsMsg) noIncidentsMsg.style.display = "none";
+            }
+
+            // Sort with selected incident first (if any), then alphabetically
             if (INCIDENT) {
               const target = INCIDENT.toLowerCase();
               incidentNames.sort((a, b) => {
@@ -966,51 +1005,44 @@
               );
             }
 
-            const totalIncidents = incidentNames.length;
-
-            // Build buttons: "Incident — Evac Map"
+            // Build chip buttons
             incidentNames.forEach((name) => {
-              const btn = document.createElement("button");
-              btn.className = "incident-button";
-              btn.textContent = `${name} — Evac Map`;
-              btn.setAttribute("data-incident", name);
+              const chip = document.createElement("button");
+              chip.className = "incident-chip";
+              chip.setAttribute("data-incident", name);
+              chip.innerHTML = `
+                <span class="incident-chip-dot"></span>
+                <span>${name}</span>
+              `;
 
-              // If there is more than 1 incident, make non-active items compact by default
-              if (totalIncidents > 1) {
-                btn.classList.add("compact");
-              }
-
-              btn.addEventListener("click", () => {
+              chip.addEventListener("click", () => {
                 const url = new URL(window.location.href);
                 url.searchParams.set("incident", name);
                 window.location.href = url.toString();
               });
 
-              listEl.appendChild(btn);
+              chipsEl.appendChild(chip);
             });
 
-            // Mark active incident, zoom to it, and restore full size
+            // Mark active incident, zoom to it
             if (INCIDENT) {
-              const items = Array.from(
-                listEl.querySelectorAll(".incident-button")
+              const chips = Array.from(
+                chipsEl.querySelectorAll(".incident-chip")
               );
-              const match = items.find(
+              const match = chips.find(
                 (el) =>
                   (el.getAttribute("data-incident") || "").toLowerCase() ===
                   INCIDENT.toLowerCase()
               );
               if (match) {
                 match.classList.add("active");
-                match.classList.remove("compact");
                 zoomToIncident(INCIDENT);
               }
             }
           })
           .catch((err) => {
             console.error("Error loading incidents:", err);
-            if (countBadge) {
-              countBadge.textContent = "0";
-            }
+            if (countBadge) countBadge.textContent = "0";
           });
       }
     );

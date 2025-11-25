@@ -148,15 +148,28 @@
   const countBadge = document.getElementById("incidentCountBadge");
   const noIncidentsMsg = document.getElementById("noIncidentsMsg");
 
+  function getIncidentFromUrl() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get("incident") || params.get("Incident") || "").trim();
+    } catch {
+      return "";
+    }
+  }
+
+  const INCIDENT = (() => {
+    const inc = getIncidentFromUrl();
+    return inc && inc.trim() ? inc.trim() : null;
+  })();
+
   function loadIncidentMenu() {
     const params = new URLSearchParams({
       where: "1=1",
       outFields: incidentFieldName,
-      returnDistinctValues: "true", // still ask server
+      returnDistinctValues: "true",
       f: "json"
     });
 
-    // Clear any existing chips in case this gets called again
     chipsEl.innerHTML = "";
     noIncidentsMsg.style.display = "none";
 
@@ -170,9 +183,9 @@
       .then(data => {
         const features = data.features || [];
 
-        // 🔹 Deduplicate by incident name (case-insensitive, trimmed)
+        // Deduplicate incident names (case-insensitive, trimmed)
         const seen = new Set();
-        const names = [];
+        const incidentNames = [];
 
         features.forEach(f => {
           const raw = f.attributes && f.attributes[incidentFieldName];
@@ -185,22 +198,35 @@
           if (seen.has(key)) return;
 
           seen.add(key);
-          names.push(name);
+          incidentNames.push(name);
         });
 
-        // Case-insensitive sort for display
-        names.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        // Sorting: same idea as evac.html
+        if (INCIDENT) {
+          const target = INCIDENT.toLowerCase();
+          incidentNames.sort((a, b) => {
+            const al = a.toLowerCase();
+            const bl = b.toLowerCase();
+            if (al === target && bl !== target) return -1;
+            if (bl === target && al !== target) return 1;
+            return al.localeCompare(bl);
+          });
+        } else {
+          incidentNames.sort((a, b) =>
+            a.toLowerCase().localeCompare(b.toLowerCase())
+          );
+        }
 
-        // Update count badge with unique incidents
-        countBadge.textContent = names.length;
+        // Update badge
+        countBadge.textContent = incidentNames.length;
 
-        if (!names.length) {
+        if (!incidentNames.length) {
           noIncidentsMsg.style.display = "block";
           return;
         }
 
         // Build chips
-        names.forEach(name => {
+        incidentNames.forEach(name => {
           const chip = document.createElement("button");
           chip.className = "incident-chip";
           chip.innerHTML =

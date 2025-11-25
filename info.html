@@ -170,8 +170,7 @@
     return inc && inc.trim() ? inc.trim() : null;
   })();
 
-  // Hide scroll hint only near bottom of page
-  window.addEventListener("scroll", () => {
+  function updateScrollHint() {
     const scrollPos =
       window.scrollY ||
       document.documentElement.scrollTop ||
@@ -185,14 +184,26 @@
       document.documentElement.scrollHeight ||
       document.body.scrollHeight;
 
-    const atBottom = scrollPos + windowHeight >= docHeight - 8;
+    const maxScroll = docHeight - windowHeight;
+
+    // If not scrollable, hide the hint
+    if (maxScroll <= 0) {
+      document.body.classList.add("scrolled");
+      return;
+    }
+
+    const atBottom = scrollPos >= maxScroll - 8;
 
     if (atBottom) {
       document.body.classList.add("scrolled");
     } else {
       document.body.classList.remove("scrolled");
     }
-  });
+  }
+
+  window.addEventListener("scroll", updateScrollHint);
+  window.addEventListener("resize", updateScrollHint);
+  document.addEventListener("DOMContentLoaded", updateScrollHint);
 
   function loadIncidentMenu() {
     const params = new URLSearchParams({

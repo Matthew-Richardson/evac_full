@@ -670,6 +670,46 @@ main {
   margin: 2px 0 6px 2px;
   font-weight: 400 !important;
 
+/* ========== PILL BUTTONS (INFO PAGE) ========== */
+
+.primary-pill,
+.secondary-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 4px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.primary-pill {
+  background: #0b4da2;
+  border: 1px solid #0b4da2;
+  color: white !important;
+}
+
+.secondary-pill {
+  background: #ffffff;
+  border: 1px solid #0b4da2;
+  color: #0b4da2 !important;
+}
+
+.primary-pill:hover,
+.secondary-pill:hover {
+  box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
+}
+
+.incident-tip {
+  font-size: 12px !important;
+  color: #777 !important;
+  opacity: 0.6 !important;
+  margin: 2px 0 6px 2px;
+  font-weight: 400 !important;
+}  /* 👈 THIS was missing */
+
 /* ========== GLOBAL SCROLL HINT ========== */
 
 .scroll-hint {
@@ -729,6 +769,7 @@ body.scrolled .scroll-hint {
     font-size: 13px;
   }
 }
+
 
 
 }

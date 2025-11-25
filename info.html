@@ -138,12 +138,12 @@
     </main>
   </div>
 
-  <!-- New scroll hint pill -->
+  <!-- Simple scroll hint (visual only, disappears on scroll) -->
   <div class="scroll-hint" id="scrollHint">
-    <button class="scroll-hint-button" type="button">
+    <div class="scroll-hint-button">
       <span class="scroll-hint-text">Scroll</span>
       <span class="scroll-hint-arrow">▾</span>
-    </button>
+    </div>
   </div>
 
   <script>
@@ -156,9 +156,9 @@
   const countBadge = document.getElementById("incidentCountBadge");
   const noIncidentsMsg = document.getElementById("noIncidentsMsg");
 
-  // Toggle body.scrolled (used to fade out scroll-hint in CSS)
+  // Toggle body.scrolled (used to hide scroll-hint)
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
+    if (window.scrollY > 10) {
       document.body.classList.add("scrolled");
     } else {
       document.body.classList.remove("scrolled");
@@ -200,7 +200,6 @@
       .then(data => {
         const features = data.features || [];
 
-        // Deduplicate incident names (case-insensitive, trimmed)
         const seen = new Set();
         const incidentNames = [];
 
@@ -218,7 +217,6 @@
           incidentNames.push(name);
         });
 
-        // Sorting: same idea as evac.html
         if (INCIDENT) {
           const target = INCIDENT.toLowerCase();
           incidentNames.sort((a, b) => {
@@ -234,7 +232,6 @@
           );
         }
 
-        // Update badge
         countBadge.textContent = incidentNames.length;
 
         if (!incidentNames.length) {
@@ -242,7 +239,6 @@
           return;
         }
 
-        // Build chips
         incidentNames.forEach(name => {
           const chip = document.createElement("button");
           chip.className = "incident-chip";
@@ -266,29 +262,7 @@
   }
 
   loadIncidentMenu();
-
-  // Make the scroll hint scroll down by ~one screen height each click
-document.addEventListener("DOMContentLoaded", () => {
-  const hintButton = document.querySelector(".scroll-hint-button");
-  if (!hintButton) return;
-
-  hintButton.addEventListener("click", () => {
-    const currentY =
-      window.scrollY ||
-      document.documentElement.scrollTop ||
-      document.body.scrollTop ||
-      0;
-
-    const delta = window.innerHeight * 0.8; // ~80% of the viewport height
-
-    window.scrollTo({
-      top: currentY + delta,
-      behavior: "smooth"
-    });
-  });
-});
-
-</script>
+  </script>
 
 </body>
 </html>

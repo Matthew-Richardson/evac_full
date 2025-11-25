@@ -1,571 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-
-  <!-- Mobile viewport so media queries and scaling work correctly -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Incident Map & Evacuation Info</title>
 
-  <!-- ArcGIS Maps SDK -->
-  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
-  <script src="https://js.arcgis.com/4.31/"></script>
+  <!-- Resource hints for faster loading on slow connections -->
+  <link rel="preconnect" href="https://js.arcgis.com" crossorigin>
+  <link rel="preconnect" href="https://services2.arcgis.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cms9files.revize.com">
 
+  <!-- Shared styles (cached across pages) -->
+  <link rel="stylesheet" href="shared-styles.css">
+
+  <!-- ArcGIS CSS - loaded early for map rendering -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+
+  <!-- Critical inline styles for instant first paint -->
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      font-family: Arial, sans-serif;
-      background: #f5f5f7;
-      font-size: 18px;
-      overflow-x: hidden;
-      color: #000000;
-    }
-
-    @media (max-width: 600px) {
-      html, body {
-        font-size: 15px;
-      }
-    }
-
-    .page-shell {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    /* ======= MAP WRAPPER & CARD ======= */
-    .map-wrapper {
-      max-width: 900px;
-      width: 100%;
-      margin: 16px auto 0 auto;
-      padding: 12px;
-      box-sizing: border-box;
-    }
-
-    .map-card {
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,0.2);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-      overflow: hidden;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ======= BRAND BLOCK (LOGO + TITLE + CALL CENTER) ======= */
-    .card-brand {
-      padding: 18px 18px 10px 18px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .header-logo {
-      max-width: 260px;
-      width: 70%;
-      height: auto;
-      display: block;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
-    }
-
-    @media (max-width: 600px) {
-      .header-logo {
-        width: 73%;
-        max-width: 275px;
-      }
-    }
-
-    .site-title {
-      text-align: center;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: #6e6e6e;
-      opacity: 0.85;
-      line-height: 1.3;
-      white-space: normal;
-    }
-
-    @media (max-width: 600px) {
-      .site-title {
-        font-size: 13px;
-        line-height: 1.4;
-        padding: 0 8px;
-      }
-    }
-
-    .call-center {
-      background: #f5f7ff;
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid rgba(11, 77, 162, 0.18);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      color: #333;
-    }
-
-    .call-center strong {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      opacity: 0.85;
-    }
-
-    .call-center a {
-      color: #0b4da2;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 20px;
-    }
-
-    .call-center a:hover {
-      text-decoration: underline;
-    }
-
-    /* Shared inset divider line (used below header + below menu) */
-    .card-divider {
-      margin: 8px 14px 0 14px;
-      border-top: 1px solid rgba(0,0,0,0.08);
-    }
-
-    /* ======= INCIDENT BAR + CHIPS ======= */
-    .incident-strip {
-      padding: 10px 18px 10px 18px;
-      box-sizing: border-box;
-      border-bottom: none;
-    }
-
-    .incident-strip-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 4px;
-      flex-wrap: nowrap;
-    }
-
-    .incident-bar-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: nowrap;
-    }
-
-    .incident-label {
-      font-size: 16px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #b3261e;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .incident-count-badge {
-      padding: 4px 12px;
-      border-radius: 999px;
-      background: #b3261e;
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.4;
-    }
-
-    .info-link {
-      font-size: 15px;
-      padding: 6px 12px;
-      border-radius: 8px; /* match call center */
-      border: 1px solid #0b4da2;
-      background: #ffffff;
-      color: #0b4da2;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s, opacity 0.2s;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .info-link:hover {
-      background: #0b4da2;
-      color: #ffffff;
-      box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
-    }
-
-    .info-icon-home {
-      font-size: 18px;
-      line-height: 1;
-    }
-
-    .info-label {
-      font-size: 14px;
-    }
-
-    @media (max-width: 600px) {
-      .info-link {
-        padding: 4px 10px;
-      }
-      .info-label {
-        display: none;
-      }
-      .info-icon-home {
-        font-size: 20px;
-      }
-    }
-
-    .incident-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    @media (max-width: 600px) {
-      .incident-chips {
-        flex-wrap: wrap;
-      }
-    }
-
-    .incident-chip {
-      border-radius: 8px; /* match call center */
-      padding: 6px 12px;
-      border: 1px solid #d0d0d0;
-      background: #ffffff;
-      font-size: 17px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #000;
-      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-      white-space: nowrap;
-      font-weight: 400;
-    }
-
-    .incident-chip-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #0b4da2;
-      opacity: 0.9;
-    }
-
-    .incident-chip:hover {
-      background: #f5f7ff;
-      border-color: #b5c8ff;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-    }
-
-    .incident-chip.active {
-      background: #0b4da2;
-      border-color: #0b4da2;
-      color: #ffffff;
-      box-shadow: 0 0 0 1px rgba(11,77,162,0.3);
-      font-weight: 700;
-    }
-
-    .incident-chip.active .incident-chip-dot {
-      background: #ffffff;
-    }
-
-    .incident-none {
-      font-size: 14px;
-      color: #666;
-      margin-top: 4px;
-    }
-
-    #viewDiv {
-      width: 100%;
-      height: 460px;
-      box-sizing: border-box;
-    }
-
-    .map-key-merged {
-      padding: 16px 18px 18px 18px;
-      border-top: 1px solid rgba(0,0,0,0.08);
-      background: #fafafa;
-      text-align: center;
-      color: #000000;
-    }
-
-    .map-key-merged .legend-title {
-      font-weight: 700;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-
-    .map-key-merged .legend-items {
-      display: inline-flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .map-key-merged .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 16px;
-      white-space: nowrap;
-      color: #000000;
-    }
-
-    .legend-icon-road {
-      position: relative;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #d60000;
-      display: inline-block;
-    }
-    .legend-icon-road::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 4px;
-      width: 14px;
-      height: 4px;
-      background: #ffffff;
-      transform: translateY(-50%);
-      border-radius: 2px;
-    }
-
-    .legend-icon-info {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #0078d4;
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .legend-icon-warning {
-      position: relative;
-      width: 22px;
-      height: 22px;
-      background: #f6e05e;
-      transform: rotate(45deg);
-      border: 1px solid #c7b100;
-      display: inline-block;
-      box-sizing: border-box;
-    }
-    .legend-icon-warning::after {
-      content: "!";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -60%) rotate(-45deg);
-      color: #000;
-      font-weight: bold;
-      font-size: 16px;
-      line-height: 1;
-    }
-
-    main {
-      display: block;
-      width: 100%;
-    }
-
-    .evac-row {
-      display: flex;
-      gap: 16px;
-      max-width: 900px;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 12px auto;
-      color: #000000;
-    }
-
-    /* Smaller SET/GO boxes */
-    .evac-box {
-      padding: 14px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.25);
-      box-sizing: border-box;
-      flex: 1;
-      min-width: 260px;
-      border: 1px solid rgba(0,0,0,0.2);
-      background: #ffffff;
-      color: #000000;
-    }
-
-    .evac-box-set {
-      border: 3px solid rgba(180, 150, 0, 0.9);
-      box-shadow: 0 0 10px rgba(180,150,0,0.45);
-    }
-
-    .evac-box-go {
-      border: 3px solid rgba(0,120,0,0.9);
-      box-shadow: 0 0 12px rgba(0,120,0,0.55);
-      animation: goPulse 2.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes goPulse {
-      from { box-shadow: 0 0 8px rgba(0,120,0,0.4); }
-      to   { box-shadow: 0 0 18px rgba(0,160,0,0.8); }
-    }
-
-    .evac-title {
-      font-weight: 700;
-      font-size: 18px;
-      margin-bottom: 8px;
-    }
-
-    .evac-body {
-      font-size: 15px;
-      line-height: 1.5;
-      display: flex;
-      flex-direction: column;
-      color: #000000;
-    }
-
-    .evac-zones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .zone-chip,
-    .no-zones-chip {
-      font-weight: 700;
-      background: rgba(0,0,0,0.08);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-
-    .evac-note {
-      margin-top: 10px;
-      font-size: 15px;
-      font-style: italic;
-      font-weight: 700;
-    }
-
-    .incident-panel {
-      max-width: 900px;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0 12px 20px 12px;
-      margin: 0 auto 20px auto;
-      font-size: 18px;
-      line-height: 1.6;
-      color: #000000;
-    }
-
-    /* ===== Status HTML from Google Sheet – match SET/GO body size ===== */
-    .status-html {
-      font-size: 15px !important;
-      line-height: 1.6 !important;
-      color: #000000;
-    }
-
-    .status-html * {
-      font-size: inherit !important;
-      line-height: inherit !important;
-      color: inherit !important;
-    }
-
-    /* Restore clear link styling inside status panels */
-    .status-html a {
-      color: #0b4da2 !important;
-      font-weight: 700 !important;
-      text-decoration: underline !important;
-    }
-
-    .status-html a:hover {
-      color: #083b7c !important;
-      text-decoration: underline !important;
-    }
-
-    .status-html h1,
-    .status-html h2,
-    .status-html h3,
-    .status-html .status-header,
-    .status-html .card-header {
-      background: #e8f0ff !important;
-      color: #0b4da2 !important;
-      padding: 10px 16px !important;
-      margin: 8px 0 4px 0 !important;
-      font-weight: 700 !important;
-      font-size: 18px !important;
-      border-radius: 999px !important;
-      display: inline-block !important;
-      box-sizing: border-box !important;
-    }
-
-    .status-html .status-card,
-    .status-html .card,
-    .status-html .card-container {
-      border-radius: 12px !important;
-      overflow: hidden !important;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.18) !important;
-      border: 1px solid rgba(0,0,0,0.15) !important;
-      margin: 12px 0 !important;
-      padding: 12px 16px !important;
-      background: #ffffff !important;
-    }
-
-    .status-timestamp {
-      font-size: 14px;
-      margin-top: 10px;
-      color: #444;
-      opacity: 0.8;
-      text-align: center;
-      padding: 0 10px;
-      box-sizing: border-box;
-    }
-
-    .source-label {
-      font-style: italic;
-      opacity: 0.9;
-      white-space: normal;
-      display: inline-block;
-    }
-
-    .incident-panel a {
-      color: #0b4da2;
-      font-weight: 700;
-      text-decoration: underline;
-    }
-
-    @media (max-width: 600px) {
-      .evac-row {
-        flex-direction: column;
-      }
-      .evac-box {
-        min-width: 0;
-      }
-    }
+    #viewDiv{width:100%;height:460px}
+    .loading-placeholder{height:460px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;color:#666}
   </style>
 </head>
 
 <body>
   <div class="page-shell">
-
     <div class="map-wrapper">
       <div class="map-card">
 
@@ -574,10 +34,11 @@
             src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
             alt="La Plata County Logo"
             class="header-logo"
-          />
-          <div class="site-title">
-            ReadyLaPlata — La Plata County Evacuation Viewer
-          </div>
+            width="260" height="auto"
+            loading="eager"
+            fetchpriority="high"
+          >
+          <div class="site-title">ReadyLaPlata — La Plata County Evacuation Viewer</div>
           <div class="call-center">
             <strong>Call Center</strong>
             <a href="tel:9703858700">970-385-8700</a>
@@ -594,42 +55,25 @@
                 <span id="incidentCountBadge" class="incident-count-badge">0</span>
               </span>
             </div>
-            <button
-              id="infoButton"
-              class="info-link"
-              type="button"
-              aria-label="Evacuation Information"
-            >
+            <button id="infoButton" class="info-link" type="button" aria-label="Evacuation Information">
               <span class="info-icon-home">🏠</span>
               <span class="info-label">Evacuation Information</span>
             </button>
           </div>
-
           <div id="incidentChips" class="incident-chips"></div>
-          <div id="noIncidentsMsg" class="incident-none" style="display:none;">
-            No active incidents are listed.
-          </div>
+          <div id="noIncidentsMsg" class="incident-none" style="display:none">No active incidents are listed.</div>
         </div>
 
         <div class="card-divider"></div>
 
-        <div id="viewDiv"></div>
+        <div id="viewDiv"><div class="loading-placeholder">Loading map…</div></div>
 
         <div class="map-key-merged">
           <div class="legend-title">Map Key</div>
           <div class="legend-items">
-            <div class="legend-item">
-              <span class="legend-icon-road"></span>
-              <span>Road closure</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-icon-info">i</span>
-              <span>Information</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-icon-warning"></span>
-              <span>Special warning</span>
-            </div>
+            <div class="legend-item"><span class="legend-icon-road"></span><span>Road closure</span></div>
+            <div class="legend-item"><span class="legend-icon-info">i</span><span>Information</span></div>
+            <div class="legend-item"><span class="legend-icon-warning"></span><span>Special warning</span></div>
           </div>
         </div>
 
@@ -637,401 +81,247 @@
     </div>
 
     <main>
-      <div id="evacRow" class="evac-row">
-        Loading evacuation information…
-      </div>
-
+      <div id="evacRow" class="evac-row">Loading evacuation information…</div>
       <div class="incident-panel">
         <div id="incident-panel">Loading incident status…</div>
       </div>
     </main>
   </div>
 
+  <!-- Non-blocking data fetch runs immediately -->
   <script>
-    const webmapId = "58a8bb313db64271a55e7960cb839f64";
-    const incidentLayerUrl =
-      "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0";
-    const incidentFieldName = "incident";
+    // Configuration
+    const CONFIG = {
+      webmapId: "58a8bb313db64271a55e7960cb839f64",
+      incidentLayerUrl: "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0",
+      incidentField: "incident",
+      statusUrl: "https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec"
+    };
 
-    function getIncidentFromUrl() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        return (params.get("incident") || params.get("Incident") || "").trim();
-      } catch {
-        return "";
-      }
-    }
+    const STATUS = {
+      labels: { SET: "SET - Pre-Evacuation", GO: "GO - Evacuate Now" },
+      colors: { SET: "#fff36a", GO: "#41f56e" },
+      text: {
+        SET: "Voluntary Evacuation;<br>Evacuation orders are likely",
+        GO: "<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access."
+      },
+      values: { SET: "Set", GO: "Go" }
+    };
 
+    // Get incident from URL
     const INCIDENT = (() => {
-      const inc = getIncidentFromUrl();
-      return inc && inc.trim() ? inc.trim() : null;
+      try {
+        const p = new URLSearchParams(location.search);
+        return (p.get("incident") || p.get("Incident") || "").trim() || null;
+      } catch { return null; }
     })();
 
-    const STATUS_LABELS = {
-      SET: "SET - Pre-Evacuation",
-      GO: "GO - Evacuate Now",
-    };
+    const escapeQuery = s => s.replace(/'/g, "''");
 
-    const STATUS_COLORS = {
-      SET: "#fff36a",
-      GO: "#41f56e",
-    };
-
-    const STATUS_TEXT = {
-      SET: "Voluntary Evacuation;<br>Evacuation orders are likely",
-      GO: "<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.",
-    };
-
-    const STATUS_VALUES = {
-      SET: "Set",
-      GO: "Go",
-    };
-
-    const ARCGIS_URL =
-      "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query";
-    const STATUS_BASE_URL =
-      "https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec";
-
-    function escapeForQuery(str) {
-      return str.replace(/'/g, "''");
-    }
+    // DOM refs
+    const evacRow = document.getElementById("evacRow");
+    const incidentPanel = document.getElementById("incident-panel");
 
     function showHelp() {
-      const helpEvacHtml = `
-        <div class="evac-box" style="background:#f3f4f6;">
+      const helpHtml = `
+        <div class="evac-box" style="background:#f3f4f6">
           <div class="evac-title">How to use this page</div>
           <div class="evac-body">
-            <div>
-              This evacuation information requires an <strong>incident name</strong> in the URL.
-            </div>
-            <div style="margin-top:8px;">
-              Use this format:
-              <br>
-              <code>?incident=YourIncidentName</code>
-            </div>
-            <div style="margin-top:8px;">
-              Example:
-              <br>
-              <code>?incident=East%20Canyon</code>
-            </div>
-            <div style="margin-top:8px;">
-              The incident name must match the name used in the map and Google Sheet.
-            </div>
+            <div>This evacuation information requires an <strong>incident name</strong> in the URL.</div>
+            <div style="margin-top:8px">Use this format:<br><code>?incident=YourIncidentName</code></div>
+            <div style="margin-top:8px">Example:<br><code>?incident=East%20Canyon</code></div>
           </div>
-        </div>
-      `;
-
-      const helpStatusHtml = `
-        <div class="evac-box" style="background:#f3f4f6;">
+        </div>`;
+      evacRow.innerHTML = helpHtml;
+      incidentPanel.innerHTML = `
+        <div class="evac-box" style="background:#f3f4f6">
           <div class="evac-title">Incident status</div>
           <div class="evac-body">
             <div>No incident was specified.</div>
-            <div style="margin-top:8px;">
-              Append <code>?incident=YourIncidentName</code> to the URL
-              (for example: <code>?incident=East%20Canyon</code>).
-            </div>
+            <div style="margin-top:8px">Append <code>?incident=YourIncidentName</code> to the URL.</div>
           </div>
-        </div>
-      `;
-
-      const row = document.getElementById("evacRow");
-      if (row) row.innerHTML = helpEvacHtml;
-
-      const panel = document.getElementById("incident-panel");
-      if (panel) panel.innerHTML = helpStatusHtml;
+        </div>`;
     }
 
-    function buildBox(statusCode, features) {
-      const label = STATUS_LABELS[statusCode];
-      const bg = STATUS_COLORS[statusCode];
-      const note = STATUS_TEXT[statusCode];
+    function buildBox(code, features) {
+      const zones = !features?.length
+        ? `<div class="evac-zones"><div class="no-zones-chip">No ${code} zones</div></div>`
+        : `<div class="evac-zones">${features.map(f => `<div class="zone-chip">${f.attributes.zonename}</div>`).join("")}</div>`;
 
-      let zonesHTML;
-      if (!features || features.length === 0) {
-        zonesHTML = `
-          <div class="evac-zones">
-            <div class="no-zones-chip">No ${statusCode} zones</div>
-          </div>`;
-      } else {
-        const chips = features
-          .map((f) => {
-            const zn = f.attributes.zonename;
-            return `<div class="zone-chip">${zn}</div>`;
-          })
-          .join("");
-        zonesHTML = `<div class="evac-zones">${chips}</div>`;
-      }
-
-      const extraClass =
-        statusCode === "GO"
-          ? " evac-box-go"
-          : statusCode === "SET"
-          ? " evac-box-set"
-          : "";
+      const cls = code === "GO" ? " evac-box-go" : code === "SET" ? " evac-box-set" : "";
 
       return `
-        <div class="evac-box${extraClass}" style="background:${bg};">
-          <div class="evac-title">${label}</div>
+        <div class="evac-box${cls}" style="background:${STATUS.colors[code]}">
+          <div class="evac-title">${STATUS.labels[code]}</div>
           <div class="evac-body">
-            <div>
-              The following zones are under ${statusCode} status for
-              <strong>${INCIDENT || "this incident"}</strong>.
-            </div>
-            ${zonesHTML}
-            <div class="evac-note">${note}</div>
+            <div>The following zones are under ${code} status for <strong>${INCIDENT || "this incident"}</strong>.</div>
+            ${zones}
+            <div class="evac-note">${STATUS.text[code]}</div>
           </div>
         </div>`;
     }
 
-    function showError(message) {
-      document.getElementById("evacRow").innerHTML = `
-        <div class="evac-box" style="background:#fff36a;">
-          <div class="evac-title">Error</div>
-          <div class="evac-body">${message}</div>
-        </div>`;
-    }
+    // Load evacuation zones (runs immediately)
+    function loadEvacZones() {
+      if (!INCIDENT) return showHelp();
 
-    function loadEvacuationZones() {
-      if (!INCIDENT) {
-        showHelp();
-        return;
-      }
-
-      const escapedIncident = escapeForQuery(INCIDENT);
-      const where = `incident='${escapedIncident}' AND STATUS IN ('${STATUS_VALUES.SET}','${STATUS_VALUES.GO}')`;
-
-      const queryParams = new URLSearchParams({
-        where,
-        outFields: "*",
-        f: "json",
-        returnGeometry: "false",
-      });
-
-      fetch(ARCGIS_URL + "?" + queryParams.toString())
-        .then((r) => {
-          if (!r.ok) {
-            throw new Error(`HTTP error! status: ${r.status}`);
-          }
-          return r.json();
-        })
-        .then((data) => {
-          const row = document.getElementById("evacRow");
-
-          if (!data.features || data.features.length === 0) {
-            row.innerHTML = `
-              <div class="evac-box" style="background:#fff36a;">
-                <div class="evac-title">No data</div>
-                <div class="evac-body">
-                  No zones found for <strong>${INCIDENT}</strong>.
-                </div>
-              </div>`;
-            return;
-          }
-
-          const setFeatures = data.features.filter(
-            (f) => f.attributes.STATUS === STATUS_VALUES.SET
-          );
-          const goFeatures = data.features.filter(
-            (f) => f.attributes.STATUS === STATUS_VALUES.GO
-          );
-
-          row.innerHTML =
-            buildBox("SET", setFeatures) + buildBox("GO", goFeatures);
-        })
-        .catch((err) => {
-          console.error("Error loading evacuation zones:", err);
-          showError(`Failed to load evacuation data: ${err.message}`);
-        });
-    }
-
-    function loadIncidentStatus(incidentName) {
-      if (!incidentName) {
-        return;
-      }
-
-      const url =
-        STATUS_BASE_URL + "?incident=" + encodeURIComponent(incidentName);
+      const where = `incident='${escapeQuery(INCIDENT)}' AND STATUS IN ('${STATUS.values.SET}','${STATUS.values.GO}')`;
+      const url = `${CONFIG.incidentLayerUrl}/query?${new URLSearchParams({ where, outFields: "*", f: "json", returnGeometry: "false" })}`;
 
       fetch(url)
-        .then((r) => {
-          if (!r.ok) {
-            throw new Error(`HTTP error! status: ${r.status}`);
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+          if (!data.features?.length) {
+            evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a"><div class="evac-title">No data</div><div class="evac-body">No zones found for <strong>${INCIDENT}</strong>.</div></div>`;
+            return;
           }
-          return r.text();
+          const setF = data.features.filter(f => f.attributes.STATUS === STATUS.values.SET);
+          const goF = data.features.filter(f => f.attributes.STATUS === STATUS.values.GO);
+          evacRow.innerHTML = buildBox("SET", setF) + buildBox("GO", goF);
         })
-        .then((html) => {
-          const panel = document.getElementById("incident-panel");
-
-          panel.innerHTML = `<div class="status-html">${html}</div>`;
-
-          const stamp = document.createElement("div");
-          stamp.className = "status-timestamp";
-          const now = new Date();
-          stamp.innerHTML = `
-            Last loaded: ${now.toLocaleString()}
-            &nbsp;•&nbsp;
-            <span class="source-label">Source: La Plata County Office of Emergency Management</span>
-          `;
-          panel.appendChild(stamp);
-        })
-        .catch((err) => {
-          console.error("Error loading incident status:", err);
-          document.getElementById("incident-panel").innerHTML =
-            "<div>Error loading incident status.</div>";
+        .catch(e => {
+          evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a"><div class="evac-title">Error</div><div class="evac-body">Failed to load: ${e}</div></div>`;
         });
     }
 
-    loadEvacuationZones();
-    loadIncidentStatus(INCIDENT);
+    // Load incident status from Google Sheet
+    function loadStatus() {
+      if (!INCIDENT) return;
 
-    /* ---------- MAP & INCIDENT CHIPS LOGIC ---------- */
-    require(
-      [
+      fetch(`${CONFIG.statusUrl}?incident=${encodeURIComponent(INCIDENT)}`)
+        .then(r => r.ok ? r.text() : Promise.reject(r.status))
+        .then(html => {
+          incidentPanel.innerHTML = `<div class="status-html">${html}</div>`;
+          const stamp = document.createElement("div");
+          stamp.className = "status-timestamp";
+          stamp.innerHTML = `Last loaded: ${new Date().toLocaleString()} &nbsp;•&nbsp; <span class="source-label">Source: La Plata County Office of Emergency Management</span>`;
+          incidentPanel.appendChild(stamp);
+        })
+        .catch(() => {
+          incidentPanel.innerHTML = "<div>Error loading incident status.</div>";
+        });
+    }
+
+    // Start data fetches immediately (don't wait for ArcGIS SDK)
+    loadEvacZones();
+    loadStatus();
+  </script>
+
+  <!-- ArcGIS SDK loaded with defer - won't block page render -->
+  <script src="https://js.arcgis.com/4.31/" defer></script>
+
+  <!-- Map initialization runs after SDK loads -->
+  <script>
+    // Wait for ArcGIS SDK
+    function initMap() {
+      if (typeof require === "undefined") {
+        setTimeout(initMap, 50);
+        return;
+      }
+
+      require([
         "esri/WebMap",
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
         "esri/widgets/Search",
         "esri/widgets/Fullscreen"
-      ],
-      function (WebMap, MapView, FeatureLayer, Search, Fullscreen) {
-        const infoButton = document.getElementById("infoButton");
+      ], (WebMap, MapView, FeatureLayer, Search, Fullscreen) => {
+
         const chipsEl = document.getElementById("incidentChips");
         const countBadge = document.getElementById("incidentCountBadge");
-        const noIncidentsMsg = document.getElementById("noIncidentsMsg");
+        const noMsg = document.getElementById("noIncidentsMsg");
 
-        infoButton.addEventListener("click", () => {
-          window.location.href = "info.html";
-        });
+        document.getElementById("infoButton").onclick = () => location.href = "info.html";
 
-        const webmap = new WebMap({
-          portalItem: { id: webmapId },
-        });
+        const webmap = new WebMap({ portalItem: { id: CONFIG.webmapId } });
 
         const view = new MapView({
           container: "viewDiv",
-          map: webmap,
+          map: webmap
         });
 
         const incidentLayer = new FeatureLayer({
-          url: incidentLayerUrl,
+          url: CONFIG.incidentLayerUrl,
           outFields: ["*"],
           visible: false,
-          listMode: "hide",
+          listMode: "hide"
         });
         webmap.add(incidentLayer);
 
-        function zoomToIncident(name) {
-          const safe = name.replace(/'/g, "''");
-          const where = `${incidentFieldName} = '${safe}'`;
-
-          return incidentLayer
-            .queryExtent({ where })
-            .then((res) => {
-              if (res.extent) {
-                return view.goTo(res.extent.expand(1.2));
-              }
-            })
+        const zoomTo = name => {
+          const where = `${CONFIG.incidentField} = '${name.replace(/'/g, "''")}'`;
+          incidentLayer.queryExtent({ where })
+            .then(r => r.extent && view.goTo(r.extent.expand(1.2)))
             .catch(console.error);
-        }
+        };
 
-        view
-          .when()
+        view.when()
           .then(() => {
-            const search = new Search({
-              view,
-              includeDefaultSources: true,
-            });
-            view.ui.add(search, "top-right");
-
-            const fullscreen = new Fullscreen({
-              view: view
-            });
-            view.ui.add(fullscreen, "top-right");
-
+            view.ui.add(new Search({ view, includeDefaultSources: true }), "top-right");
+            view.ui.add(new Fullscreen({ view }), "top-right");
             return incidentLayer.when();
           })
-          .then(() => {
-            return incidentLayer.queryFeatures({
-              where: "1=1",
-              outFields: [incidentFieldName],
-              returnDistinctValues: true,
-              orderByFields: [incidentFieldName],
-            });
-          })
-          .then((fs) => {
-            const features = fs.features || [];
+          .then(() => incidentLayer.queryFeatures({
+            where: "1=1",
+            outFields: [CONFIG.incidentField],
+            returnDistinctValues: true,
+            orderByFields: [CONFIG.incidentField]
+          }))
+          .then(fs => {
+            const names = (fs.features || [])
+              .map(f => f.attributes[CONFIG.incidentField])
+              .filter(Boolean);
 
-            const incidentNames = [];
-            features.forEach((f) => {
-              const name = f.attributes[incidentFieldName];
-              if (name) incidentNames.push(name);
-            });
+            countBadge.textContent = names.length;
 
-            if (countBadge) {
-              countBadge.textContent = incidentNames.length;
-            }
-
-            if (!incidentNames.length) {
-              if (noIncidentsMsg) noIncidentsMsg.style.display = "block";
+            if (!names.length) {
+              noMsg.style.display = "block";
               return;
-            } else {
-              if (noIncidentsMsg) noIncidentsMsg.style.display = "none";
             }
+            noMsg.style.display = "none";
 
+            // Sort: active incident first, then alphabetical
             if (INCIDENT) {
               const target = INCIDENT.toLowerCase();
-              incidentNames.sort((a, b) => {
-                const al = a.toLowerCase();
-                const bl = b.toLowerCase();
-                if (al === target && bl !== target) return -1;
-                if (bl === target && al !== target) return 1;
-                return al.localeCompare(bl);
+              names.sort((a, b) => {
+                if (a.toLowerCase() === target) return -1;
+                if (b.toLowerCase() === target) return 1;
+                return a.localeCompare(b);
               });
             } else {
-              incidentNames.sort((a, b) =>
-                a.toLowerCase().localeCompare(b.toLowerCase())
-              );
+              names.sort((a, b) => a.localeCompare(b));
             }
 
-            incidentNames.forEach((name) => {
+            names.forEach(name => {
               const chip = document.createElement("button");
               chip.className = "incident-chip";
-              chip.setAttribute("data-incident", name);
-              chip.innerHTML = `
-                <span class="incident-chip-dot"></span>
-                <span>${name}</span>
-              `;
-
-              chip.addEventListener("click", () => {
-                const url = new URL(window.location.href);
+              chip.dataset.incident = name;
+              chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
+              chip.onclick = () => {
+                const url = new URL(location.href);
                 url.searchParams.set("incident", name);
-                window.location.href = url.toString();
-              });
-
+                location.href = url;
+              };
               chipsEl.appendChild(chip);
             });
 
             if (INCIDENT) {
-              const chips = Array.from(
-                chipsEl.querySelectorAll(".incident-chip")
-              );
-              const match = chips.find(
-                (el) =>
-                  (el.getAttribute("data-incident") || "").toLowerCase() ===
-                  INCIDENT.toLowerCase()
-              );
+              const match = [...chipsEl.querySelectorAll(".incident-chip")]
+                .find(el => el.dataset.incident?.toLowerCase() === INCIDENT.toLowerCase());
               if (match) {
                 match.classList.add("active");
-                zoomToIncident(INCIDENT);
+                zoomTo(INCIDENT);
               }
             }
           })
-          .catch((err) => {
-            console.error("Error loading incidents:", err);
-            if (countBadge) countBadge.textContent = "0";
+          .catch(e => {
+            console.error("Error loading incidents:", e);
+            countBadge.textContent = "0";
           });
-      }
-    );
+      });
+    }
+
+    initMap();
   </script>
 </body>
 </html>

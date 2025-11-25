@@ -104,7 +104,7 @@
     </main>
   </div>
 
-  <!-- Simple scroll hint (visual only, disappears on scroll) -->
+  <!-- Simple scroll hint (visual only) -->
   <div class="scroll-hint" id="scrollHint">
     <div class="scroll-hint-button">
       <span class="scroll-hint-text">Scroll</span>
@@ -379,7 +379,6 @@
 
         // On small screens, let the PAGE scroll instead of the map
         if (window.innerWidth < 700 && view.navigation) {
-          // no wheel, and no single-finger pan stealing scroll
           view.navigation.mouseWheelZoomEnabled = false;
           if ("browserTouchPanEnabled" in view.navigation) {
             view.navigation.browserTouchPanEnabled = false;
@@ -389,9 +388,24 @@
           }
         }
 
-        // Toggle body.scrolled (used to hide scroll-hint)
+        // Compute bottom-of-page and hide scroll hint there
         window.addEventListener("scroll", () => {
-          if (window.scrollY > 10) {
+          const scrollPos =
+            window.scrollY ||
+            document.documentElement.scrollTop ||
+            document.body.scrollTop ||
+            0;
+          const windowHeight =
+            window.innerHeight ||
+            document.documentElement.clientHeight ||
+            document.body.clientHeight;
+          const docHeight =
+            document.documentElement.scrollHeight ||
+            document.body.scrollHeight;
+
+          const atBottom = scrollPos + windowHeight >= docHeight - 8;
+
+          if (atBottom) {
             document.body.classList.add("scrolled");
           } else {
             document.body.classList.remove("scrolled");

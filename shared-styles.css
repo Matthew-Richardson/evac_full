@@ -1,394 +1,860 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Incident Map & Evacuation Info</title>
+/* ========== GLOBAL LAYOUT & TYPOGRAPHY ========== */
 
-  <!-- DNS prefetch & preconnect for external resources -->
-  <link rel="dns-prefetch" href="//js.arcgis.com">
-  <link rel="dns-prefetch" href="//services2.arcgis.com">
-  <link rel="dns-prefetch" href="//cms9files.revize.com">
-  <link rel="preconnect" href="https://js.arcgis.com" crossorigin>
-  <link rel="preconnect" href="https://services2.arcgis.com" crossorigin>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-  <!-- Critical CSS inline for fastest first paint -->
-  <style>
-    *,*::before,*::after{box-sizing:border-box}
-    html,body{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;background:#f5f5f7;font-size:18px;overflow-x:hidden;color:#000}
-    .page-shell{min-height:100vh;display:flex;flex-direction:column}
-    .map-wrapper{max-width:900px;width:100%;margin:16px auto 0;padding:12px}
-    .map-card{width:100%;border-radius:14px;border:1px solid rgba(0,0,0,0.2);box-shadow:0 2px 10px rgba(0,0,0,0.25);overflow:hidden;background:#fff;display:flex;flex-direction:column}
-    #viewDiv{width:100%;height:460px;background:#e5e5e5}
-  </style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  background: #f5f5f7;
+  font-size: 18px;
+  overflow-x: hidden;
+  color: #000;
+}
 
-  <!-- Non-critical CSS loaded async -->
-  <link rel="stylesheet" href="shared-styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="shared-styles.css"></noscript>
+@media (max-width: 600px) {
+  html, body { font-size: 15px; }
+}
 
-  <!-- ArcGIS CSS - loaded async -->
-  <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css"></noscript>
-</head>
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-<body>
-  <div class="page-shell">
-    <div class="map-wrapper">
-      <div class="map-card">
+/* ========== MAP WRAPPER & CARD ========== */
 
-        <div class="card-brand">
-          <img
-            src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
-            alt="La Plata County Logo"
-            class="header-logo"
-            width="260"
-            height="auto"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          >
-          <div class="site-title">ReadyLaPlata<span class="title-break"> — </span><span class="title-sub">La Plata County Evacuation Viewer</span></div>
-          <div class="call-center">
-            <strong>Call Center</strong>
-            <a href="tel:9703858700">970-385-8700</a>
-          </div>
-        </div>
+.map-wrapper {
+  max-width: 900px;
+  width: 100%;
+  margin: 16px auto 0;
+  padding: 12px;
+}
 
-        <div class="card-divider"></div>
+.map-card {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.2);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
 
-        <div class="incident-strip">
-          <div class="incident-strip-top">
-            <div class="incident-bar-left">
-              <span class="incident-label">
-                Active incidents
-                <span id="incidentCountBadge" class="incident-count-badge">0</span>
-              </span>
-            </div>
-            <button id="infoButton" class="info-link" type="button" aria-label="Evacuation Information">
-              <span class="info-icon-home">🏠</span>
-              <span class="info-label">Evacuation Information</span>
-            </button>
-          </div>
+/* ========== BRAND BLOCK ========== */
 
-          <div class="incident-tip">Tap an incident below to view the evacuation map.</div>
-          <div id="incidentChips" class="incident-chips"></div>
-          <div id="noIncidentsMsg" class="incident-none" style="display:none">No active incidents are listed.</div>
-        </div>
+.card-brand {
+  padding: 18px 18px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
 
-        <div class="card-divider"></div>
-        <div id="viewDiv"></div>
+.header-logo {
+  max-width: 260px;
+  width: 70%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
 
-        <div class="map-key-merged">
-          <div class="legend-title">Map Key</div>
-          <div class="legend-items">
-            <div class="legend-item">
-              <span class="legend-icon-road"></span>
-              <span>Road closure</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-icon-info">i</span>
-              <span>Information</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-icon-warning"></span>
-              <span>Special warning</span>
-            </div>
-          </div>
-        </div>
+@media (max-width: 600px) {
+  .header-logo {
+    width: 73%;
+    max-width: 275px;
+  }
+}
 
-      </div>
-    </div>
+.site-title {
+  text-align: center;
+  margin: 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #6e6e6e;
+  opacity: 0.85;
+  line-height: 1.3;
+}
 
-    <main>
-      <div id="evacRow" class="evac-row">Loading evacuation information…</div>
-      <div class="incident-panel">
-        <div id="incident-panel">Loading incident status…</div>
-      </div>
-    </main>
-  </div>
+@media (max-width: 600px) {
+  .site-title {
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 0 8px;
+  }
+}
 
-  <!-- Floating CodeRED Button -->
-  <a href="sms:99411?&body=LPCOEM" class="codered-fab">
-    <span class="codered-fab-icon">🔔</span>
-    <span class="codered-fab-text">CodeRED Alerts</span>
-  </a>
+.call-center {
+  background: #f5f7ff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(11,77,162,0.18);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #333;
+}
 
-  <!-- ArcGIS SDK loaded with defer -->
-  <script src="https://js.arcgis.com/4.31/" defer></script>
+.call-center strong {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
 
-  <script>
-  (function() {
-    'use strict';
+.call-center a {
+  color: #0b4da2;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 20px;
+}
 
-    // ========== CONFIGURATION ==========
-    const CONFIG = {
-      webmapId: '58a8bb313db64271a55e7960cb839f64',
-      incidentLayerUrl: 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0',
-      statusBaseUrl: 'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec',
-      incidentField: 'incident',
-      statusValues: { SET: 'Set', GO: 'Go' }
-    };
+.call-center a:hover {
+  text-decoration: underline;
+}
 
-    const STATUS_DATA = {
-      SET: {
-        label: 'SET - Pre-Evacuation',
-        color: '#fff36a',
-        text: 'Voluntary Evacuation;<br>Evacuation orders are likely'
-      },
-      GO: {
-        label: 'GO - Evacuate Now',
-        color: '#41f56e',
-        text: '<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.'
-      }
-    };
+.card-divider {
+  margin: 8px 14px 0;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
 
-    // ========== CACHED DOM ELEMENTS ==========
-    const DOM = {};
-    function cacheDOM() {
-      DOM.evacRow = document.getElementById('evacRow');
-      DOM.incidentPanel = document.getElementById('incident-panel');
-      DOM.chipsEl = document.getElementById('incidentChips');
-      DOM.countBadge = document.getElementById('incidentCountBadge');
-      DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
-      DOM.infoButton = document.getElementById('infoButton');
-    }
+/* ========== INCIDENT BAR & CHIPS ========== */
 
-    // ========== UTILITIES ==========
-    const INCIDENT = (() => {
-      try {
-        const params = new URLSearchParams(location.search);
-        const inc = (params.get('incident') || params.get('Incident') || '').trim();
-        return inc || null;
-      } catch { return null; }
-    })();
+.incident-strip {
+  padding: 10px 18px;
+}
 
-    const escapeQuery = str => str.replace(/'/g, "''");
+.incident-strip-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
 
-    // ========== HTML BUILDERS ==========
-    function buildBox(statusCode, features) {
-      const data = STATUS_DATA[statusCode];
-      const hasFeatures = features && features.length;
-      
-      const zonesHTML = hasFeatures
-        ? `<div class="evac-zones">${features.map(f => 
-            `<div class="zone-chip">${f.attributes.zonename}</div>`
-          ).join('')}</div>`
-        : `<div class="evac-zones"><div class="no-zones-chip">No ${statusCode} zones</div></div>`;
+.incident-bar-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
-      const boxClass = statusCode === 'GO' ? ' evac-box-go' : statusCode === 'SET' ? ' evac-box-set' : '';
+.incident-label {
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #b3261e;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
-      return `<div class="evac-box${boxClass}" style="background:${data.color}">
-        <div class="evac-title">${data.label}</div>
-        <div class="evac-body">
-          <div>The following zones are under ${statusCode} status for <strong>${INCIDENT || 'this incident'}</strong>.</div>
-          ${zonesHTML}
-          <div class="evac-note">${data.text}</div>
-        </div>
-      </div>`;
-    }
+.incident-count-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #b3261e;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
 
-    function showHelp() {
-      DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#f3f4f6">
-        <div class="evac-title">How to use this page</div>
-        <div class="evac-body">
-          <div>This evacuation information requires an <strong>incident name</strong> in the URL.</div>
-          <div style="margin-top:8px">Use this format:<br><code>?incident=YourIncidentName</code></div>
-          <div style="margin-top:8px">Example:<br><code>?incident=East%20Canyon</code></div>
-        </div>
-      </div>`;
+.info-link {
+  font-size: 15px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #0b4da2;
+  background: #fff;
+  color: #0b4da2;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 
-      DOM.incidentPanel.innerHTML = `<div class="evac-box" style="background:#f3f4f6">
-        <div class="evac-title">Incident status</div>
-        <div class="evac-body">
-          <div>No incident was specified.</div>
-          <div style="margin-top:8px">Append <code>?incident=YourIncidentName</code> to the URL.</div>
-        </div>
-      </div>`;
-    }
+.info-link:hover {
+  background: #0b4da2;
+  color: #fff;
+}
 
-    function showError(message) {
-      DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a">
-        <div class="evac-title">Error</div>
-        <div class="evac-body">${message}</div>
-      </div>`;
-    }
+.info-icon-home {
+  font-size: 18px;
+  line-height: 1;
+}
 
-    // ========== DATA FETCHING ==========
-    async function loadEvacuationZones() {
-      if (!INCIDENT) { showHelp(); return; }
+.info-label {
+  font-size: 14px;
+}
 
-      const where = `incident='${escapeQuery(INCIDENT)}' AND STATUS IN ('${CONFIG.statusValues.SET}','${CONFIG.statusValues.GO}')`;
-      const params = new URLSearchParams({ where, outFields: '*', f: 'json', returnGeometry: 'false' });
+@media (max-width: 600px) {
+  .info-link { padding: 4px 10px; }
+  .info-label { display: none; }
+  .info-icon-home { font-size: 20px; }
+}
 
-      try {
-        const res = await fetch(`${CONFIG.incidentLayerUrl}/query?${params}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+.incident-tip {
+  font-size: 12px;
+  color: #777;
+  opacity: 0.6;
+  margin: 2px 0 6px 2px;
+  font-weight: 400;
+}
 
-        if (!data.features?.length) {
-          DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a">
-            <div class="evac-title">No data</div>
-            <div class="evac-body">No zones found for <strong>${INCIDENT}</strong>.</div>
-          </div>`;
-          return;
-        }
+.incident-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
 
-        const setFeatures = data.features.filter(f => f.attributes.STATUS === CONFIG.statusValues.SET);
-        const goFeatures = data.features.filter(f => f.attributes.STATUS === CONFIG.statusValues.GO);
-        DOM.evacRow.innerHTML = buildBox('SET', setFeatures) + buildBox('GO', goFeatures);
-      } catch (err) {
-        console.error('Error loading evacuation zones:', err);
-        showError(`Failed to load evacuation data: ${err.message}`);
-      }
-    }
+.incident-chip {
+  border-radius: 8px;
+  padding: 6px 12px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  font-size: 17px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #000;
+  transition: background 0.15s, border-color 0.15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  white-space: nowrap;
+}
 
-    async function loadIncidentStatus() {
-      if (!INCIDENT) return;
+.incident-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0b4da2;
+  opacity: 0.9;
+}
 
-      try {
-        const res = await fetch(`${CONFIG.statusBaseUrl}?incident=${encodeURIComponent(INCIDENT)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const html = await res.text();
+.incident-chip:hover {
+  background: #f5f7ff;
+  border-color: #b5c8ff;
+}
 
-        DOM.incidentPanel.innerHTML = `<div class="status-html">${html}</div>
-          <div class="status-timestamp">
-            Last loaded: ${new Date().toLocaleString()}
-            &nbsp;•&nbsp;
-            <span class="source-label">Source: La Plata County Office of Emergency Management</span>
-          </div>`;
-      } catch (err) {
-        console.error('Error loading incident status:', err);
-        DOM.incidentPanel.innerHTML = '<div>Error loading incident status.</div>';
-      }
-    }
+.incident-chip.active {
+  background: #0b4da2;
+  border-color: #0b4da2;
+  color: #fff;
+  font-weight: 700;
+}
 
-    // ========== MAP INITIALIZATION ==========
-    function initMap() {
-      if (typeof require === 'undefined') {
-        // ArcGIS not loaded yet, wait
-        setTimeout(initMap, 100);
-        return;
-      }
+.incident-chip.active .incident-chip-dot {
+  background: #fff;
+}
 
-      require([
-        'esri/WebMap',
-        'esri/views/MapView',
-        'esri/layers/FeatureLayer',
-        'esri/widgets/Search',
-        'esri/widgets/Fullscreen'
-      ], (WebMap, MapView, FeatureLayer, Search, Fullscreen) => {
+.incident-none {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
 
-        DOM.infoButton.addEventListener('click', () => { location.href = 'info.html'; });
+/* ========== MAP CONTAINER & LEGEND ========== */
 
-        const webmap = new WebMap({ portalItem: { id: CONFIG.webmapId } });
-        const view = new MapView({ container: 'viewDiv', map: webmap });
+#viewDiv {
+  width: 100%;
+  height: 460px;
+  contain: strict;
+}
 
-        // Disable scroll zoom on mobile for better UX
-        if (window.innerWidth < 700 && view.navigation) {
-          view.navigation.mouseWheelZoomEnabled = false;
-          if ('browserTouchPanEnabled' in view.navigation) view.navigation.browserTouchPanEnabled = false;
-        }
+.map-key-merged {
+  padding: 16px 18px 18px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  background: #fafafa;
+  text-align: center;
+}
 
-        const incidentLayer = new FeatureLayer({
-          url: CONFIG.incidentLayerUrl,
-          outFields: ['*'],
-          visible: false,
-          listMode: 'hide'
-        });
-        webmap.add(incidentLayer);
+.map-key-merged .legend-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
 
-        const zoomToIncident = name => {
-          const where = `${CONFIG.incidentField} = '${escapeQuery(name)}'`;
-          return incidentLayer.queryExtent({ where })
-            .then(res => res.extent && view.goTo(res.extent.expand(1.2)))
-            .catch(console.error);
-        };
+.map-key-merged .legend-items {
+  display: inline-flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
-        view.when()
-          .then(() => {
-            view.ui.add(new Search({ view, includeDefaultSources: true }), 'top-right');
-            view.ui.add(new Fullscreen({ view }), 'top-right');
-            return incidentLayer.when();
-          })
-          .then(() => incidentLayer.queryFeatures({
-            where: '1=1',
-            outFields: [CONFIG.incidentField],
-            returnDistinctValues: true,
-            orderByFields: [CONFIG.incidentField]
-          }))
-          .then(fs => {
-            const names = (fs.features || [])
-              .map(f => f.attributes[CONFIG.incidentField])
-              .filter(Boolean);
+.map-key-merged .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  white-space: nowrap;
+}
 
-            DOM.countBadge.textContent = names.length;
+.legend-icon-road {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #d60000;
+}
 
-            if (!names.length) {
-              DOM.noIncidentsMsg.style.display = 'block';
-              return;
-            }
-            DOM.noIncidentsMsg.style.display = 'none';
+.legend-icon-road::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 14px;
+  height: 4px;
+  background: #fff;
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
 
-            // Sort: current incident first, then alphabetical
-            const target = INCIDENT?.toLowerCase();
-            names.sort((a, b) => {
-              const al = a.toLowerCase(), bl = b.toLowerCase();
-              if (target) {
-                if (al === target && bl !== target) return -1;
-                if (bl === target && al !== target) return 1;
-              }
-              return al.localeCompare(bl);
-            });
+.legend-icon-info {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0078d4;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-            // Build chips with document fragment for single reflow
-            const frag = document.createDocumentFragment();
-            names.forEach(name => {
-              const chip = document.createElement('button');
-              chip.className = 'incident-chip';
-              chip.dataset.incident = name;
-              chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
-              chip.addEventListener('click', () => {
-                const url = new URL(location.href);
-                url.searchParams.set('incident', name);
-                location.href = url;
-              });
-              frag.appendChild(chip);
-            });
-            DOM.chipsEl.appendChild(frag);
+.legend-icon-warning {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  background: #f6e05e;
+  transform: rotate(45deg);
+  border: 1px solid #c7b100;
+}
 
-            // Highlight active incident
-            if (INCIDENT) {
-              const match = DOM.chipsEl.querySelector(`[data-incident="${INCIDENT}"]`);
-              if (match) {
-                match.classList.add('active');
-                zoomToIncident(INCIDENT);
-              }
-            }
-          })
-          .catch(err => {
-            console.error('Error loading incidents:', err);
-            DOM.countBadge.textContent = '0';
-          });
-      });
-    }
+.legend-icon-warning::after {
+  content: "!";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(-45deg);
+  color: #000;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+}
 
-    // ========== INIT ==========
-    function init() {
-      cacheDOM();
-      // Fire data fetches immediately (don't wait for map)
-      loadEvacuationZones();
-      loadIncidentStatus();
-      // Init map when ArcGIS SDK is ready
-      initMap();
-    }
+main {
+  display: block;
+  width: 100%;
+}
 
-    // Start when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
-  </script>
-</body>
-</html>
+/* ========== EVAC SET/GO ROW & BOXES ========== */
+
+.evac-row {
+  display: flex;
+  gap: 16px;
+  max-width: 900px;
+  width: 100%;
+  padding: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 12px auto;
+}
+
+.evac-box {
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.25);
+  flex: 1;
+  min-width: 260px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: #fff;
+}
+
+.evac-box-set {
+  border: 3px solid rgba(180,150,0,0.9);
+  box-shadow: 0 0 10px rgba(180,150,0,0.45);
+}
+
+.evac-box-go {
+  border: 3px solid rgba(0,120,0,0.9);
+  box-shadow: 0 0 12px rgba(0,120,0,0.55);
+  animation: goPulse 2.5s ease-in-out infinite alternate;
+  will-change: box-shadow;
+}
+
+@keyframes goPulse {
+  from { box-shadow: 0 0 8px rgba(0,120,0,0.4); }
+  to { box-shadow: 0 0 18px rgba(0,160,0,0.8); }
+}
+
+.evac-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.evac-body {
+  font-size: 15px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+
+.evac-zones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.zone-chip,
+.no-zones-chip {
+  font-weight: 700;
+  background: rgba(0,0,0,0.08);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.evac-note {
+  margin-top: 10px;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+/* ========== INCIDENT PANEL & STATUS HTML ========== */
+
+.incident-panel {
+  max-width: 900px;
+  width: 100%;
+  padding: 0 12px 20px;
+  margin: 0 auto 20px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.incident-panel a {
+  color: #0b4da2;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.status-html {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.status-html a {
+  color: #0b4da2;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.status-html a:hover {
+  color: #083b7c;
+}
+
+.status-html h1,
+.status-html h2,
+.status-html h3 {
+  margin: 12px 0 6px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.status-html .status-card,
+.status-html .card,
+.status-html .card-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+  border: 1px solid rgba(0,0,0,0.15);
+  margin: 12px 0;
+  padding: 12px 16px;
+  background: #fff;
+}
+
+.status-timestamp {
+  font-size: 14px;
+  margin-top: 10px;
+  color: #444;
+  opacity: 0.8;
+  text-align: enter;
+  padding: 0 10px;
+}
+
+.source-label {
+  font-style: italic;
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .evac-row { flex-direction: column; }
+  .evac-box { min-width: 0; }
+}
+
+/* ========== HOMEPAGE CONTENT (INFO PAGE) ========== */
+
+.home-wrapper {
+  max-width: 900px;
+  margin: 16px auto 0;
+  padding: 0 4px;
+}
+
+.home-card {
+  border-radius: 14px;
+  border: 1px solid #222;
+  margin-bottom: 14px;
+  padding: 14px 18px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.home-card-info,
+.home-card-codered {
+  background: #e6f0ff;
+  border: 2px solid #3b78c2;
+}
+
+.home-card-ready {
+  background: #ffd6d6;
+  border-color: #d93a3a;
+}
+
+.home-card-set {
+  background: #fff36a;
+  border-color: #d2b700;
+}
+
+.home-card-go {
+  background: #41f56e;
+  border-color: #0f8c30;
+}
+
+.home-card-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.home-small {
+  font-size: 16px;
+  max-width: 780px;
+  margin: 6px auto 0;
+  line-height: 1.5;
+}
+
+.home-card-set .home-small,
+.home-card-go .home-small {
+  margin-top: 2px;
+}
+
+/* ========== PILL BUTTONS ========== */
+
+.primary-pill,
+.secondary-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 4px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.primary-pill {
+  background: #0b4da2;
+  border: 1px solid #0b4da2;
+  color: #fff;
+}
+
+.secondary-pill {
+  background: #fff;
+  border: 1px solid #0b4da2;
+  color: #0b4da2;
+}
+
+.primary-pill:hover,
+.secondary-pill:hover {
+  box-shadow: 0 0 0 2px rgba(11,77,162,0.3);
+}
+
+/* ========== FLOATING CODERED BUTTON ========== */
+
+.codered-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(185,28,28,0.4), 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.codered-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(185,28,28,0.5), 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.codered-fab-icon {
+  font-size: 16px;
+}
+
+.codered-fab-text {
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .codered-fab {
+    bottom: 14px;
+    right: 14px;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}
+
+/* ========== TIMELINE STYLES (INFO PAGE) ========== */
+
+.preview-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.preview-label {
+  background: #1e293b;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.preview-frame {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 20px;
+}
+
+.evac-stages {
+  margin-top: 8px;
+}
+
+.stage-header-main {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.stage-tagline {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.stage-headline {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0b4da2;
+}
+
+.stage-subhead {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  text-align: center;
+  margin: 20px 0 16px 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Info-style card in the timeline section */
+.stage-card-info {
+  background: #e8f0fa;
+  border: 2px solid rgba(11, 77, 162, 0.5);
+  box-shadow: 0 0 8px rgba(11, 77, 162, 0.2);
+  margin-bottom: 0;
+}
+
+.stage-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Vertical timeline line */
+.stage-timeline::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 50%;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    #b33a3a 0%,
+    #b33a3a 30%,
+    #a68f00 30%,
+    #a68f00 65%,
+    #0a7c25 65%,
+    #0a7c25 100%
+  );
+  transform: translateX(-50%);
+  border-radius: 2px;
+  z-index: 0;
+}
+
+.stage-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+/* Timeline pin */
+.stage-pin {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.stage-pin-ready {
+  background: #b33a3a;
+}
+
+.stage-pin-set {
+  background: #a68f00;
+}
+
+.stage-pin-go {
+  background: #0a7c25;
+}
+
+/* Stage connector line segment */
+.stage-connector {
+  width: 3px;
+  height: 20px;
+  margin: -4px 0;
+  position: relative;
+  z-index: 0;
+}
+
+.stage-connector-ready-set {
+  background: linear-gradient(to bottom, #b33a3a, #a68f00);
+}
+
+.stage-connector-set-go {
+  background: linear-gradient(to bottom, #a68f00, #0a7c25);
+}
+
+/* Cards - matching timeline styling */
+.stage-card {
+  width: 100%;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+}
+
+.stage-card-ready {
+  background: #ffd6d6;
+  border: 3px solid rgba(180, 50, 50, 0.7);
+  box-shadow: 0 0 10px rgba(180, 50, 50, 0.35);
+}
+
+.stage-card-set {
+  background: #fff36a;
+  border: 3px solid rgba(180, 150, 0, 0.9);
+  box-shadow: 0 0 10px rgba(180, 150, 0, 0.45);
+}
+
+.stage-card-go {
+  background: #41f56e;
+  border: 3px solid rgba(0, 120, 0, 0.9);
+  box-shadow: 0 0 12px rgba(0, 120, 0, 0.55);
+  /* uses the same goPulse keyframes already defined above */
+  animation: goPulse 2.5s ease-in-out infinite alternate;
+}
+
+.stage-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.stage-subtitle {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+.stage-body {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.stage-body p {
+  margin: 0 0 6px 0;
+}
+
+.stage-body p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .preview-frame {
+    padding: 16px;
+  }
+
+  .stage-headline {
+    font-size: 20px;
+  }
+}

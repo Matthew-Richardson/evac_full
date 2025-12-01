@@ -515,7 +515,7 @@ main {
 .home-wrapper {
   max-width: 900px;
   margin: 16px auto 0;
-  padding: 0 4px;
+  padding: 0; /* remove side padding so cards align with header card */
 }
 
 .home-card {
@@ -646,10 +646,10 @@ main {
 
 /* Match width & alignment of the main header card */
 .preview-container {
-  max-width: 900px;      /* same as .map-wrapper */
+  max-width: 100%;       /* use home-wrapper's 900px and centering */
   width: 100%;
-  margin: 16px auto 24px;
-  padding: 0 12px;       /* aligns with .map-wrapper padding */
+  margin: 16px 0 24px;
+  padding: 0;            /* no extra side padding */
 }
 
 /* Card that visually matches the header card */

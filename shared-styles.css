@@ -644,19 +644,21 @@ main {
 
 /* ========== TIMELINE STYLES (INFO PAGE) ========== */
 
+/* Match width & alignment of the main header card */
 .preview-container {
-  max-width: 900px;
-  margin: 18px auto 0;
-  padding: 0 8px;
+  max-width: 900px;      /* same as .map-wrapper */
+  width: 100%;
+  margin: 16px auto 24px;
+  padding: 0 12px;       /* aligns with .map-wrapper padding */
 }
 
-/* Make the timeline card visually match the header card */
+/* Card that visually matches the header card */
 .preview-frame {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 14px;                       /* same radius as .map-card */
   border: 1px solid rgba(0,0,0,0.2);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-  padding: 16px 18px 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);   /* same family of shadow */
+  padding: 18px 18px 26px;
 }
 
 .evac-stages {
@@ -683,7 +685,7 @@ main {
   color: #0b4da2;
 }
 
-/*subheader */
+/* original centered subheader style */
 .stage-subhead {
   font-size: 14px;
   font-weight: 700;
@@ -701,7 +703,7 @@ main {
   color: #111827;
 }
 
-/* Timeline back to the original simpler layout */
+/* Timeline (original look) */
 
 .stage-timeline {
   position: relative;
@@ -754,8 +756,8 @@ main {
 }
 
 .stage-pin-ready { background: #b33a3a; }
-.stage-pin-set { background: #a68f00; }
-.stage-pin-go { background: #0a7c25; }
+.stage-pin-set   { background: #a68f00; }
+.stage-pin-go    { background: #0a7c25; }
 
 /* Stage connector segments */
 .stage-connector {
@@ -774,7 +776,7 @@ main {
   background: linear-gradient(to bottom, #a68f00, #0a7c25);
 }
 
-/* Stage cards (match original with your R/S/G backgrounds) */
+/* Stage cards */
 
 .stage-card {
   width: 100%;
@@ -834,10 +836,15 @@ main {
   margin-bottom: 0;
 }
 
+/* helper for centered paragraphs in SET / GO */
+.stage-body-center {
+  text-align: center;
+}
+
 /* Mobile tweaks */
 @media (max-width: 600px) {
   .preview-frame {
-    padding: 14px 12px 18px;
+    padding: 14px 12px 20px;
   }
 
   .stage-headline {

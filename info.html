@@ -66,6 +66,12 @@
                 <span id="incidentCountBadge" class="incident-count-badge">0</span>
               </span>
             </div>
+            <div class="incident-actions">
+              <!-- Info page only shows CodeRED button (no home icon) -->
+              <button id="coderedButton" class="alert-link" type="button" aria-label="CodeRED Alerts">
+                🔔 CodeRED Alerts
+              </button>
+            </div>
           </div>
 
           <div class="incident-tip">Tap an incident below to view the evacuation map.</div>
@@ -161,11 +167,33 @@
     </main>
   </div>
 
-  <!-- Floating CodeRED Button -->
-  <a href="sms:99411?&body=LPCOEM" class="codered-fab">
-    <span class="codered-fab-icon">🔔</span>
-    <span class="codered-fab-text">CodeRED Alerts</span>
-  </a>
+  <!-- CodeRED Overlay (same as evac.html) -->
+  <div id="coderedOverlay" class="codered-overlay" aria-hidden="true">
+    <div class="codered-dialog" role="dialog" aria-modal="true" aria-labelledby="coderedTitle">
+      <button id="coderedClose" class="codered-close" type="button" aria-label="Close CodeRED info">×</button>
+      <h2 id="coderedTitle" class="codered-title">CodeRED Emergency Alerts</h2>
+      <p class="codered-subtitle">Stay informed about wildfires, floods, and other emergencies in La Plata County.</p>
+      <div class="codered-body">
+        <p><strong>CodeRED</strong> is the official emergency alerting system used by La Plata County Office of Emergency Management (LPCOEM).</p>
+        <p>You can receive notifications by text, phone call, and email about evacuation notices, road closures, and other time-sensitive information.</p>
+        <p>Choose one of the options below to enroll or confirm your subscription:</p>
+      </div>
+      <div class="codered-actions">
+        <!-- Replace href with LPCOEM-specific CodeRED signup link if different -->
+        <a
+          href="https://public.coderedweb.com/CNE/en-US/"
+          class="primary-pill"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Sign up on CodeRED website
+        </a>
+        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">
+          Text “LPCOEM” to 99411
+        </a>
+      </div>
+    </div>
+  </div>
 
   <script>
     (function() {
@@ -180,7 +208,10 @@
       const DOM = {
         chipsEl: document.getElementById('incidentChips'),
         countBadge: document.getElementById('incidentCountBadge'),
-        noIncidentsMsg: document.getElementById('noIncidentsMsg')
+        noIncidentsMsg: document.getElementById('noIncidentsMsg'),
+        coderedButton: document.getElementById('coderedButton'),
+        coderedOverlay: document.getElementById('coderedOverlay'),
+        coderedClose: document.getElementById('coderedClose')
       };
 
       const INCIDENT = (() => {
@@ -255,10 +286,44 @@
         }
       }
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadIncidents);
-      } else {
+      function initCoderedOverlay() {
+        if (!DOM.coderedButton || !DOM.coderedOverlay) return;
+
+        const open = () => {
+          DOM.coderedOverlay.classList.add('is-open');
+          DOM.coderedOverlay.setAttribute('aria-hidden', 'false');
+        };
+
+        const close = () => {
+          DOM.coderedOverlay.classList.remove('is-open');
+          DOM.coderedOverlay.setAttribute('aria-hidden', 'true');
+        };
+
+        DOM.coderedButton.addEventListener('click', open);
+        if (DOM.coderedClose) DOM.coderedClose.addEventListener('click', close);
+
+        DOM.coderedOverlay.addEventListener('click', (e) => {
+          if (e.target === DOM.coderedOverlay) {
+            close();
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && DOM.coderedOverlay.classList.contains('is-open')) {
+            close();
+          }
+        });
+      }
+
+      function init() {
         loadIncidents();
+        initCoderedOverlay();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
       }
     })();
   </script>

@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Evacuation Information – ReadyLaPlata</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evacuation Information — ReadyLaPlata</title>
 
-  <!-- Shared styles -->
-  <link rel="stylesheet" href="shared-styles.css" />
+  <!-- DNS prefetch for external resources -->
+  <link rel="dns-prefetch" href="//services2.arcgis.com">
+  <link rel="dns-prefetch" href="//cms9files.revize.com">
+  <link rel="preconnect" href="https://services2.arcgis.com" crossorigin>
+
+  <!-- Critical CSS inline for fastest first paint -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;background:#f5f5f7;font-size:18px;overflow-x:hidden;color:#000}
+    .page-shell{min-height:100vh;display:flex;flex-direction:column}
+    .map-wrapper{max-width:900px;width:100%;margin:16px auto 0;padding:12px}
+    .map-card{width:100%;border-radius:14px;border:1px solid rgba(0,0,0,0.2);box-shadow:0 2px 10px rgba(0,0,0,0.25);overflow:hidden;background:#fff;display:flex;flex-direction:column}
+    .home-wrapper{max-width:900px;margin:16px auto 0;padding:0 4px}
+    .home-card{border-radius:14px;border:1px solid #222;margin-bottom:14px;padding:14px 18px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+  </style>
+
+  <!-- Non-critical CSS loaded async -->
+  <link rel="stylesheet" href="shared-styles.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="shared-styles.css"></noscript>
 </head>
 
 <body>
@@ -14,11 +31,17 @@
     <div class="map-wrapper">
       <div class="map-card">
 
-        <!-- Header -->
         <div class="card-brand">
-          <img src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
-               alt="La Plata County Logo"
-               class="header-logo" />
+          <img
+            src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
+            alt="La Plata County Logo"
+            class="header-logo"
+            width="260"
+            height="auto"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          >
           <div class="site-title">ReadyLaPlata — La Plata County Evacuation Viewer</div>
           <div class="call-center">
             <strong>Call Center</strong>
@@ -28,7 +51,6 @@
 
         <div class="card-divider"></div>
 
-        <!-- Incident menu -->
         <div class="incident-strip">
           <div class="incident-strip-top">
             <div class="incident-bar-left">
@@ -39,14 +61,9 @@
             </div>
           </div>
 
-          <div class="incident-tip">
-            Tap an incident below to view the evacuation map.
-          </div>
-
+          <div class="incident-tip">Tap an incident below to view the evacuation map.</div>
           <div id="incidentChips" class="incident-chips"></div>
-          <div id="noIncidentsMsg" class="incident-none" style="display:none;">
-            No active incidents are listed.
-          </div>
+          <div id="noIncidentsMsg" class="incident-none" style="display:none">No active incidents are listed.</div>
         </div>
 
         <div class="card-divider"></div>
@@ -57,78 +74,57 @@
       <div class="incident-panel">
         <div class="home-wrapper">
 
-          <!-- Top blue card -->
           <div class="home-card home-card-info">
-            <h2 class="home-card-title">
-              La Plata County Office of Emergency Management (LPCOEM)
-            </h2>
+            <h2 class="home-card-title">La Plata County Office of Emergency Management (LPCOEM)</h2>
             <div class="home-small">
               La Plata County Office of Emergency Management (<strong>LPCOEM</strong>) uses the Ready, Set, Go! system to establish evacuation zones.
               <strong>Click the incident map above to confirm your zone.</strong>
-              During a incident your zone name and area is subject to change.
+              During an incident your zone name and area is subject to change.
             </div>
           </div>
 
-          <!-- Red READY card -->
           <div class="home-card home-card-ready">
             <h2 class="home-card-title">Be READY, Stay SAFE</h2>
             <div class="home-small">
-              <p>
-                <strong>Stay Informed:</strong>
+              <p><strong>Stay Informed:</strong>
                 <a class="primary-pill" href="#">CodeRED signup</a>
                 or
                 <a class="secondary-pill" href="sms:99411?&body=LPCOEM">text 'LPCOEM' to 99411</a>,
-                ensure Gov’t Alerts are enabled on your cell phone, and use apps like
-                <a href="#" style="text-decoration:underline; color:#0b4da2; font-weight:700;">Watch Duty</a>.
+                ensure Gov't Alerts are enabled on your cell phone, and use apps like
+                <a href="#" style="text-decoration:underline;color:#0b4da2;font-weight:700">Watch Duty</a>.
               </p>
-              <p>
-                <strong>Arrangements:</strong>
-                Make a plan and practice your evacuation; People, Pets, Photos, Papers and Pills.
-              </p>
-              <p>
-                <strong>Fire Ready:</strong>
-                Fire Mitigation and last minute safety measures; “Go Kit” with Protective Clothing and masks.
-              </p>
-              <p>
-                <strong>Evacuate:</strong>
-                Don’t hesitate or ignore evacuation orders. Know multiple ways out.
-              </p>
+              <p><strong>Arrangements:</strong> Make a plan and practice your evacuation; People, Pets, Photos, Papers and Pills.</p>
+              <p><strong>Fire Ready:</strong> Fire Mitigation and last minute safety measures; "Go Kit" with Protective Clothing and masks.</p>
+              <p><strong>Evacuate:</strong> Don't hesitate or ignore evacuation orders. Know multiple ways out.</p>
             </div>
           </div>
 
-          <!-- Yellow SET card -->
           <div class="home-card home-card-set">
             <h2 class="home-card-title">SET - Pre-Evacuation</h2>
-            <div class="home-small" style="text-align:center;">
-              Voluntary Evacuation;<br />
-              Evacuation orders are likely.
+            <div class="home-small" style="text-align:center">
+              Voluntary Evacuation;<br>Evacuation orders are likely.
             </div>
           </div>
 
-          <!-- Green GO card -->
           <div class="home-card home-card-go">
             <h2 class="home-card-title">GO - Evacuate Now</h2>
-            <div class="home-small" style="text-align:center;">
-              <strong>LEAVE NOW.</strong> Immediate threat to life.<br />
-              This area is closed to public access.
+            <div class="home-small" style="text-align:center">
+              <strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.
             </div>
           </div>
 
-          <!-- Bottom CodeRED card -->
           <div class="home-card home-card-codered">
             <h2 class="home-card-title">CodeRED Emergency Notifications</h2>
             <div class="home-small">
               <p>
-                La Plata County’s emergency notification system is called CodeRed.
+                La Plata County's emergency notification system is called CodeRed.
                 If you live in La Plata County, you may now register up to five cell or Internet phone numbers with your physical street address,
-                ensuring that you get emergency notifications even when you’re not at home or don’t have a land line.
+                ensuring that you get emergency notifications even when you're not at home or don't have a land line.
                 Register for CodeRed Community Notification Enrollment to receive notifications.
               </p>
-              <p style="margin-top:10px;">
+              <p style="margin-top:10px">
                 <strong>Mobile Signup:</strong>
-                <a class="secondary-pill" href="sms:99411?&body=LPCOEM">
-                  Text 'LPCOEM' to 99411
-                </a>
+                <a class="secondary-pill" href="sms:99411?&body=LPCOEM">Text 'LPCOEM' to 99411</a>
               </p>
             </div>
           </div>
@@ -139,114 +135,102 @@
   </div>
 
   <script>
+  (function() {
+    'use strict';
 
-  const INCIDENT_MAP_URL = "evac.html";
-  const incidentLayerUrl =
-    "https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query";
-  const incidentFieldName = "incident";
+    const CONFIG = {
+      mapUrl: 'evac.html',
+      incidentLayerUrl: 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query',
+      incidentField: 'incident'
+    };
 
-  const chipsEl = document.getElementById("incidentChips");
-  const countBadge = document.getElementById("incidentCountBadge");
-  const noIncidentsMsg = document.getElementById("noIncidentsMsg");
+    // Cache DOM elements
+    const DOM = {
+      chipsEl: document.getElementById('incidentChips'),
+      countBadge: document.getElementById('incidentCountBadge'),
+      noIncidentsMsg: document.getElementById('noIncidentsMsg')
+    };
 
-  function getIncidentFromUrl() {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return (params.get("incident") || params.get("Incident") || "").trim();
-    } catch {
-      return "";
-    }
-  }
+    // Get incident from URL
+    const INCIDENT = (() => {
+      try {
+        const params = new URLSearchParams(location.search);
+        const inc = (params.get('incident') || params.get('Incident') || '').trim();
+        return inc || null;
+      } catch { return null; }
+    })();
 
-  const INCIDENT = (() => {
-    const inc = getIncidentFromUrl();
-    return inc && inc.trim() ? inc.trim() : null;
-  })();
+    async function loadIncidentMenu() {
+      const params = new URLSearchParams({
+        where: '1=1',
+        outFields: CONFIG.incidentField,
+        returnDistinctValues: 'true',
+        f: 'json'
+      });
 
-  function loadIncidentMenu() {
-    const params = new URLSearchParams({
-      where: "1=1",
-      outFields: incidentFieldName,
-      returnDistinctValues: "true",
-      f: "json"
-    });
-
-    chipsEl.innerHTML = "";
-    noIncidentsMsg.style.display = "none";
-
-    fetch(incidentLayerUrl + "?" + params.toString())
-      .then(r => {
-        if (!r.ok) {
-          throw new Error(`HTTP error ${r.status}`);
-        }
-        return r.json();
-      })
-      .then(data => {
-        const features = data.features || [];
+      try {
+        const res = await fetch(`${CONFIG.incidentLayerUrl}?${params}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
 
         const seen = new Set();
-        const incidentNames = [];
+        const names = (data.features || [])
+          .map(f => f.attributes?.[CONFIG.incidentField]?.trim())
+          .filter(name => {
+            if (!name) return false;
+            const key = name.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
 
-        features.forEach(f => {
-          const raw = f.attributes && f.attributes[incidentFieldName];
-          if (!raw) return;
-
-          const name = String(raw).trim();
-          if (!name) return;
-
-          const key = name.toLowerCase();
-          if (seen.has(key)) return;
-
-          seen.add(key);
-          incidentNames.push(name);
-        });
-
-        if (INCIDENT) {
-          const target = INCIDENT.toLowerCase();
-          incidentNames.sort((a, b) => {
-            const al = a.toLowerCase();
-            const bl = b.toLowerCase();
+        // Sort: current incident first, then alphabetical
+        const target = INCIDENT?.toLowerCase();
+        names.sort((a, b) => {
+          const al = a.toLowerCase(), bl = b.toLowerCase();
+          if (target) {
             if (al === target && bl !== target) return -1;
             if (bl === target && al !== target) return 1;
-            return al.localeCompare(bl);
-          });
-        } else {
-          incidentNames.sort((a, b) =>
-            a.toLowerCase().localeCompare(b.toLowerCase())
-          );
-        }
+          }
+          return al.localeCompare(bl);
+        });
 
-        countBadge.textContent = incidentNames.length;
+        DOM.countBadge.textContent = names.length;
 
-        if (!incidentNames.length) {
-          noIncidentsMsg.style.display = "block";
+        if (!names.length) {
+          DOM.noIncidentsMsg.style.display = 'block';
           return;
         }
 
-        incidentNames.forEach(name => {
-          const chip = document.createElement("button");
-          chip.className = "incident-chip";
-          chip.innerHTML =
-            `<span class="incident-chip-dot"></span><span>${name}</span>`;
-
-          chip.onclick = () => {
-            const url = new URL(INCIDENT_MAP_URL, window.location.href);
-            url.searchParams.set("incident", name);
-            window.location.href = url.toString();
-          };
-
-          chipsEl.appendChild(chip);
+        // Build chips with document fragment for single reflow
+        const frag = document.createDocumentFragment();
+        names.forEach(name => {
+          const chip = document.createElement('button');
+          chip.className = 'incident-chip';
+          chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
+          chip.addEventListener('click', () => {
+            const url = new URL(CONFIG.mapUrl, location.href);
+            url.searchParams.set('incident', name);
+            location.href = url;
+          });
+          frag.appendChild(chip);
         });
-      })
-      .catch(err => {
-        console.error("Error loading incidents:", err);
-        countBadge.textContent = "0";
-        noIncidentsMsg.style.display = "block";
-      });
-  }
+        DOM.chipsEl.appendChild(frag);
 
-  loadIncidentMenu();
+      } catch (err) {
+        console.error('Error loading incidents:', err);
+        DOM.countBadge.textContent = '0';
+        DOM.noIncidentsMsg.style.display = 'block';
+      }
+    }
+
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadIncidentMenu);
+    } else {
+      loadIncidentMenu();
+    }
+  })();
   </script>
-
 </body>
 </html>

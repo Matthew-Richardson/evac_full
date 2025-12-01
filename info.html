@@ -42,7 +42,7 @@
             fetchpriority="high"
             decoding="async"
           >
-          <div class="site-title">ReadyLaPlata — La Plata County Evacuation Viewer</div>
+          <div class="site-title">ReadyLaPlata<span class="title-break"> — </span><span class="title-sub">La Plata County Evacuation Viewer</span></div>
           <div class="call-center">
             <strong>Call Center</strong>
             <a href="tel:9703858700">970-385-8700</a>
@@ -83,49 +83,51 @@
             </div>
           </div>
 
-          <div class="home-card home-card-ready">
-            <h2 class="home-card-title">Be READY, Stay SAFE</h2>
-            <div class="home-small">
-              <p><strong>Stay Informed:</strong>
-                <a class="primary-pill" href="#">CodeRED signup</a>
-                or
-                <a class="secondary-pill" href="sms:99411?&body=LPCOEM">text 'LPCOEM' to 99411</a>,
-                ensure Gov't Alerts are enabled on your cell phone, and use apps like
-                <a href="#" style="text-decoration:underline;color:#0b4da2;font-weight:700">Watch Duty</a>.
-              </p>
-              <p><strong>Arrangements:</strong> Make a plan and practice your evacuation; People, Pets, Photos, Papers and Pills.</p>
-              <p><strong>Fire Ready:</strong> Fire Mitigation and last minute safety measures; "Go Kit" with Protective Clothing and masks.</p>
-              <p><strong>Evacuate:</strong> Don't hesitate or ignore evacuation orders. Know multiple ways out.</p>
-            </div>
-          </div>
+          <!-- Evacuation Stages Flow -->
+          <div class="evac-stages">
+            <div class="stage-header">Evacuation Stages</div>
+            
+            <div class="stage-flow">
+              <!-- Stage 1: READY -->
+              <div class="home-card home-card-ready stage-card">
+                <div class="stage-badge">1</div>
+                <h2 class="home-card-title">READY</h2>
+                <div class="stage-subtitle">Be Prepared</div>
+                <div class="home-small">
+                  <p><strong>Stay Informed:</strong> Sign up for CodeRED alerts, enable Gov't Alerts on your phone, and use apps like Watch Duty.</p>
+                  <p><strong>Make a Plan:</strong> People, Pets, Photos, Papers and Pills.</p>
+                  <p><strong>Prepare a Go Kit:</strong> Protective clothing, masks, essentials.</p>
+                  <p><strong>Know Your Routes:</strong> Multiple ways out of your area.</p>
+                </div>
+              </div>
 
-          <div class="home-card home-card-set">
-            <h2 class="home-card-title">SET - Pre-Evacuation</h2>
-            <div class="home-small" style="text-align:center">
-              Voluntary Evacuation;<br>Evacuation orders are likely.
-            </div>
-          </div>
+              <div class="stage-arrow">▼</div>
 
-          <div class="home-card home-card-go">
-            <h2 class="home-card-title">GO - Evacuate Now</h2>
-            <div class="home-small" style="text-align:center">
-              <strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.
-            </div>
-          </div>
+              <!-- Stage 2: SET -->
+              <div class="home-card home-card-set stage-card">
+                <div class="stage-badge">2</div>
+                <h2 class="home-card-title">SET</h2>
+                <div class="stage-subtitle">Pre-Evacuation</div>
+                <div class="home-small" style="text-align:center">
+                  <strong>Voluntary Evacuation</strong><br>
+                  Evacuation orders are likely.<br>
+                  Be ready to leave at a moment's notice.
+                </div>
+              </div>
 
-          <div class="home-card home-card-codered">
-            <h2 class="home-card-title">CodeRED Emergency Notifications</h2>
-            <div class="home-small">
-              <p>
-                La Plata County's emergency notification system is called CodeRed.
-                If you live in La Plata County, you may now register up to five cell or Internet phone numbers with your physical street address,
-                ensuring that you get emergency notifications even when you're not at home or don't have a land line.
-                Register for CodeRed Community Notification Enrollment to receive notifications.
-              </p>
-              <p style="margin-top:10px">
-                <strong>Mobile Signup:</strong>
-                <a class="secondary-pill" href="sms:99411?&body=LPCOEM">Text 'LPCOEM' to 99411</a>
-              </p>
+              <div class="stage-arrow">▼</div>
+
+              <!-- Stage 3: GO -->
+              <div class="home-card home-card-go stage-card">
+                <div class="stage-badge">3</div>
+                <h2 class="home-card-title">GO</h2>
+                <div class="stage-subtitle">Evacuate Now</div>
+                <div class="home-small" style="text-align:center">
+                  <strong>LEAVE IMMEDIATELY.</strong><br>
+                  Immediate threat to life.<br>
+                  This area is closed to public access.
+                </div>
+              </div>
             </div>
           </div>
 
@@ -133,6 +135,12 @@
       </div>
     </main>
   </div>
+
+  <!-- Floating CodeRED Button -->
+  <a href="sms:99411?&body=LPCOEM" class="codered-fab">
+    <span class="codered-fab-icon">🔔</span>
+    <span class="codered-fab-text">CodeRED Alerts</span>
+  </a>
 
   <script>
   (function() {

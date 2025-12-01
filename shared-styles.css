@@ -473,14 +473,10 @@ main {
 .status-html h1,
 .status-html h2,
 .status-html h3 {
-  background: #e8f0ff;
-  color: #0b4da2;
-  padding: 10px 16px;
-  margin: 8px 0 4px;
+  margin: 12px 0 6px;
   font-weight: 700;
   font-size: 18px;
-  border-radius: 999px;
-  display: inline-block;
+  color: #0f172a;
 }
 
 .status-html .status-card,

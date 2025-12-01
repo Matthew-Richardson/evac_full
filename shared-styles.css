@@ -683,21 +683,17 @@ main {
   color: #0b4da2;
 }
 
-/* Pill-style subheader */
+/*subheader */
 .stage-subhead {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 14px;
-  margin: 18px auto 16px auto;
-  border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #0f172a;
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  letter-spacing: 0.05em;
+  color: #64748b;
+  text-align: center;
+  margin: 20px 0 16px 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 .stage-header-main .stage-body {

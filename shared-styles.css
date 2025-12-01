@@ -496,7 +496,7 @@ main {
   margin-top: 10px;
   color: #444;
   opacity: 0.8;
-  text-align: enter;
+  text-align: center;
   padding: 0 10px;
 }
 
@@ -599,115 +599,66 @@ main {
   box-shadow: 0 0 0 2px rgba(11,77,162,0.3);
 }
 
-/* ========== FLOATING CODERED BUTTON ========== */
-
-.codered-fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  color: #fff;
-  padding: 12px 18px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(185,28,28,0.4), 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1000;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.codered-fab:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(185,28,28,0.5), 0 3px 6px rgba(0,0,0,0.15);
-}
-
-.codered-fab-icon {
-  font-size: 16px;
-}
-
-.codered-fab-text {
-  white-space: nowrap;
-}
-
-@media (max-width: 600px) {
-  .codered-fab {
-    bottom: 14px;
-    right: 14px;
-    font-size: 13px;
-    padding: 10px 14px;
-  }
-}
-
 /* ========== TIMELINE STYLES (INFO PAGE) ========== */
 
 .preview-container {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.preview-label {
-  background: #1e293b;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px 8px 0 0;
-  font-size: 14px;
-  font-weight: 600;
+  max-width: 900px;
+  margin: 18px auto 0;
+  padding: 0 8px;
 }
 
 .preview-frame {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  padding: 20px;
+  background: #f9fafb;
+  border: none;
+  border-radius: 16px;
+  padding: 18px 18px 22px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .evac-stages {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .stage-header-main {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .stage-tagline {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #64748b;
+  letter-spacing: 0.12em;
+  color: #6b7280;
   margin-bottom: 4px;
 }
 
 .stage-headline {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0b4da2;
 }
 
+/* subheader separator */
 .stage-subhead {
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  margin: 18px auto 16px auto;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
-  text-align: center;
-  margin: 20px 0 16px 0;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.12em;
+  color: #0f172a;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
-/* Info-style card in the timeline section */
-.stage-card-info {
-  background: #e8f0fa;
-  border: 2px solid rgba(11, 77, 162, 0.5);
-  box-shadow: 0 0 8px rgba(11, 77, 162, 0.2);
-  margin-bottom: 0;
+.stage-header-main .stage-body {
+  font-size: 14px;
+  color: #111827;
 }
 
 .stage-timeline {
@@ -715,14 +666,15 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  row-gap: 16px;
+  padding-top: 4px;
 }
 
-/* Vertical timeline line */
 .stage-timeline::before {
   content: '';
   position: absolute;
-  top: 24px;
-  bottom: 24px;
+  top: 28px;
+  bottom: 28px;
   left: 50%;
   width: 3px;
   background: linear-gradient(
@@ -742,37 +694,29 @@ main {
 .stage-item {
   position: relative;
   width: 100%;
+  max-width: 620px;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1;
 }
 
-/* Timeline pin */
+/* Timeline Pin */
 .stage-pin {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 3px solid #fff;
+  border: 3px solid #f9fafb;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   margin-bottom: 8px;
   position: relative;
   z-index: 2;
 }
 
-.stage-pin-ready {
-  background: #b33a3a;
-}
+.stage-pin-ready { background: #b33a3a; }
+.stage-pin-set { background: #a68f00; }
+.stage-pin-go { background: #0a7c25; }
 
-.stage-pin-set {
-  background: #a68f00;
-}
-
-.stage-pin-go {
-  background: #0a7c25;
-}
-
-/* Stage connector line segment */
 .stage-connector {
   width: 3px;
   height: 20px;
@@ -789,39 +733,40 @@ main {
   background: linear-gradient(to bottom, #a68f00, #0a7c25);
 }
 
-/* Cards - matching timeline styling */
+/* Cards */
+
 .stage-card {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 14px;
   margin-bottom: 0;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.22);
+  border: 1px solid rgba(15, 23, 42, 0.12);
 }
 
 .stage-card-ready {
   background: #ffd6d6;
-  border: 3px solid rgba(180, 50, 50, 0.7);
-  box-shadow: 0 0 10px rgba(180, 50, 50, 0.35);
+  border-color: rgba(180,50,50,0.7);
+  box-shadow: 0 0 10px rgba(180,50,50,0.35);
 }
 
 .stage-card-set {
   background: #fff36a;
-  border: 3px solid rgba(180, 150, 0, 0.9);
-  box-shadow: 0 0 10px rgba(180, 150, 0, 0.45);
+  border-color: rgba(180,150,0,0.9);
+  box-shadow: 0 0 10px rgba(180,150,0,0.45);
 }
 
 .stage-card-go {
   background: #41f56e;
-  border: 3px solid rgba(0, 120, 0, 0.9);
-  box-shadow: 0 0 12px rgba(0, 120, 0, 0.55);
-  /* uses the same goPulse keyframes already defined above */
+  border-color: rgba(0,120,0,0.9);
+  box-shadow: 0 0 12px rgba(0,120,0,0.55);
   animation: goPulse 2.5s ease-in-out infinite alternate;
 }
 
 .stage-title {
   margin: 0;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
 }
 
@@ -829,15 +774,15 @@ main {
   text-align: center;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(0, 0, 0, 0.6);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-top: 2px;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
   margin-bottom: 8px;
 }
 
 .stage-body {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -849,12 +794,23 @@ main {
   margin-bottom: 0;
 }
 
+/* Mobile Tweaks */
 @media (max-width: 600px) {
   .preview-frame {
-    padding: 16px;
+    padding: 14px 12px 18px;
+    border-radius: 12px;
   }
 
   .stage-headline {
     font-size: 20px;
+  }
+
+  .stage-timeline::before {
+    top: 30px;
+    bottom: 30px;
+  }
+
+  .stage-item {
+    max-width: 100%;
   }
 }

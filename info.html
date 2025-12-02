@@ -67,10 +67,10 @@
               </span>
             </div>
             <div class="incident-actions">
-              <button id="mapButton" class="info-link" type="button" aria-label="View Map">
-                <span class="info-icon-home">🗺️</span>
-                <span class="info-label-desktop">View Map</span>
-                <span class="info-label-mobile">Map</span>
+              <button id="infoButton" class="info-link" type="button" aria-label="Evacuation Information">
+                <span class="info-icon-home">🏠</span>
+                <span class="info-label-full">Evacuation Information</span>
+                <span class="info-label-short">Evac Info</span>
               </button>
               <button id="coderedButton" class="alert-link" type="button" aria-label="CodeRED Alerts">
                 <span class="alert-icon">🔔</span>
@@ -111,9 +111,10 @@
                 <!-- Centered subheader -->
                 <div class="stage-subhead">Ready, Set, Go! System</div>
 
-                <div class="stage-triangle">
-                  <!-- SVG connectors -->
-                  <svg class="triangle-connectors" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                <div class="stage-timeline">
+
+                  <!-- SVG Triangle Connectors -->
+                  <svg class="triangle-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                     <defs>
                       <linearGradient id="grad-ready-set" x1="50%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stop-color="#b33a3a"/>
@@ -123,21 +124,21 @@
                         <stop offset="0%" stop-color="#b33a3a"/>
                         <stop offset="100%" stop-color="#0a7c25"/>
                       </linearGradient>
-                      <linearGradient id="grad-set-go" x1="0%" y1="50%" x2="100%" y2="50%">
+                      <linearGradient id="grad-set-go" x1="0%" y1="100%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#a68f00"/>
                         <stop offset="100%" stop-color="#0a7c25"/>
                       </linearGradient>
                     </defs>
-                    <!-- READY to SET -->
-                    <line x1="200" y1="45" x2="65" y2="255" stroke="url(#grad-ready-set)" stroke-width="4" stroke-linecap="round"/>
-                    <!-- READY to GO -->
-                    <line x1="200" y1="45" x2="335" y2="255" stroke="url(#grad-ready-go)" stroke-width="4" stroke-linecap="round"/>
-                    <!-- SET to GO -->
-                    <line x1="65" y1="255" x2="335" y2="255" stroke="url(#grad-set-go)" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Ready to Set (top center to bottom left) -->
+                    <line x1="50" y1="8" x2="12" y2="52" stroke="url(#grad-ready-set)" stroke-width="0.6" stroke-linecap="round"/>
+                    <!-- Ready to Go (top center to bottom right) -->
+                    <line x1="50" y1="8" x2="88" y2="52" stroke="url(#grad-ready-go)" stroke-width="0.6" stroke-linecap="round"/>
+                    <!-- Set to Go (bottom left to bottom right) -->
+                    <line x1="12" y1="52" x2="88" y2="52" stroke="url(#grad-set-go)" stroke-width="0.6" stroke-linecap="round"/>
                   </svg>
 
-                  <!-- READY - top -->
-                  <div class="triangle-top">
+                  <!-- READY (top center) -->
+                  <div class="stage-item stage-item-ready">
                     <div class="stage-pin stage-pin-ready"></div>
                     <div class="stage-card stage-card-ready">
                       <h2 class="stage-title">READY</h2>
@@ -151,33 +152,33 @@
                     </div>
                   </div>
 
-                  <!-- Bottom row: SET left, GO right -->
-                  <div class="triangle-bottom">
-                    <div class="triangle-left">
-                      <div class="stage-pin stage-pin-set"></div>
-                      <div class="stage-card stage-card-set">
-                        <h2 class="stage-title">SET</h2>
-                        <div class="stage-subtitle">Pre-Evacuation</div>
-                        <div class="stage-body stage-body-center">
-                          <p><strong>SET - Pre-Evacuation</strong></p>
-                          <p>Voluntary Evacuation; Evacuation orders are likely.</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="triangle-right">
-                      <div class="stage-pin stage-pin-go"></div>
-                      <div class="stage-card stage-card-go">
-                        <h2 class="stage-title">GO</h2>
-                        <div class="stage-subtitle">Evacuate Now</div>
-                        <div class="stage-body stage-body-center">
-                          <p><strong>GO - Evacuate Now</strong></p>
-                          <p>LEAVE NOW. Immediate threat to life.</p>
-                          <p>This area is closed to public access.</p>
-                        </div>
+                  <!-- SET (bottom left) -->
+                  <div class="stage-item stage-item-set">
+                    <div class="stage-pin stage-pin-set"></div>
+                    <div class="stage-card stage-card-set">
+                      <h2 class="stage-title">SET</h2>
+                      <div class="stage-subtitle">Pre-Evacuation</div>
+                      <div class="stage-body stage-body-center">
+                        <p><strong>SET - Pre-Evacuation</strong></p>
+                        <p>Voluntary Evacuation; Evacuation orders are likely.</p>
                       </div>
                     </div>
                   </div>
+
+                  <!-- GO (bottom right) -->
+                  <div class="stage-item stage-item-go">
+                    <div class="stage-pin stage-pin-go"></div>
+                    <div class="stage-card stage-card-go">
+                      <h2 class="stage-title">GO</h2>
+                      <div class="stage-subtitle">Evacuate Now</div>
+                      <div class="stage-body stage-body-center">
+                        <p><strong>GO - Evacuate Now</strong></p>
+                        <p>LEAVE NOW. Immediate threat to life.</p>
+                        <p>This area is closed to public access.</p>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
@@ -230,7 +231,7 @@
         chipsEl: document.getElementById('incidentChips'),
         countBadge: document.getElementById('incidentCountBadge'),
         noIncidentsMsg: document.getElementById('noIncidentsMsg'),
-        mapButton: document.getElementById('mapButton'),
+        infoButton: document.getElementById('infoButton'),
         coderedButton: document.getElementById('coderedButton'),
         coderedOverlay: document.getElementById('coderedOverlay'),
         coderedClose: document.getElementById('coderedClose')
@@ -337,16 +338,19 @@
         });
       }
 
+      function initInfoButton() {
+        if (!DOM.infoButton) return;
+        DOM.infoButton.addEventListener('click', () => {
+          const url = new URL(CONFIG.mapUrl, location.href);
+          if (INCIDENT) url.searchParams.set('incident', INCIDENT);
+          location.href = url;
+        });
+      }
+
       function init() {
         loadIncidents();
+        initInfoButton();
         initCoderedOverlay();
-        
-        // Map button navigation
-        if (DOM.mapButton) {
-          DOM.mapButton.addEventListener('click', () => {
-            location.href = 'evac.html';
-          });
-        }
       }
 
       if (document.readyState === 'loading') {

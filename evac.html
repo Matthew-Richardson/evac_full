@@ -117,335 +117,466 @@
     <div class="codered-dialog" role="dialog" aria-modal="true" aria-labelledby="coderedTitle">
       <button id="coderedClose" class="codered-close" type="button" aria-label="Close CodeRED info">×</button>
       <h2 id="coderedTitle" class="codered-title">CodeRED Emergency Alerts</h2>
-      <p class="codered-subtitle">Stay informed about wildfires, floods, and other emergencies in La Plata County.</p>
+      <p class="codered-subtitle">Get emergency notifications for La Plata County</p>
       <div class="codered-body">
-        <p><strong>CodeRED</strong> is the official emergency alerting system used by La Plata County Office of Emergency Management (LPCOEM).</p>
-        <p>You can receive notifications by text, phone call, and email about evacuation notices, road closures, and other time-sensitive information.</p>
-        <p>Choose one of the options below to enroll or confirm your subscription:</p>
+        <ul>
+          <li><strong>Sign up online:</strong> <a href="https://public.coderedweb.com/CNE/en-US/655AC5D55998" target="_blank" rel="noopener">CodeRED Portal</a></li>
+          <li><strong>Text to enroll:</strong> Text <strong>LPCOEM</strong> to <strong>99411</strong></li>
+          <li><strong>Already have CodeRED?</strong> Log in to update your address or notification preferences.</li>
+        </ul>
       </div>
       <div class="codered-actions">
-        <!-- Replace href with LPCOEM-specific CodeRED signup link if different -->
-        <a
-          href="https://public.coderedweb.com/CNE/en-US/"
-          class="primary-pill"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Sign up on CodeRED website
-        </a>
-        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">
-          Text “LPCOEM” to 99411
-        </a>
+        <a class="codered-primary" href="https://public.coderedweb.com/CNE/en-US/655AC5D55998" target="_blank" rel="noopener">Open CodeRED Portal</a>
+        <button id="coderedCloseBottom" class="codered-secondary" type="button">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- ArcGIS SDK loaded with defer -->
-  <script src="https://js.arcgis.com/4.31/" defer></script>
-
+  <script src="https://js.arcgis.com/4.31/"></script>
   <script>
-  (function() {
-    'use strict';
+    (() => {
+      const CONFIG = {
+        mapUrl: 'evac.html',
+        incidentLayerUrl: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/Evacuation_Zone_View_Public/FeatureServer/0',
+        incidentField: 'ZoneName',
+        statusLayerUrl: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/Emergency_Notifications/FeatureServer/0',
+        statusFields: ['title', 'timestamp', 'description'],
+        statusMaxFeatures: 5,
+        evacTableUrl: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/Evacuation_Information/FeatureServer/0'
+      };
 
-    // ========== CONFIGURATION ==========
-    const CONFIG = {
-      webmapId: '58a8bb313db64271a55e7960cb839f64',
-      incidentLayerUrl: 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0',
-      statusBaseUrl: 'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec',
-      incidentField: 'incident',
-      statusValues: { SET: 'Set', GO: 'Go' }
-    };
+      const DOM = {};
 
-    const STATUS_DATA = {
-      SET: {
-        label: 'SET - Pre-Evacuation',
-        color: '#fff36a',
-        text: 'Voluntary Evacuation;<br>Evacuation orders are likely'
-      },
-      GO: {
-        label: 'GO - Evacuate Now',
-        color: '#41f56e',
-        text: '<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.'
-      }
-    };
+      const INCIDENT = (() => {
+        try {
+          const p = new URLSearchParams(location.search);
+          const inc = (p.get('incident') || p.get('Incident') || '').trim();
+          return inc || null;
+        } catch { return null; }
+      })();
 
-    // ========== CACHED DOM ELEMENTS ==========
-    const DOM = {};
-    function cacheDOM() {
-      DOM.evacRow = document.getElementById('evacRow');
-      DOM.incidentPanel = document.getElementById('incident-panel');
-      DOM.chipsEl = document.getElementById('incidentChips');
-      DOM.countBadge = document.getElementById('incidentCountBadge');
-      DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
-      DOM.infoButton = document.getElementById('infoButton');
-
-      DOM.coderedButton = document.getElementById('coderedButton');
-      DOM.coderedOverlay = document.getElementById('coderedOverlay');
-      DOM.coderedClose = document.getElementById('coderedClose');
-    }
-
-    // ========== UTILITIES ==========
-    const INCIDENT = (() => {
-      try {
-        const params = new URLSearchParams(location.search);
-        const inc = (params.get('incident') || params.get('Incident') || '').trim();
-        return inc || null;
-      } catch { return null; }
-    })();
-
-    const escapeQuery = str => str.replace(/'/g, "''");
-
-    // ========== HTML BUILDERS ==========
-    function buildBox(statusCode, features) {
-      const data = STATUS_DATA[statusCode];
-      const hasFeatures = features && features.length;
-      
-      const zonesHTML = hasFeatures
-        ? `<div class="evac-zones">${features.map(f => 
-            `<div class="zone-chip">${f.attributes.zonename}</div>`
-          ).join('')}</div>`
-        : `<div class="evac-zones"><div class="no-zones-chip">No ${statusCode} zones</div></div>`;
-
-      const boxClass = statusCode === 'GO' ? ' evac-box-go' : statusCode === 'SET' ? ' evac-box-set' : '';
-
-      return `<div class="evac-box${boxClass}" style="background:${data.color}">
-        <div class="evac-title">${data.label}</div>
-        <div class="evac-body">
-          <div>The following zones are under ${statusCode} status for <strong>${INCIDENT || 'this incident'}</strong>.</div>
-          ${zonesHTML}
-          <div class="evac-note">${data.text}</div>
-        </div>
-      </div>`;
-    }
-
-    function showHelp() {
-      DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#f3f4f6">
-        <div class="evac-title">How to use this page</div>
-        <div class="evac-body">
-          <div>This evacuation information requires an <strong>incident name</strong> in the URL.</div>
-          <div style="margin-top:8px">Use this format:<br><code>?incident=YourIncidentName</code></div>
-          <div style="margin-top:8px">Example:<br><code>?incident=East%20Canyon</code></div>
-        </div>
-      </div>`;
-
-      DOM.incidentPanel.innerHTML = `<div class="evac-box" style="background:#f3f4f6">
-        <div class="evac-title">Incident status</div>
-        <div class="evac-body">
-          <div>No incident was specified.</div>
-          <div style="margin-top:8px">Append <code>?incident=YourIncidentName</code> to the URL.</div>
-        </div>
-      </div>`;
-    }
-
-    function showError(message) {
-      DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a">
-        <div class="evac-title">Error</div>
-        <div class="evac-body">${message}</div>
-      </div>`;
-    }
-
-    // ========== DATA FETCHING ==========
-    async function loadEvacuationZones() {
-      if (!INCIDENT) { showHelp(); return; }
-
-      const where = `incident='${escapeQuery(INCIDENT)}' AND STATUS IN ('${CONFIG.statusValues.SET}','${CONFIG.statusValues.GO}')`;
-      const params = new URLSearchParams({ where, outFields: '*', f: 'json', returnGeometry: 'false' });
-
-      try {
-        const res = await fetch(`${CONFIG.incidentLayerUrl}/query?${params}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        if (!data.features?.length) {
-          DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a">
-            <div class="evac-title">No data</div>
-            <div class="evac-body">No zones found for <strong>${INCIDENT}</strong>.</div>
-          </div>`;
-          return;
-        }
-
-        const setFeatures = data.features.filter(f => f.attributes.STATUS === CONFIG.statusValues.SET);
-        const goFeatures = data.features.filter(f => f.attributes.STATUS === CONFIG.statusValues.GO);
-        DOM.evacRow.innerHTML = buildBox('SET', setFeatures) + buildBox('GO', goFeatures);
-      } catch (err) {
-        console.error('Error loading evacuation zones:', err);
-        showError(`Failed to load evacuation data: ${err.message}`);
-      }
-    }
-
-    async function loadIncidentStatus() {
-      if (!INCIDENT) return;
-
-      try {
-        const res = await fetch(`${CONFIG.statusBaseUrl}?incident=${encodeURIComponent(INCIDENT)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const html = await res.text();
-
-        DOM.incidentPanel.innerHTML = `<div class="status-html">${html}</div>
-          <div class="status-timestamp">
-            Last loaded: ${new Date().toLocaleString()}
-            &nbsp;•&nbsp;
-            <span class="source-label">Source: La Plata County Office of Emergency Management</span>
-          </div>`;
-      } catch (err) {
-        console.error('Error loading incident status:', err);
-        DOM.incidentPanel.innerHTML = '<div>Error loading incident status.</div>';
-      }
-    }
-
-    // ========== MAP INITIALIZATION ==========
-    function initMap() {
-      if (typeof require === 'undefined') {
-        setTimeout(initMap, 100);
-        return;
-      }
-
-      require([
-        'esri/WebMap',
-        'esri/views/MapView',
-        'esri/layers/FeatureLayer',
-        'esri/widgets/Search',
-        'esri/widgets/Fullscreen'
-      ], (WebMap, MapView, FeatureLayer, Search, Fullscreen) => {
+      function cacheDOM() {
+        DOM.viewDiv = document.getElementById('viewDiv');
+        DOM.evacRow = document.getElementById('evacRow');
+        DOM.incidentPanel = document.getElementById('incident-panel');
+        DOM.chipsEl = document.getElementById('incidentChips');
+        DOM.countBadge = document.getElementById('incidentCountBadge');
+        DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
+        DOM.infoButton = document.getElementById('infoButton');
+        DOM.coderedButton = document.getElementById('coderedButton');
+        DOM.coderedOverlay = document.getElementById('coderedOverlay');
+        DOM.coderedClose = document.getElementById('coderedClose');
+        DOM.coderedCloseBottom = document.getElementById('coderedCloseBottom');
 
         if (DOM.infoButton) {
-          DOM.infoButton.addEventListener('click', () => { location.href = 'info.html'; });
+          DOM.infoButton.addEventListener('click', () => {
+            const url = new URL('info.html', location.href);
+            if (INCIDENT) url.searchParams.set('incident', INCIDENT);
+            location.href = url;
+          });
         }
 
-        const webmap = new WebMap({ portalItem: { id: CONFIG.webmapId } });
-        const view = new MapView({ container: 'viewDiv', map: webmap });
-
-        // Disable scroll zoom on mobile for better UX
-        if (window.innerWidth < 700 && view.navigation) {
-          view.navigation.mouseWheelZoomEnabled = false;
-          if ('browserTouchPanEnabled' in view.navigation) view.navigation.browserTouchPanEnabled = false;
+        if (DOM.coderedCloseBottom && DOM.coderedClose) {
+          DOM.coderedCloseBottom.addEventListener('click', () => DOM.coderedClose.click());
         }
+      }
 
-        const incidentLayer = new FeatureLayer({
-          url: CONFIG.incidentLayerUrl,
-          outFields: ['*'],
-          visible: false,
-          listMode: 'hide'
+      async function loadIncidentStatus() {
+        if (!DOM.incidentPanel) return;
+
+        const params = new URLSearchParams({
+          where: '1=1',
+          orderByFields: 'timestamp DESC',
+          outFields: CONFIG.statusFields.join(','),
+          resultRecordCount: CONFIG.statusMaxFeatures,
+          f: 'json'
         });
-        webmap.add(incidentLayer);
 
-        const zoomToIncident = name => {
-          const where = `${CONFIG.incidentField} = '${escapeQuery(name)}'`;
-          return incidentLayer.queryExtent({ where })
-            .then(res => res.extent && view.goTo(res.extent.expand(1.2)))
-            .catch(console.error);
+        try {
+          const res = await fetch(`${CONFIG.statusLayerUrl}/query?${params}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+          const features = data.features || [];
+
+          if (!features.length) {
+            DOM.incidentPanel.innerHTML = '<div class="status-empty">No incident updates available.</div>';
+            return;
+          }
+
+          const list = document.createElement('ul');
+          list.className = 'status-list';
+
+          features.forEach(f => {
+            const attrs = f.attributes || {};
+            const li = document.createElement('li');
+            li.className = 'status-card';
+
+            const title = attrs.title || 'Status update';
+            const desc = attrs.description || 'No description provided.';
+            const ts = attrs.timestamp ? new Date(attrs.timestamp).toLocaleString() : 'Unknown time';
+
+            li.innerHTML = `
+              <div class="status-title">${title}</div>
+              <div class="status-time">${ts}</div>
+              <div class="status-body">${desc}</div>
+            `;
+            list.appendChild(li);
+          });
+
+          DOM.incidentPanel.innerHTML = '';
+          DOM.incidentPanel.appendChild(list);
+        } catch (err) {
+          console.error('Error loading incident status:', err);
+          DOM.incidentPanel.innerHTML = '<div class="status-error">Unable to load incident updates.</div>';
+        }
+      }
+
+      async function loadEvacuationZones() {
+        if (!DOM.evacRow) return;
+
+        const params = new URLSearchParams({
+          where: '1=1',
+          outFields: '*',
+          orderByFields: 'OrderBy ASC',
+          f: 'json'
+        });
+
+        try {
+          const res = await fetch(`${CONFIG.evacTableUrl}/query?${params}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+          const features = data.features || [];
+          if (!features.length) {
+            DOM.evacRow.textContent = 'No evacuation information is available.';
+            return;
+          }
+
+          const fragment = document.createDocumentFragment();
+
+          const addColumn = (title, icon, content) => {
+            const col = document.createElement('div');
+            col.className = 'evac-col';
+            col.innerHTML = `
+              <div class="evac-title">
+                <span class="evac-icon">${icon}</span>
+                <span>${title}</span>
+              </div>
+              <div class="evac-content">${content}</div>
+            `;
+            fragment.appendChild(col);
+          };
+
+          features.forEach(f => {
+            const attrs = f.attributes || {};
+            addColumn(attrs.Title || 'Evacuation Info', '📋', attrs.Description || 'No description');
+            addColumn('Shelters', '🏠', attrs.Shelters || 'No shelter information');
+            addColumn('Livestock', '🐴', attrs.Livestock || 'No livestock guidance');
+            addColumn('Road Closures', '🚧', attrs.RoadClosures || 'No road closure info');
+          });
+
+          DOM.evacRow.innerHTML = '';
+          DOM.evacRow.appendChild(fragment);
+        } catch (err) {
+          console.error('Error loading evac table:', err);
+          DOM.evacRow.textContent = 'Unable to load evacuation information.';
+        }
+      }
+
+      const escapeQuery = (str = '') =>
+        str.replace(/'/g, "''");
+
+      function initMap() {
+        require([
+          'esri/Map',
+          'esri/views/MapView',
+          'esri/layers/FeatureLayer',
+          'esri/widgets/Search',
+          'esri/widgets/Fullscreen'
+        ], (Map, MapView, FeatureLayer, Search, Fullscreen) => {
+
+          const map = new Map({ basemap: 'topo-vector' });
+          const view = new MapView({
+            container: DOM.viewDiv,
+            map,
+            center: [-107.9, 37.27],
+            zoom: 9
+          });
+
+          const incidentLayer = new FeatureLayer({
+            url: CONFIG.incidentLayerUrl,
+            title: 'Incidents',
+            outFields: [CONFIG.incidentField],
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{' + CONFIG.incidentField + '}',
+              content: 'Tap the incident chip above to zoom.'
+            }
+          });
+
+          const statusLayer = new FeatureLayer({
+            url: CONFIG.statusLayerUrl,
+            title: 'Emergency Notifications',
+            outFields: CONFIG.statusFields,
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{title}',
+              content: '{description}',
+              fieldInfos: [
+                {
+                  fieldName: 'timestamp',
+                  label: 'Updated',
+                  format: {
+                    dateFormat: 'short-date-short-time'
+                  }
+                }
+              ]
+            },
+            visible: false,
+            listMode: 'hide'
+          });
+          map.add(statusLayer);
+
+          const roadClosureLayer = new FeatureLayer({
+            url: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/LPC_Road_Closures_2024/FeatureServer/0',
+            title: 'Road Closures',
+            outFields: ['*'],
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{Location}',
+              content: `
+                <div><strong>Status:</strong> {Status}</div>
+                <div><strong>Reason:</strong> {Reason}</div>
+                <div><strong>Updated:</strong> {Date_}</div>
+              `
+            }
+          });
+          map.add(roadClosureLayer);
+
+          const infoLayer = new FeatureLayer({
+            url: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/LPC_Information_Locations_View_Public/FeatureServer/0',
+            title: 'Information Points',
+            outFields: ['*'],
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{LocationName}',
+              content: '{Details}'
+            }
+          });
+          map.add(infoLayer);
+
+          const warnLayer = new FeatureLayer({
+            url: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/LPC_Special_Warnings/FeatureServer/0',
+            title: 'Special Warnings',
+            outFields: ['*'],
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{Title}',
+              content: '{Description}'
+            }
+          });
+          map.add(warnLayer);
+
+          const evacLayer = new FeatureLayer({
+            url: CONFIG.incidentLayerUrl,
+            title: 'Evacuation Zones',
+            outFields: [CONFIG.incidentField],
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{' + CONFIG.incidentField + '}',
+              content: `
+                <div>Check the incident chips above to zoom to this zone.</div>
+                <div><em>Zone polygons may update during an incident.</em></div>
+              `
+            },
+            renderer: {
+              type: 'simple',
+              symbol: {
+                type: 'simple-fill',
+                color: [255, 170, 0, 0.12],
+                outline: {
+                  color: [255, 120, 0, 0.7],
+                  width: 1.5
+                }
+              }
+            },
+            opacity: 0.6,
+            listMode: 'hide'
+          });
+          map.add(evacLayer);
+
+          const incidentLayer2 = new FeatureLayer({
+            url: CONFIG.incidentLayerUrl,
+            title: 'Incident Names',
+            outFields: [CONFIG.incidentField],
+            labelingInfo: [{
+              labelExpressionInfo: { expression: `$feature.${CONFIG.incidentField}` },
+              symbol: {
+                type: 'text',
+                color: '#b33a3a',
+                haloColor: '#fff',
+                haloSize: '2px',
+                font: { size: 12, weight: 'bold' }
+              }
+            }],
+            renderer: {
+              type: 'simple',
+              symbol: {
+                type: 'simple-fill',
+                color: [0, 0, 0, 0],
+                outline: { color: [0, 0, 0, 0] }
+              }
+            },
+            minScale: 0,
+            maxScale: 0,
+            opacity: 0.9,
+            listMode: 'hide'
+          });
+          map.add(incidentLayer2);
+
+          const incidentLayer = new FeatureLayer({
+            url: CONFIG.incidentLayerUrl,
+            title: 'Incidents',
+            outFields: [CONFIG.incidentField],
+            popupEnabled: true,
+            popupTemplate: {
+              title: '{' + CONFIG.incidentField + '}',
+              content: 'Tap the incident chip above to zoom.'
+            },
+            renderer: {
+              type: 'simple',
+              symbol: {
+                type: 'simple-marker',
+                color: '#b33a3a',
+                size: '10px',
+                outline: {
+                  color: '#fff',
+                  width: 1.5
+                }
+              }
+            },
+            listMode: 'hide'
+          });
+          webmap.add(incidentLayer);
+
+          const zoomToIncident = name => {
+            const where = `${CONFIG.incidentField} = '${escapeQuery(name)}'`;
+            return incidentLayer.queryExtent({ where })
+              .then(res => res.extent && view.goTo(res.extent.expand(1.2)))
+              .catch(console.error);
+          };
+
+          view.when()
+            .then(() => {
+              view.ui.add(new Search({ view, includeDefaultSources: true }), 'top-right');
+              view.ui.add(new Fullscreen({ view }), 'top-right');
+              return incidentLayer.when();
+            })
+            .then(() => incidentLayer.queryFeatures({
+              where: '1=1',
+              outFields: [CONFIG.incidentField],
+              returnDistinctValues: true,
+              orderByFields: [CONFIG.incidentField]
+            }))
+            .then(fs => {
+              const names = (fs.features || [])
+                .map(f => f.attributes[CONFIG.incidentField])
+                .filter(Boolean);
+
+              DOM.countBadge.textContent = names.length;
+
+              if (!names.length) {
+                DOM.noIncidentsMsg.style.display = 'block';
+                return;
+              }
+              DOM.noIncidentsMsg.style.display = 'none';
+
+              const target = INCIDENT?.toLowerCase();
+              names.sort((a, b) => {
+                const al = a.toLowerCase(), bl = b.toLowerCase();
+                if (target) {
+                  if (al === target && bl !== target) return -1;
+                  if (bl === target && al !== target) return 1;
+                }
+                return al.localeCompare(bl);
+              });
+
+              const frag = document.createDocumentFragment();
+              names.forEach(name => {
+                const chip = document.createElement('button');
+                chip.className = 'incident-chip';
+                chip.dataset.incident = name;
+                chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
+                chip.addEventListener('click', () => {
+                  const url = new URL(location.href);
+                  url.searchParams.set('incident', name);
+                  location.href = url;
+                });
+                frag.appendChild(chip);
+              });
+              DOM.chipsEl.appendChild(frag);
+
+              if (INCIDENT) {
+                const match = DOM.chipsEl.querySelector(`[data-incident="${INCIDENT}"]`);
+                if (match) {
+                  match.classList.add('active');
+                  zoomToIncident(INCIDENT);
+                }
+              }
+            })
+            .catch(err => {
+              console.error('Error loading incidents:', err);
+              DOM.countBadge.textContent = '0';
+            });
+        });
+      }
+
+      // ========== CODERED OVERLAY INIT ==========
+      function initCoderedOverlay() {
+        if (!DOM.coderedButton || !DOM.coderedOverlay) return;
+
+        const open = () => {
+          DOM.coderedOverlay.classList.add('is-open');
+          DOM.coderedOverlay.setAttribute('aria-hidden', 'false');
         };
 
-        view.when()
-          .then(() => {
-            view.ui.add(new Search({ view, includeDefaultSources: true }), 'top-right');
-            view.ui.add(new Fullscreen({ view }), 'top-right');
-            return incidentLayer.when();
-          })
-          .then(() => incidentLayer.queryFeatures({
-            where: '1=1',
-            outFields: [CONFIG.incidentField],
-            returnDistinctValues: true,
-            orderByFields: [CONFIG.incidentField]
-          }))
-          .then(fs => {
-            const names = (fs.features || [])
-              .map(f => f.attributes[CONFIG.incidentField])
-              .filter(Boolean);
+        const close = () => {
+          DOM.coderedOverlay.classList.remove('is-open');
+          DOM.coderedOverlay.setAttribute('aria-hidden', 'true');
+        };
 
-            DOM.countBadge.textContent = names.length;
+        DOM.coderedButton.addEventListener('click', open);
+        if (DOM.coderedClose) DOM.coderedClose.addEventListener('click', close);
 
-            if (!names.length) {
-              DOM.noIncidentsMsg.style.display = 'block';
-              return;
-            }
-            DOM.noIncidentsMsg.style.display = 'none';
+        DOM.coderedOverlay.addEventListener('click', (e) => {
+          if (e.target === DOM.coderedOverlay) {
+            close();
+          }
+        });
 
-            const target = INCIDENT?.toLowerCase();
-            names.sort((a, b) => {
-              const al = a.toLowerCase(), bl = b.toLowerCase();
-              if (target) {
-                if (al === target && bl !== target) return -1;
-                if (bl === target && al !== target) return 1;
-              }
-              return al.localeCompare(bl);
-            });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && DOM.coderedOverlay.classList.contains('is-open')) {
+            close();
+          }
+        });
+      }
 
-            const frag = document.createDocumentFragment();
-            names.forEach(name => {
-              const chip = document.createElement('button');
-              chip.className = 'incident-chip';
-              chip.dataset.incident = name;
-              chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
-              chip.addEventListener('click', () => {
-                const url = new URL(location.href);
-                url.searchParams.set('incident', name);
-                location.href = url;
-              });
-              frag.appendChild(chip);
-            });
-            DOM.chipsEl.appendChild(frag);
+      // ========== INIT ==========
+      function init() {
+        cacheDOM();
+        initCoderedOverlay();
+        loadEvacuationZones();
+        loadIncidentStatus();
+        initMap();
+      }
 
-            if (INCIDENT) {
-              const match = DOM.chipsEl.querySelector(`[data-incident="${INCIDENT}"]`);
-              if (match) {
-                match.classList.add('active');
-                zoomToIncident(INCIDENT);
-              }
-            }
-          })
-          .catch(err => {
-            console.error('Error loading incidents:', err);
-            DOM.countBadge.textContent = '0';
-          });
-      });
-    }
-
-    // ========== CODERED OVERLAY INIT ==========
-    function initCoderedOverlay() {
-      if (!DOM.coderedButton || !DOM.coderedOverlay) return;
-
-      const open = () => {
-        DOM.coderedOverlay.classList.add('is-open');
-        DOM.coderedOverlay.setAttribute('aria-hidden', 'false');
-      };
-
-      const close = () => {
-        DOM.coderedOverlay.classList.remove('is-open');
-        DOM.coderedOverlay.setAttribute('aria-hidden', 'true');
-      };
-
-      DOM.coderedButton.addEventListener('click', open);
-      if (DOM.coderedClose) DOM.coderedClose.addEventListener('click', close);
-
-      DOM.coderedOverlay.addEventListener('click', (e) => {
-        if (e.target === DOM.coderedOverlay) {
-          close();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && DOM.coderedOverlay.classList.contains('is-open')) {
-          close();
-        }
-      });
-    }
-
-    // ========== INIT ==========
-    function init() {
-      cacheDOM();
-      initCoderedOverlay();
-      loadEvacuationZones();
-      loadIncidentStatus();
-      initMap();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
   </script>
 </body>
 </html>

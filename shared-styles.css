@@ -141,14 +141,14 @@ html, body {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 4px;
-  flex-wrap: wrap;
 }
 
 .incident-bar-left {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .incident-label {
@@ -177,6 +177,7 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Info (home) button */
@@ -262,9 +263,9 @@ html, body {
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .incident-strip {
-    padding: 10px 14px;
+    padding: 10px 12px;
   }
 
   .incident-strip-top {
@@ -272,49 +273,91 @@ html, body {
   }
 
   .incident-label {
-    font-size: 14px;
+    font-size: 13px;
+    letter-spacing: 0.02em;
   }
 
   .incident-count-badge {
-    padding: 3px 10px;
-    font-size: 14px;
+    padding: 2px 8px;
+    font-size: 13px;
   }
 
   .incident-actions {
-    gap: 6px;
+    gap: 5px;
   }
 
   .info-link,
   .alert-link {
-    padding: 5px 8px;
-    gap: 4px;
+    padding: 5px 7px;
+    gap: 3px;
     border-radius: 6px;
   }
 
   .info-icon-home,
   .alert-icon {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .info-label-short {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .alert-label { display: none; }
   .alert-label-short { 
     display: inline;
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 
-/* Very small screens - icon only for info button */
-@media (max-width: 380px) {
+/* Small mobile - tighter spacing */
+@media (max-width: 420px) {
+  .incident-strip {
+    padding: 8px 10px;
+  }
+
+  .incident-bar-left {
+    gap: 4px;
+  }
+
+  .incident-label {
+    font-size: 12px;
+  }
+
+  .incident-count-badge {
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+
+  .incident-actions {
+    gap: 4px;
+  }
+
+  .info-link,
+  .alert-link {
+    padding: 4px 6px;
+    gap: 2px;
+    border-width: 1.5px;
+  }
+
+  .info-icon-home,
+  .alert-icon {
+    font-size: 13px;
+  }
+
+  .info-label-short,
+  .alert-label-short {
+    font-size: 10px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
   .info-label-short { display: none; }
   .info-link {
-    padding: 6px 8px;
+    padding: 5px 6px;
   }
   .info-icon-home {
-    font-size: 18px;
+    font-size: 15px;
   }
 }
 

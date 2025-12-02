@@ -65,7 +65,13 @@
                 Active incidents
                 <span id="incidentCountBadge" class="incident-count-badge">0</span>
               </span>
-              <!-- CodeRED button now sits immediately to the right of "Active incidents" -->
+            </div>
+            <div class="incident-actions">
+              <button id="mapButton" class="info-link" type="button" aria-label="View Map">
+                <span class="info-icon-home">🗺️</span>
+                <span class="info-label-desktop">View Map</span>
+                <span class="info-label-mobile">Map</span>
+              </button>
               <button id="coderedButton" class="alert-link" type="button" aria-label="CodeRED Alerts">
                 <span class="alert-icon">🔔</span>
                 <span class="alert-label">CodeRED Alerts</span>
@@ -105,10 +111,33 @@
                 <!-- Centered subheader -->
                 <div class="stage-subhead">Ready, Set, Go! System</div>
 
-                <div class="stage-timeline">
+                <div class="stage-triangle">
+                  <!-- SVG connectors -->
+                  <svg class="triangle-connectors" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                      <linearGradient id="grad-ready-set" x1="50%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#b33a3a"/>
+                        <stop offset="100%" stop-color="#a68f00"/>
+                      </linearGradient>
+                      <linearGradient id="grad-ready-go" x1="50%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#b33a3a"/>
+                        <stop offset="100%" stop-color="#0a7c25"/>
+                      </linearGradient>
+                      <linearGradient id="grad-set-go" x1="0%" y1="50%" x2="100%" y2="50%">
+                        <stop offset="0%" stop-color="#a68f00"/>
+                        <stop offset="100%" stop-color="#0a7c25"/>
+                      </linearGradient>
+                    </defs>
+                    <!-- READY to SET -->
+                    <line x1="200" y1="45" x2="65" y2="255" stroke="url(#grad-ready-set)" stroke-width="4" stroke-linecap="round"/>
+                    <!-- READY to GO -->
+                    <line x1="200" y1="45" x2="335" y2="255" stroke="url(#grad-ready-go)" stroke-width="4" stroke-linecap="round"/>
+                    <!-- SET to GO -->
+                    <line x1="65" y1="255" x2="335" y2="255" stroke="url(#grad-set-go)" stroke-width="4" stroke-linecap="round"/>
+                  </svg>
 
-                  <!-- READY -->
-                  <div class="stage-item">
+                  <!-- READY - top -->
+                  <div class="triangle-top">
                     <div class="stage-pin stage-pin-ready"></div>
                     <div class="stage-card stage-card-ready">
                       <h2 class="stage-title">READY</h2>
@@ -116,125 +145,92 @@
                       <div class="stage-body">
                         <p><strong>Stay Informed:</strong> CodeRED signup or text 'LPCOEM' to 99411, ensure Gov't Alerts are enabled on your cell phone, and use apps like Watch Duty.</p>
                         <p><strong>Arrangements:</strong> Make a plan and practice your evacuation; People, Pets, Photos, Papers and Pills.</p>
-                        <p><strong>Pack Smart:</strong> Go-Bags ready with water, food, prescriptions, chargers, cash, ID.</p>
-                        <p><strong>Vehicles:</strong> Keep fuel topped off (at least half-full) and keep vehicle accessible.</p>
-                        <p><strong>Home Safety:</strong> Clear vegetation / debris away from home, outbuildings and propane tank.</p>
+                        <p><strong>Fire Ready:</strong> Fire Mitigation and last minute safety measures, "Go Kit" with Protective Clothing and masks.</p>
+                        <p><strong>Evacuate:</strong> Don't hesitate or ignore evacuation orders. Know multiple ways out.</p>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Connector Ready -> Set -->
-                  <div class="stage-connector stage-connector-ready-set"></div>
+                  <!-- Bottom row: SET left, GO right -->
+                  <div class="triangle-bottom">
+                    <div class="triangle-left">
+                      <div class="stage-pin stage-pin-set"></div>
+                      <div class="stage-card stage-card-set">
+                        <h2 class="stage-title">SET</h2>
+                        <div class="stage-subtitle">Pre-Evacuation</div>
+                        <div class="stage-body stage-body-center">
+                          <p><strong>SET - Pre-Evacuation</strong></p>
+                          <p>Voluntary Evacuation; Evacuation orders are likely.</p>
+                        </div>
+                      </div>
+                    </div>
 
-                  <!-- SET -->
-                  <div class="stage-item">
-                    <div class="stage-pin stage-pin-set"></div>
-                    <div class="stage-card stage-card-set">
-                      <h2 class="stage-title">SET</h2>
-                      <div class="stage-subtitle">BE READY TO GO</div>
-                      <div class="stage-body">
-                        <p><strong>Stay Informed:</strong> Pack and prepare; confirm CodeRED and Watch Duty notifications are on.</p>
-                        <p><strong>Pack and Prepare:</strong> Pack pets and valuables, load your vehicle, confirm evacuation routes, and choose a place to stay.</p>
-                        <p><strong>Help Neighbors:</strong> Look out for neighbors who may need extra assistance.</p>
-                        <p><strong>Execute Home Prep:</strong> Close garage, windows, doors, and gates. Move propane grill away from house.</p>
-                        <p class="stage-body-center"><em>Gather essentials. Plan for pets. Leave early if you feel unsafe.</em></p>
+                    <div class="triangle-right">
+                      <div class="stage-pin stage-pin-go"></div>
+                      <div class="stage-card stage-card-go">
+                        <h2 class="stage-title">GO</h2>
+                        <div class="stage-subtitle">Evacuate Now</div>
+                        <div class="stage-body stage-body-center">
+                          <p><strong>GO - Evacuate Now</strong></p>
+                          <p>LEAVE NOW. Immediate threat to life.</p>
+                          <p>This area is closed to public access.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  <!-- Connector Set -> Go -->
-                  <div class="stage-connector stage-connector-set-go"></div>
-
-                  <!-- GO -->
-                  <div class="stage-item">
-                    <div class="stage-pin stage-pin-go"></div>
-                    <div class="stage-card stage-card-go">
-                      <h2 class="stage-title">GO</h2>
-                      <div class="stage-subtitle">LEAVE IMMEDIATELY</div>
-                      <div class="stage-body">
-                        <p><strong>Evacuate Immediately:</strong> Leave now with your go-bags and pets.</p>
-                        <p><strong>Stay Informed:</strong> Follow official instructions from LPCOEM, Sheriff’s Office, Fire District, or other emergency officials.</p>
-                        <p><strong>Check On Neighbors:</strong> Help neighbors if possible.</p>
-                        <p><strong>Stay Clear:</strong> Do not return until authorities say it is safe.</p>
-                        <p class="stage-body-center"><strong>Remember:</strong> Your life is the priority. Leave early; stay safe.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              <!-- BASIC PREPAREDNESS GRID -->
-              <div class="prep-grid">
-                <div class="prep-card">
-                  <h3>CodeRED Alerts</h3>
-                  <p>Sign up for CodeRED alerts to receive emergency notifications.</p>
-                  <p><strong>Sign up:</strong> <a href="https://public.coderedweb.com/CNE/en-US/655AC5D55998" target="_blank" rel="noopener">Online portal</a></p>
-                  <p><strong>Text:</strong> Text <strong>LPCOEM</strong> to <strong>99411</strong></p>
-                </div>
-                <div class="prep-card">
-                  <h3>Stay Connected</h3>
-                  <p><strong>Watch Duty:</strong> Follow <a href="https://watchduty.org" target="_blank" rel="noopener">Watch Duty</a> for incident info.</p>
-                  <p><strong>Social Media:</strong> Follow <a href="https://www.facebook.com/search/top?q=la%20plata%20county%20office%20of%20emergency%20management" target="_blank" rel="noopener">OEM Facebook</a> and local agencies.</p>
-                  <p><strong>Local Media:</strong> Listen to local radio and check county updates.</p>
-                </div>
-                <div class="prep-card">
-                  <h3>Evacuation Kit</h3>
-                  <ul>
-                    <li>Water, food, first aid</li>
-                    <li>Medications & prescriptions</li>
-                    <li>Important documents & IDs</li>
-                    <li>Chargers & batteries</li>
-                    <li>Cash & cards</li>
-                    <li>Clothes & sturdy shoes</li>
-                    <li>Pet supplies</li>
-                  </ul>
-                </div>
-                <div class="prep-card">
-                  <h3>Defensible Space</h3>
-                  <p>Maintain defensible space around your home: clear leaves/debris, trim vegetation, and store flammables away from structures.</p>
                 </div>
               </div>
 
             </div>
           </div>
+
         </div>
       </div>
     </main>
   </div>
 
-  <!-- CodeRED Overlay (shared with evac.html) -->
+  <!-- CodeRED Overlay (same as evac.html) -->
   <div id="coderedOverlay" class="codered-overlay" aria-hidden="true">
     <div class="codered-dialog" role="dialog" aria-modal="true" aria-labelledby="coderedTitle">
       <button id="coderedClose" class="codered-close" type="button" aria-label="Close CodeRED info">×</button>
       <h2 id="coderedTitle" class="codered-title">CodeRED Emergency Alerts</h2>
-      <p class="codered-subtitle">Get emergency notifications for La Plata County</p>
+      <p class="codered-subtitle">Stay informed about wildfires, floods, and other emergencies in La Plata County.</p>
       <div class="codered-body">
-        <ul>
-          <li><strong>Sign up online:</strong> <a href="https://public.coderedweb.com/CNE/en-US/655AC5D55998" target="_blank" rel="noopener">CodeRED Portal</a></li>
-          <li><strong>Text to enroll:</strong> Text <strong>LPCOEM</strong> to <strong>99411</strong></li>
-          <li><strong>Already have CodeRED?</strong> Log in to update your address or notification preferences.</li>
-        </ul>
+        <p><strong>CodeRED</strong> is the official emergency alerting system used by La Plata County Office of Emergency Management (LPCOEM).</p>
+        <p>You can receive notifications by text, phone call, and email about evacuation notices, road closures, and other time-sensitive information.</p>
+        <p>Choose one of the options below to enroll or confirm your subscription:</p>
       </div>
       <div class="codered-actions">
-        <a class="codered-primary" href="https://public.coderedweb.com/CNE/en-US/655AC5D55998" target="_blank" rel="noopener">Open CodeRED Portal</a>
-        <button id="coderedCloseBottom" class="codered-secondary" type="button">Close</button>
+        <a
+          href="https://public.coderedweb.com/CNE/en-US/"
+          class="primary-pill"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Sign up on CodeRED website
+        </a>
+        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">
+          Text “LPCOEM” to 99411
+        </a>
       </div>
     </div>
   </div>
 
   <script>
-    (() => {
+    (function() {
+      'use strict';
+
       const CONFIG = {
-        incidentLayerUrl: 'https://services2.arcgis.com/eRFVaQ8rWUqS72mL/arcgis/rest/services/Evacuation_Zone_View_Public/FeatureServer/0',
-        incidentField: 'ZoneName',
-        mapUrl: 'evac.html'
+        mapUrl: 'evac.html',
+        incidentLayerUrl: 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0/query',
+        incidentField: 'incident'
       };
 
       const DOM = {
         chipsEl: document.getElementById('incidentChips'),
         countBadge: document.getElementById('incidentCountBadge'),
         noIncidentsMsg: document.getElementById('noIncidentsMsg'),
+        mapButton: document.getElementById('mapButton'),
         coderedButton: document.getElementById('coderedButton'),
         coderedOverlay: document.getElementById('coderedOverlay'),
         coderedClose: document.getElementById('coderedClose')
@@ -344,6 +340,13 @@
       function init() {
         loadIncidents();
         initCoderedOverlay();
+        
+        // Map button navigation
+        if (DOM.mapButton) {
+          DOM.mapButton.addEventListener('click', () => {
+            location.href = 'evac.html';
+          });
+        }
       }
 
       if (document.readyState === 'loading') {

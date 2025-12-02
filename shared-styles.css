@@ -228,11 +228,11 @@ html, body {
   line-height: 1;
 }
 
-.info-label-desktop {
+.info-label-full {
   font-size: 14px;
 }
 
-.info-label-mobile {
+.info-label-short {
   font-size: 14px;
   display: none;
 }
@@ -248,8 +248,8 @@ html, body {
 
 @media (max-width: 600px) {
   .info-link { padding: 4px 10px; }
-  .info-label-desktop { display: none; }
-  .info-label-mobile { display: inline; }
+  .info-label-full { display: none; }
+  .info-label-short { display: inline; }
   .info-icon-home { font-size: 20px; }
 
   .alert-link {
@@ -743,122 +743,7 @@ main {
   transform: translateY(-1px);
 }
 
-/* ========== TRIANGULAR TIMELINE STYLES (INFO PAGE) ========== */
-
-.stage-triangle {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  padding-top: 20px;
-}
-
-.triangle-connectors {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.triangle-top {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.triangle-top .stage-pin {
-  margin-bottom: 8px;
-}
-
-.triangle-top .stage-card {
-  max-width: 420px;
-  width: 100%;
-}
-
-.triangle-bottom {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  position: relative;
-  z-index: 1;
-}
-
-.triangle-left,
-.triangle-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 48%;
-}
-
-.triangle-left .stage-pin,
-.triangle-right .stage-pin {
-  margin-bottom: 8px;
-}
-
-.triangle-left .stage-card,
-.triangle-right .stage-card {
-  width: 100%;
-}
-
-/* Mobile adjustments for triangle */
-@media (max-width: 600px) {
-  .stage-triangle {
-    max-width: 100%;
-    padding-top: 16px;
-  }
-
-  .triangle-top .stage-card {
-    max-width: 100%;
-  }
-
-  .triangle-bottom {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .triangle-left,
-  .triangle-right {
-    max-width: 100%;
-  }
-
-  /* Hide SVG connectors on mobile, use simpler visual */
-  .triangle-connectors {
-    display: none;
-  }
-
-  /* Add vertical connector lines for mobile */
-  .triangle-top::after {
-    content: '';
-    width: 4px;
-    height: 24px;
-    background: linear-gradient(to bottom, #b33a3a, #a68f00);
-    border-radius: 2px;
-    margin-top: 8px;
-  }
-
-  .triangle-left::after {
-    content: '';
-    width: 4px;
-    height: 20px;
-    background: linear-gradient(to bottom, #a68f00, #0a7c25);
-    border-radius: 2px;
-    margin-top: 8px;
-  }
-
-  .triangle-right::after {
-    display: none;
-  }
-}
-
-/* ========== TIMELINE STYLES (INFO PAGE - LEGACY) ========== */
+/* ========== TRIANGLE TIMELINE STYLES (INFO PAGE) ========== */
 
 .preview-container {
   max-width: 100%;
@@ -917,54 +802,72 @@ main {
   color: #111827;
 }
 
-/* Timeline */
-
+/* Triangle Timeline Container */
 .stage-timeline {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  padding-top: 20px;
 }
 
-/* Vertical gradient line */
+/* Triangle connectors via SVG overlay */
 .stage-timeline::before {
   content: '';
   position: absolute;
-  top: 24px;
-  bottom: 24px;
-  left: 50%;
-  width: 3px;
-  background: linear-gradient(
-    to bottom,
-    #b33a3a 0%,
-    #b33a3a 30%,
-    #a68f00 30%,
-    #a68f00 65%,
-    #0a7c25 65%,
-    #0a7c25 100%
-  );
-  transform: translateX(-50%);
-  border-radius: 2px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
   z-index: 0;
 }
 
+/* Triangle SVG connector lines */
+.triangle-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Stage items in triangle formation */
 .stage-item {
   position: relative;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 1;
 }
 
-/* Timeline pin */
+.stage-item-ready {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 100%;
+}
+
+.stage-item-set {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.stage-item-go {
+  grid-column: 2;
+  justify-self: end;
+}
+
+/* Timeline pins */
 .stage-pin {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 3px solid #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  margin-bottom: 10px;
   position: relative;
   z-index: 2;
 }
@@ -973,28 +876,36 @@ main {
 .stage-pin-set   { background: #a68f00; }
 .stage-pin-go    { background: #0a7c25; }
 
-/* Stage connector segments */
-.stage-connector {
-  width: 3px;
-  height: 20px;
-  margin: -4px 0;
-  position: relative;
+/* Triangle connector lines - CSS only approach */
+.stage-connectors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
   z-index: 0;
+  overflow: visible;
 }
 
-.stage-connector-ready-set {
-  background: linear-gradient(to bottom, #b33a3a, #a68f00);
+.stage-connectors svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.stage-connector-set-go {
-  background: linear-gradient(to bottom, #a68f00, #0a7c25);
+/* Hide old vertical connectors */
+.stage-connector {
+  display: none;
 }
 
 /* Stage cards */
-
 .stage-card {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 14px;
   margin-bottom: 0;
   box-shadow: 0 0 5px rgba(0,0,0,0.25);
@@ -1063,5 +974,21 @@ main {
 
   .stage-headline {
     font-size: 20px;
+  }
+
+  .stage-timeline {
+    gap: 12px;
+  }
+
+  .stage-card {
+    padding: 12px;
+  }
+
+  .stage-title {
+    font-size: 16px;
+  }
+
+  .stage-body {
+    font-size: 13px;
   }
 }

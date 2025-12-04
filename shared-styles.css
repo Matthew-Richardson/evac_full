@@ -180,6 +180,16 @@ html, body {
   flex-shrink: 0;
 }
 
+/* Centered navigation below incident strip */
+.incident-nav-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px 10px 18px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
 /* Info (home) button */
 .info-link {
   font-size: 14px;
@@ -209,9 +219,9 @@ html, body {
   font-size: 14px;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 2px solid #b3261e;
+  border: 2px solid #0b4da2;
   background: #fff;
-  color: #b3261e;
+  color: #0b4da2;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   white-space: nowrap;
@@ -223,9 +233,9 @@ html, body {
 }
 
 .alert-link:hover {
-  background: #b3261e;
+  background: #0b4da2;
   color: #fff;
-  box-shadow: 0 0 0 2px rgba(179,38,30,0.25);
+  box-shadow: 0 0 0 2px rgba(11,77,162,0.25);
 }
 
 .info-icon-home {
@@ -284,6 +294,11 @@ html, body {
 
   .incident-actions {
     gap: 5px;
+  }
+
+  .incident-nav-centered {
+    padding: 6px 12px 8px 12px;
+    gap: 6px;
   }
 
   .info-link,

@@ -406,8 +406,8 @@ html, body {
 }
 
 .incident-chip.active {
-  background: #0b4da2;
-  border-color: #0b4da2;
+  background: #b3261e;
+  border-color: #b3261e;
   color: #fff;
   font-weight: 700;
 }

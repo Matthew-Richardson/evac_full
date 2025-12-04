@@ -67,6 +67,11 @@
               </span>
             </div>
             <div class="incident-actions">
+              <button id="overviewButton" class="info-link" type="button" aria-label="Overview Map">
+                <span class="info-icon-home">🗺️</span>
+                <span class="info-label-full">Overview Map</span>
+                <span class="info-label-short">Overview</span>
+              </button>
               <button id="coderedButton" class="alert-link" type="button" aria-label="CodeRED Alerts">
                 <span class="alert-icon">🔔</span>
                 <span class="alert-label">CodeRED Alerts</span>
@@ -227,6 +232,7 @@
         chipsEl: document.getElementById('incidentChips'),
         countBadge: document.getElementById('incidentCountBadge'),
         noIncidentsMsg: document.getElementById('noIncidentsMsg'),
+        overviewButton: document.getElementById('overviewButton'),
         coderedButton: document.getElementById('coderedButton'),
         coderedOverlay: document.getElementById('coderedOverlay'),
         coderedClose: document.getElementById('coderedClose')
@@ -333,6 +339,14 @@
         });
       }
 
+      function initOverviewButton() {
+        if (!DOM.overviewButton) return;
+        
+        DOM.overviewButton.addEventListener('click', () => {
+          location.href = 'overview.html';
+        });
+      }
+
       function initTriangleLines() {
         const container = document.getElementById('stageTimeline');
         const svg = document.getElementById('triangleLines');
@@ -412,6 +426,7 @@
 
       function init() {
         loadIncidents();
+        initOverviewButton();
         initCoderedOverlay();
         initTriangleLines();
       }

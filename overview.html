@@ -78,7 +78,8 @@
             </div>
           </div>
 
-          <div class="incident-tip">Click a pin on the map to view detailed evacuation information.</div>
+          <div class="incident-tip">Click a pin on the map or tap an incident below to view details.</div>
+          <div id="incidentChips" class="incident-chips"></div>
         </div>
 
         <div class="card-divider"></div>
@@ -142,6 +143,7 @@
     const DOM = {};
     function cacheDOM() {
       DOM.countBadge = document.getElementById('incidentCountBadge');
+      DOM.chipsEl = document.getElementById('incidentChips');
       DOM.infoButton = document.getElementById('infoButton');
       DOM.coderedButton = document.getElementById('coderedButton');
       DOM.coderedOverlay = document.getElementById('coderedOverlay');
@@ -233,8 +235,12 @@
 
         // Load incident layer
         const incidentLayer = new FeatureLayer({
-          url: CONFIG.incidentLayerUrl
+          url: CONFIG.incidentLayerUrl,
+          outFields: ['*'],
+          visible: false,
+          listMode: 'hide'
         });
+        map.add(incidentLayer);
 
         // Add widgets
         view.when()
@@ -253,21 +259,38 @@
             });
           })
           .then(featureSet => {
-            const incidentNames = (featureSet.features || [])
+            const names = (featureSet.features || [])
               .map(f => f.attributes[CONFIG.incidentField])
               .filter(Boolean);
 
-            DOM.countBadge.textContent = incidentNames.length;
+            DOM.countBadge.textContent = names.length;
 
-            if (!incidentNames.length) {
+            if (!names.length) {
               console.log('No incidents found');
               return;
             }
 
-            console.log('Found incidents:', incidentNames);
+            console.log('Found incidents:', names);
 
-            // For each incident, query its extent and create a pin
-            return Promise.all(incidentNames.map(incidentName => {
+            // Create incident chips
+            const frag = document.createDocumentFragment();
+            names.forEach(name => {
+              const chip = document.createElement('button');
+              chip.className = 'incident-chip';
+              chip.dataset.incident = name;
+              chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
+              chip.addEventListener('click', () => {
+                location.href = `evac-3.html?incident=${encodeURIComponent(name)}`;
+              });
+              frag.appendChild(chip);
+            });
+            
+            if (DOM.chipsEl) {
+              DOM.chipsEl.appendChild(frag);
+            }
+
+            // Create pins for each incident
+            return Promise.all(names.map(incidentName => {
               return incidentLayer.queryExtent({
                 where: `${CONFIG.incidentField}='${incidentName.replace(/'/g, "''")}'`
               }).then(result => {
@@ -280,7 +303,7 @@
                   const markerSymbol = {
                     type: 'simple-marker',
                     color: [11, 77, 162],
-                    size: 18,
+                    size: 24,
                     outline: {
                       color: [255, 255, 255],
                       width: 3
@@ -303,7 +326,7 @@
                     },
                     popupTemplate: {
                       title: '{incident}',
-                      content: `<a href="evac-3.html?incident=${encodeURIComponent(incidentName)}" style="color:#0b4da2;font-weight:700;text-decoration:underline;">View Evacuation Details →</a>`
+                      content: `<div style="padding:8px;"><a href="evac-3.html?incident=${encodeURIComponent(incidentName)}" style="color:#0b4da2;font-weight:700;text-decoration:underline;font-size:15px;">View Evacuation Details →</a></div>`
                     }
                   });
 
@@ -325,7 +348,7 @@
             DOM.countBadge.textContent = '0';
           });
 
-        // Handle click on graphics
+        // Handle click on graphics (direct navigation)
         view.on('click', (event) => {
           view.hitTest(event).then((response) => {
             if (response.results.length > 0) {

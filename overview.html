@@ -89,8 +89,10 @@
           <div class="legend-title">Map Key</div>
           <div class="legend-items">
             <div class="legend-item">
-              <span class="legend-icon-info">i</span>
-              <span>Active Incident</span>
+              <span style="display:inline-block;width:22px;height:22px;position:relative;">
+                <span style="position:absolute;top:6px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;background:#0b4da2;border:2px solid #fff;"></span>
+              </span>
+              <span>Incident Location</span>
             </div>
           </div>
         </div>
@@ -286,7 +288,7 @@
               chip.dataset.incident = name;
               chip.innerHTML = `<span class="incident-chip-dot"></span><span>${name}</span>`;
               chip.addEventListener('click', () => {
-                location.href = `evac-3.html?incident=${encodeURIComponent(name)}`;
+                location.href = `evac.html?incident=${encodeURIComponent(name)}`;
               });
               frag.appendChild(chip);
             });
@@ -312,15 +314,17 @@
                     spatialReference: center.spatialReference
                   });
 
-                  // Create marker symbol - larger and more visible
+                  // Create pin marker symbol - teardrop style
                   const markerSymbol = {
                     type: 'simple-marker',
+                    style: 'diamond',
                     color: [11, 77, 162],
-                    size: 20,
+                    size: 24,
                     outline: {
                       color: [255, 255, 255],
                       width: 3
-                    }
+                    },
+                    yoffset: 12
                   };
 
                   // Create text symbol for label
@@ -335,7 +339,7 @@
                     },
                     haloColor: [255, 255, 255],
                     haloSize: 2,
-                    yoffset: -18
+                    yoffset: -24
                   };
 
                   // Create marker graphic
@@ -348,7 +352,7 @@
                     },
                     popupTemplate: {
                       title: incidentName,
-                      content: `<div style="padding:8px;"><a href="evac-3.html?incident=${encodeURIComponent(incidentName)}" style="color:#0b4da2;font-weight:700;text-decoration:underline;font-size:15px;">View Evacuation Details →</a></div>`
+                      content: `<div style="padding:8px;"><a href="evac.html?incident=${encodeURIComponent(incidentName)}" style="color:#0b4da2;font-weight:700;text-decoration:underline;font-size:15px;">View Evacuation Details →</a></div>`
                     }
                   });
 
@@ -396,7 +400,7 @@
               if (result) {
                 const incidentName = result.graphic.attributes.incident;
                 console.log('Navigating to incident:', incidentName);
-                window.location.href = `evac-3.html?incident=${encodeURIComponent(incidentName)}`;
+                window.location.href = `evac.html?incident=${encodeURIComponent(incidentName)}`;
               }
             }
           });

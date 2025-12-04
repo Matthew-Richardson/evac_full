@@ -70,6 +70,11 @@
                 <span class="info-label-full">Evacuation Information</span>
                 <span class="info-label-short">Evac Info</span>
               </button>
+              <button id="overviewButton" class="info-link" type="button" aria-label="Overview Map">
+                <span class="info-icon-home">🗺️</span>
+                <span class="info-label-full">Overview Map</span>
+                <span class="info-label-short">Overview</span>
+              </button>
               <button id="coderedButton" class="alert-link" type="button" aria-label="CodeRED Alerts">
                 <span class="alert-icon">🔔</span>
                 <span class="alert-label">CodeRED Alerts</span>
@@ -181,6 +186,7 @@
       DOM.countBadge = document.getElementById('incidentCountBadge');
       DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
       DOM.infoButton = document.getElementById('infoButton');
+      DOM.overviewButton = document.getElementById('overviewButton');
 
       DOM.coderedButton = document.getElementById('coderedButton');
       DOM.coderedOverlay = document.getElementById('coderedOverlay');
@@ -313,6 +319,10 @@
 
         if (DOM.infoButton) {
           DOM.infoButton.addEventListener('click', () => { location.href = 'info.html'; });
+        }
+
+        if (DOM.overviewButton) {
+          DOM.overviewButton.addEventListener('click', () => { location.href = 'overview.html'; });
         }
 
         const webmap = new WebMap({ portalItem: { id: CONFIG.webmapId } });

@@ -3,7 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Incident Map & Evacuation Info</title>
+  <title>ReadyLaPlata — La Plata County Evacuation Viewer</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- Meta Tags -->
+  <meta name="description" content="Official evacuation information and interactive maps for La Plata County, Colorado. View active incidents, evacuation zones, and sign up for emergency alerts.">
+  <meta name="theme-color" content="#0b4da2">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="ReadyLaPlata — La Plata County Evacuation Viewer">
+  <meta property="og:description" content="Official evacuation information and interactive maps for La Plata County, Colorado. View active incidents and evacuation zones.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="ReadyLaPlata — La Plata County Evacuation Viewer">
+  <meta name="twitter:description" content="Official evacuation information for La Plata County, Colorado.">
 
   <!-- DNS prefetch & preconnect for external resources -->
   <link rel="dns-prefetch" href="//js.arcgis.com">
@@ -84,7 +102,9 @@
 
           <div class="incident-tip">Tap an incident below to view the evacuation map.</div>
           <div id="incidentChips" class="incident-chips"></div>
-          <div id="noIncidentsMsg" class="incident-none" style="display:none">No active incidents are listed.</div>
+          <div id="noIncidentsMsg" class="incident-none" style="display:none">
+            ✓ No active incidents. Stay prepared by <a href="#" id="noIncidentCodered" style="color:#0b4da2;font-weight:700;">signing up for CodeRED alerts</a>.
+          </div>
         </div>
 
         <div class="card-divider"></div>
@@ -184,6 +204,7 @@
       DOM.chipsEl = document.getElementById('incidentChips');
       DOM.countBadge = document.getElementById('incidentCountBadge');
       DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
+      DOM.noIncidentCodered = document.getElementById('noIncidentCodered');
       DOM.infoButton = document.getElementById('infoButton');
       DOM.overviewButton = document.getElementById('overviewButton');
       DOM.coderedButton = document.getElementById('coderedButton');
@@ -196,6 +217,9 @@
       try {
         const params = new URLSearchParams(location.search);
         const inc = (params.get('incident') || params.get('Incident') || '').trim();
+        if (inc) {
+          document.title = `${inc} — ReadyLaPlata`;
+        }
         return inc || null;
       } catch { return null; }
     })();
@@ -264,9 +288,15 @@
         const data = await res.json();
 
         if (!data.features?.length) {
-          DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a">
-            <div class="evac-title">No data</div>
-            <div class="evac-body">No zones found for <strong>${INCIDENT}</strong>.</div>
+          DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#f3f4f6">
+            <div class="evac-title">No Active Zones</div>
+            <div class="evac-body">
+              <div>No evacuation zones are currently active for <strong>${INCIDENT}</strong>.</div>
+              <div style="margin-top:12px">This incident may have ended or the name may have changed.</div>
+              <div style="margin-top:12px">
+                <a href="overview.html" class="primary-pill" style="text-decoration:none;">View All Active Incidents</a>
+              </div>
+            </div>
           </div>`;
           return;
         }
@@ -428,6 +458,12 @@
 
       DOM.coderedButton.addEventListener('click', open);
       DOM.coderedClose?.addEventListener('click', close);
+      
+      // Link in "no incidents" message
+      DOM.noIncidentCodered?.addEventListener('click', (e) => {
+        e.preventDefault();
+        open();
+      });
 
       DOM.coderedOverlay.addEventListener('click', (e) => {
         if (e.target === DOM.coderedOverlay) close();

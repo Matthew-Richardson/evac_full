@@ -1088,3 +1088,88 @@ main {
     line-height: 1.5;
   }
 }
+
+/* ========== PAST INCIDENTS TABLE ========== */
+
+.past-incidents-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.15);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+.past-incidents-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #fafafa;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.past-incidents-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.past-incidents-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.past-incidents-body {
+  padding: 0;
+  overflow-x: auto;
+}
+
+.past-incidents-body table {
+  min-width: 100%;
+}
+
+.past-incidents-loading,
+.past-incidents-error {
+  padding: 20px 18px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.past-incidents-error {
+  color: #b3261e;
+}
+
+.past-incidents-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 18px;
+  background: #fffbeb;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #92400e;
+}
+
+.past-incidents-disclaimer svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #f59e0b;
+}
+
+@media (max-width: 600px) {
+  .past-incidents-header {
+    padding: 12px 14px;
+  }
+
+  .past-incidents-title {
+    font-size: 15px;
+  }
+
+  .past-incidents-disclaimer {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+}

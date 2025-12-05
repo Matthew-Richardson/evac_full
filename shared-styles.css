@@ -209,13 +209,13 @@ html, body {
   font-weight: 600;
 }
 
-/* CHANGED: Hover state now red to match active color */
+/* HOVER: Blue to match theme */
 .info-link:hover,
 .alert-link:hover {
-  background: #b3261e;
-  border-color: #b3261e;
+  background: #0b4da2;
+  border-color: #0b4da2;
   color: #fff;
-  box-shadow: 0 0 0 2px rgba(179,38,30,0.25);
+  box-shadow: 0 0 0 2px rgba(11,77,162,0.25);
 }
 
 .info-icon-home,

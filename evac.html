@@ -47,7 +47,7 @@
             fetchpriority="high"
             decoding="async"
           >
-          <div class="site-title">ReadyLaPlata<span class="title-break"> — </span><span class="title-sub">La Plata County Evacuation Viewer</span></div>
+          <div class="site-title">La Plata County Evacuation Viewer</div>
           <div class="call-center">
             <strong>Call Center</strong>
             <a href="tel:9703858700">970-385-8700</a>
@@ -71,8 +71,6 @@
             <span class="alert-label-short">CodeRED</span>
           </button>
         </div>
-
-        <div class="card-divider"></div>
 
         <div class="incident-strip">
           <div class="incident-strip-top">
@@ -121,7 +119,7 @@
     </main>
   </div>
 
-  <!-- CodeRED Overlay (shared with info.html) -->
+  <!-- CodeRED Overlay -->
   <div id="coderedOverlay" class="codered-overlay" aria-hidden="true">
     <div class="codered-dialog" role="dialog" aria-modal="true" aria-labelledby="coderedTitle">
       <button id="coderedClose" class="codered-close" type="button" aria-label="Close CodeRED info">×</button>
@@ -133,7 +131,6 @@
         <p>Choose one of the options below to enroll or confirm your subscription:</p>
       </div>
       <div class="codered-actions">
-        <!-- Replace href with LPCOEM-specific CodeRED signup link if different -->
         <a
           href="https://public.coderedweb.com/CNE/en-US/"
           class="primary-pill"
@@ -143,7 +140,7 @@
           Sign up on CodeRED website
         </a>
         <a href="sms:99411?&body=LPCOEM" class="secondary-pill">
-          Text “LPCOEM” to 99411
+          Text "LPCOEM" to 99411
         </a>
       </div>
     </div>
@@ -180,6 +177,7 @@
 
     // ========== CACHED DOM ELEMENTS ==========
     const DOM = {};
+    
     function cacheDOM() {
       DOM.evacRow = document.getElementById('evacRow');
       DOM.incidentPanel = document.getElementById('incident-panel');
@@ -188,7 +186,6 @@
       DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
       DOM.infoButton = document.getElementById('infoButton');
       DOM.overviewButton = document.getElementById('overviewButton');
-
       DOM.coderedButton = document.getElementById('coderedButton');
       DOM.coderedOverlay = document.getElementById('coderedOverlay');
       DOM.coderedClose = document.getElementById('coderedClose');
@@ -208,7 +205,7 @@
     // ========== HTML BUILDERS ==========
     function buildBox(statusCode, features) {
       const data = STATUS_DATA[statusCode];
-      const hasFeatures = features && features.length;
+      const hasFeatures = features?.length;
       
       const zonesHTML = hasFeatures
         ? `<div class="evac-zones">${features.map(f => 
@@ -318,13 +315,8 @@
         'esri/widgets/Fullscreen'
       ], (WebMap, MapView, FeatureLayer, Search, Fullscreen) => {
 
-        if (DOM.infoButton) {
-          DOM.infoButton.addEventListener('click', () => { location.href = 'info.html'; });
-        }
-
-        if (DOM.overviewButton) {
-          DOM.overviewButton.addEventListener('click', () => { location.href = 'overview.html'; });
-        }
+        DOM.infoButton?.addEventListener('click', () => location.href = 'info.html');
+        DOM.overviewButton?.addEventListener('click', () => location.href = 'overview.html');
 
         const webmap = new WebMap({ portalItem: { id: CONFIG.webmapId } });
         const view = new MapView({ container: 'viewDiv', map: webmap });
@@ -332,7 +324,9 @@
         // Disable scroll zoom on mobile for better UX
         if (window.innerWidth < 700 && view.navigation) {
           view.navigation.mouseWheelZoomEnabled = false;
-          if ('browserTouchPanEnabled' in view.navigation) view.navigation.browserTouchPanEnabled = false;
+          if ('browserTouchPanEnabled' in view.navigation) {
+            view.navigation.browserTouchPanEnabled = false;
+          }
         }
 
         const incidentLayer = new FeatureLayer({
@@ -430,18 +424,14 @@
       };
 
       DOM.coderedButton.addEventListener('click', open);
-      if (DOM.coderedClose) DOM.coderedClose.addEventListener('click', close);
+      DOM.coderedClose?.addEventListener('click', close);
 
       DOM.coderedOverlay.addEventListener('click', (e) => {
-        if (e.target === DOM.coderedOverlay) {
-          close();
-        }
+        if (e.target === DOM.coderedOverlay) close();
       });
 
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && DOM.coderedOverlay.classList.contains('is-open')) {
-          close();
-        }
+        if (e.key === 'Escape' && DOM.coderedOverlay.classList.contains('is-open')) close();
       });
     }
 

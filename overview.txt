@@ -1,0 +1,42 @@
+This project is a public-facing evacuation viewer for La Plata County. Residents start on a simple info homepage where they can see who’s in charge, learn what “Ready / Set / Go” means, and pick an active incident. From there, they jump into a focused incident page that shows a live ArcGIS web map, which zones are in SET or GO, and rich status details pulled from a Google Sheet (so non-technical staff can update wording without touching code). A shared stylesheet keeps everything visually consistent, and a small Apps Script turns spreadsheet rows into styled HTML cards.
+
+Goal: Provide clear, mobile-friendly evacuation info that non-technical staff can keep up to date.
+
+User flow:
+  Land on info.html → see general guidance + list of active incidents.
+  Tap an incident chip → go to evac.html?incident=Name.
+  On evac page → see map, SET/GO zones, and a detailed status panel from Google Sheets.
+Data sources:
+  ArcGIS WebMap + FeatureLayer (LPC_Evac_Zones_View) for incidents and zones.
+  Google Sheet (“IncidentStatus”) + Apps Script for status text, shelters, check-in, animals, etc.
+Design:
+  One shared CSS file for both pages and injected HTML (so everything looks like one app).
+  Fully responsive, tuned for phones but still clean on desktop.
+File-by-file highlights
+  info.html – Evacuation Information Home
+  Shows logo, ReadyLaPlata title, and call center number.
+  Queries ArcGIS for a distinct list of incidents and renders them as clickable chips.
+  Provides static educational cards for Ready / Set / Go and CodeRED signup.
+  Clicking a chip opens evac.html?incident=ThatIncident.
+evac.html – Incident Map & Live Status
+  Reads ?incident= from the URL.
+  Uses ArcGIS WebMap to show the incident map with Search and Fullscreen widgets.
+  Queries evac zones to build SET and GO cards with zone chips.
+  Calls the Apps Script URL with ?incident=... and injects the returned HTML into the status panel.
+  Rebuilds incident chips (like info.html) so users can switch incidents directly from the map.
+shared-styles.css – Shared Design System
+  Defines the card layout, typography, colors, and spacing for both pages.
+  Styles the header, incident strip, chips, SET/GO cards, and status cards.
+  Includes responsive tweaks so the UI works well on mobile devices.
+  Normalizes the look of the HTML that comes back from Apps Script via .status-html.
+Google Apps Script – IncidentStatus HTML Service
+  Entry point: doGet(e) expects ?incident=....
+  Looks up the matching row in the IncidentStatus sheet.
+  Builds a set of mini-cards for:
+  Status update link
+  Check-in location(s)
+  Shelters
+  Road closures
+  Small and large animal evacuation info (with “Get directions” links)
+  Caches each incident’s HTML for 15 seconds to keep things fast and reduce Sheet reads.
+  Returns ready-to-inject HTML that evac.html drops into the page under the map.

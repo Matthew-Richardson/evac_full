@@ -128,6 +128,30 @@
         <span class="source-label">Source: La Plata County Office of Emergency Management</span>
       </div>
     </div>
+
+    <!-- Past Incidents Section -->
+    <div class="incident-panel">
+      <div class="past-incidents-card">
+        <div class="past-incidents-header">
+          <svg class="past-incidents-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <h2 class="past-incidents-title">Past Incidents</h2>
+        </div>
+        <div id="pastIncidentsTable" class="past-incidents-body">
+          <div class="past-incidents-loading">Loading past incidents...</div>
+        </div>
+        <div class="past-incidents-disclaimer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>Even after evacuations are lifted, emergency personnel may still be active in the area. Please follow all posted signs and instructions.</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- CodeRED Modal -->
@@ -166,6 +190,7 @@
     // ========== CONFIGURATION ==========
     const CONFIG = {
       incidentLayerUrl: 'https://services2.arcgis.com/ilLrLpXfElYxSy9y/ArcGIS/rest/services/LPC_Evac_Zones_View/FeatureServer/0',
+      statusBaseUrl: 'https://script.google.com/macros/s/AKfycbxOFlSc6xXHqERr7n9VQbfnXnPGRqsvbgUs5lx4y6cy9YfnYSGFkLk5nSut66ecoRUwtA/exec',
       incidentField: 'incident',
       mapCenter: [-107.8801, 37.2753],
       mapScale: 800000
@@ -181,7 +206,8 @@
       coderedClose: null,
       lastLoaded: null,
       noIncidentsMsg: null,
-      noIncidentCodered: null
+      noIncidentCodered: null,
+      pastIncidentsTable: null
     };
 
     function cacheDOM() {
@@ -194,6 +220,7 @@
       DOM.lastLoaded = document.getElementById('lastLoaded');
       DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
       DOM.noIncidentCodered = document.getElementById('noIncidentCodered');
+      DOM.pastIncidentsTable = document.getElementById('pastIncidentsTable');
     }
 
     // ========== NAVIGATION ==========
@@ -430,11 +457,27 @@
       });
     }
 
+    // ========== PAST INCIDENTS ==========
+    async function loadPastIncidents() {
+      if (!DOM.pastIncidentsTable) return;
+
+      try {
+        const res = await fetch(`${CONFIG.statusBaseUrl}?type=past`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const html = await res.text();
+        DOM.pastIncidentsTable.innerHTML = html;
+      } catch (err) {
+        console.error('Error loading past incidents:', err);
+        DOM.pastIncidentsTable.innerHTML = '<div class="past-incidents-error">Unable to load past incidents.</div>';
+      }
+    }
+
     // ========== INIT ==========
     function init() {
       cacheDOM();
       setupNavigation();
       initCoderedOverlay();
+      loadPastIncidents();
       initMap();
     }
 

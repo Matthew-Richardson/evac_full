@@ -1122,11 +1122,19 @@ main {
 
 .past-incidents-body {
   padding: 0;
-  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 220px;
 }
 
 .past-incidents-body table {
   min-width: 100%;
+}
+
+.past-incidents-body thead th {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 1;
 }
 
 .past-incidents-loading,

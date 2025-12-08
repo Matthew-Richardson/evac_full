@@ -196,7 +196,7 @@ readylaplata/
 
 ## Contributing
 
-This project is maintained by La Plata County Office of Emergency Management. For questions or issues, contact the LPCOEM GIS team.
+This project is maintained by La Plata County GIS on behalf of La Plata County Office of Emeregency Management. For questions or issues, contact the LPCOEM GIS team.
 
 ---
 

@@ -208,6 +208,6 @@ This project is maintained by La Plata County Office of Emergency Management. Fo
 
 ## Related Links
 
-- [La Plata County OEM](https://www.co.laplata.co.us/government/departments/emergency_management/)
-- [CodeRED Signup](https://public.coderedweb.com/CNE/en-US/)
-- [ArcGIS Online](https://www.arcgis.com/)
+- [La Plata County OEM](https://www.lpcgov.org/departments/emergency_management/index.php)
+- [CodeRED Signup](https://identityservice.onsolve.net/SignIn?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3Dself-registration-user%26redirect_uri%3Dhttps%253A%252F%252Faccountportal.onsolve.net%252Fidentity%252Fsignin%252Fcallback%26response_type%3Dcode%26scope%3Dopenid%2520profile%2520onsolve-selfregistration-api%2520openid%2520profile%26state%3D49411630fb2341248d15e07142c80a35_eyJwb3J0YWxVcmwiOiIvbHBjYWxlcnRzIn0%253D%26code_challenge%3DJ7dvCveZwfzly7cYcG9afqOZqiBpxM4OWUei679ZZnQ%26code_challenge_method%3DS256%26response_mode%3Dquery%26branding_descriptor%3DeyJwb3J0YWxJZCI6NTM1MX0%253D%26organization_uuid%3D9f2d09f5-273c-465d-a5d8-993d5e9d88f4%26division_uuid%3D009d9956-000e-3000-80c0-fceb55463ffe%26ui_lang%3Den-US%26origin%3Dhttps%253A%252F%252Faccountportal.onsolve.net%252Flpcalerts)
+- [La Plata County GIS/IT](https://www.lpcgov.org/departments/gis___mapping/index.php)

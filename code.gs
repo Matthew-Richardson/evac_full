@@ -271,6 +271,7 @@ function buildHtml(r) {
 
 // ========== HEADER BLOCK ==========
 function headerBlock(statusLink) {
+  const normalizedLink = normalizeUrl(statusLink);
   return `
   <div style="
     padding:14px 18px;
@@ -295,8 +296,8 @@ function headerBlock(statusLink) {
           color:${BRAND.text};
         ">Incident Support Resources</div>
       </div>
-      ${statusLink ? `
-      <a href="${str(statusLink)}" target="_blank" rel="noopener noreferrer" class="status-btn" style="
+      ${normalizedLink ? `
+      <a href="${normalizedLink}" target="_blank" rel="noopener noreferrer" class="status-btn" style="
         display:inline-flex;
         align-items:center;
         justify-content:center;
@@ -538,6 +539,17 @@ function svgWarningIcon() {
 }
 
 // ========== UTILITIES ==========
+function normalizeUrl(url) {
+  url = str(url);
+  if (!url) return '';
+  // Already has a protocol
+  if (/^https?:\/\//i.test(url)) return url;
+  // Has protocol without slashes (e.g., "https:example.com")
+  if (/^https?:/i.test(url)) return url.replace(/^(https?:)/i, '$1//');
+  // No protocol - add https://
+  return 'https://' + url;
+}
+
 function str(v) { return String(v || '').trim(); }
 function esc(s) {
   return String(s)

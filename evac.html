@@ -5,32 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReadyLaPlata — La Plata County Evacuation Viewer</title>
   
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  
-  <!-- Meta Tags -->
   <meta name="description" content="Official evacuation information and interactive maps for La Plata County, Colorado. View active incidents, evacuation zones, and sign up for emergency alerts.">
   <meta name="theme-color" content="#0b4da2">
   
-  <!-- Open Graph -->
   <meta property="og:title" content="ReadyLaPlata — La Plata County Evacuation Viewer">
   <meta property="og:description" content="Official evacuation information and interactive maps for La Plata County, Colorado. View active incidents and evacuation zones.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="en_US">
   
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="ReadyLaPlata — La Plata County Evacuation Viewer">
   <meta name="twitter:description" content="Official evacuation information for La Plata County, Colorado.">
 
-  <!-- DNS prefetch & preconnect for external resources -->
   <link rel="dns-prefetch" href="//js.arcgis.com">
   <link rel="dns-prefetch" href="//services2.arcgis.com">
   <link rel="dns-prefetch" href="//cms9files.revize.com">
   <link rel="preconnect" href="https://js.arcgis.com" crossorigin>
   <link rel="preconnect" href="https://services2.arcgis.com" crossorigin>
 
-  <!-- Critical CSS inline for fastest first paint -->
   <style>
     *,*::before,*::after{box-sizing:border-box}
     html,body{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;background:#f5f5f7;font-size:18px;overflow-x:hidden;color:#000}
@@ -40,11 +33,9 @@
     #viewDiv{width:100%;height:clamp(400px, 55vh, 550px);background:#e5e5e5}
   </style>
 
-  <!-- Non-critical CSS loaded async -->
   <link rel="stylesheet" href="shared-styles.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="shared-styles.css"></noscript>
 
-  <!-- ArcGIS CSS - loaded async -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css"></noscript>
 </head>
@@ -55,16 +46,7 @@
       <div class="map-card">
 
         <div class="card-brand">
-          <img
-            src="https://cms9files.revize.com/laplata/_assets_/images/logo.png"
-            alt="La Plata County Logo"
-            class="header-logo"
-            width="260"
-            height="auto"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          >
+          <img src="https://cms9files.revize.com/laplata/_assets_/images/logo.png" alt="La Plata County Logo" class="header-logo" width="260" height="auto" loading="eager" fetchpriority="high" decoding="async">
           <div class="site-title">ReadyLaPlata — La Plata County Evacuation Viewer</div>
           <div class="call-center">
             <strong>Call Center</strong>
@@ -99,7 +81,6 @@
               </span>
             </div>
           </div>
-
           <div class="incident-tip">Tap an incident below to view the evacuation map.</div>
           <div id="incidentChips" class="incident-chips"></div>
           <div id="noIncidentsMsg" class="incident-none" style="display:none">
@@ -113,33 +94,22 @@
         <div class="map-key-merged">
           <div class="legend-title">Map Key</div>
           <div class="legend-items">
-            <div class="legend-item">
-              <span class="legend-icon-road"></span>
-              <span>Road closure</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-icon-info">i</span>
-              <span>Information</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-icon-warning"></span>
-              <span>Special warning</span>
-            </div>
+            <div class="legend-item"><span class="legend-icon-road"></span><span>Road closure</span></div>
+            <div class="legend-item"><span class="legend-icon-info">i</span><span>Information</span></div>
+            <div class="legend-item"><span class="legend-icon-warning"></span><span>Special warning</span></div>
           </div>
         </div>
-
       </div>
     </div>
 
     <main>
       <div id="evacRow" class="evac-row">Loading evacuation information…</div>
       <div class="incident-panel">
-        <div id="incident-panel">Loading incident status…</div>
+        <div id="incidentPanel">Loading incident status…</div>
       </div>
     </main>
   </div>
 
-  <!-- CodeRED Overlay -->
   <div id="coderedOverlay" class="codered-overlay" aria-hidden="true">
     <div class="codered-dialog" role="dialog" aria-modal="true" aria-labelledby="coderedTitle">
       <button id="coderedClose" class="codered-close" type="button" aria-label="Close CodeRED info">×</button>
@@ -151,22 +121,12 @@
         <p>Choose one of the options below to enroll or confirm your subscription:</p>
       </div>
       <div class="codered-actions">
-        <a
-          href="https://public.coderedweb.com/CNE/en-US/"
-          class="primary-pill"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Sign up on CodeRED website
-        </a>
-        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">
-          Text "LPCOEM" to 99411
-        </a>
+        <a href="https://public.coderedweb.com/CNE/en-US/" class="primary-pill" target="_blank" rel="noopener noreferrer">Sign up on CodeRED website</a>
+        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">Text "LPCOEM" to 99411</a>
       </div>
     </div>
   </div>
 
-  <!-- ArcGIS SDK loaded with defer -->
   <script src="https://js.arcgis.com/4.31/" defer></script>
 
   <script>
@@ -183,58 +143,53 @@
     };
 
     const STATUS_DATA = {
-      SET: {
-        label: 'SET - Pre-Evacuation',
-        color: '#fff36a',
-        text: 'Voluntary Evacuation;<br>Evacuation orders are likely'
-      },
-      GO: {
-        label: 'GO - Evacuate Now',
-        color: '#41f56e',
-        text: '<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.'
-      }
+      SET: { label: 'SET - Pre-Evacuation', color: '#fff36a', text: 'Voluntary Evacuation;<br>Evacuation orders are likely' },
+      GO: { label: 'GO - Evacuate Now', color: '#41f56e', text: '<strong>LEAVE NOW.</strong> Immediate threat to life.<br>This area is closed to public access.' }
     };
 
-    // ========== CACHED DOM ELEMENTS ==========
+    // ========== DOM CACHE ==========
+    const $ = id => document.getElementById(id);
     const DOM = {};
-    
-    function cacheDOM() {
-      DOM.evacRow = document.getElementById('evacRow');
-      DOM.incidentPanel = document.getElementById('incident-panel');
-      DOM.chipsEl = document.getElementById('incidentChips');
-      DOM.countBadge = document.getElementById('incidentCountBadge');
-      DOM.noIncidentsMsg = document.getElementById('noIncidentsMsg');
-      DOM.noIncidentCodered = document.getElementById('noIncidentCodered');
-      DOM.infoButton = document.getElementById('infoButton');
-      DOM.overviewButton = document.getElementById('overviewButton');
-      DOM.coderedButton = document.getElementById('coderedButton');
-      DOM.coderedOverlay = document.getElementById('coderedOverlay');
-      DOM.coderedClose = document.getElementById('coderedClose');
-    }
 
-    // ========== UTILITIES ==========
+    // ========== URL PARAMETER (computed once) ==========
     const INCIDENT = (() => {
-      try {
-        const params = new URLSearchParams(location.search);
-        const inc = (params.get('incident') || params.get('Incident') || '').trim();
-        if (inc) {
-          document.title = `${inc} — ReadyLaPlata`;
-        }
-        return inc || null;
-      } catch { return null; }
+      const params = new URLSearchParams(location.search);
+      const inc = (params.get('incident') || params.get('Incident') || '').trim();
+      if (inc) document.title = `${inc} — ReadyLaPlata`;
+      return inc || null;
     })();
 
-    const escapeQuery = str => str.replace(/'/g, "''");
+    // ========== UTILITIES ==========
+    const escapeQuery = s => s.replace(/'/g, "''");
+
+    const sortIncidents = (names, target) => {
+      const targetLower = target?.toLowerCase();
+      return names.sort((a, b) => {
+        const al = a.toLowerCase(), bl = b.toLowerCase();
+        if (targetLower) {
+          if (al === targetLower) return -1;
+          if (bl === targetLower) return 1;
+        }
+        return al.localeCompare(bl);
+      });
+    };
+
+    const createChip = (name, onClick) => {
+      const chip = document.createElement('button');
+      chip.className = 'incident-chip';
+      chip.dataset.incident = name;
+      chip.innerHTML = `<span class="incident-chip-icon">!</span><span>${name}</span>`;
+      chip.addEventListener('click', onClick);
+      return chip;
+    };
 
     // ========== HTML BUILDERS ==========
-    function buildBox(statusCode, features) {
+    const buildBox = (statusCode, features) => {
       const data = STATUS_DATA[statusCode];
-      const hasFeatures = features?.length;
+      const hasFeatures = features?.length > 0;
       
       const zonesHTML = hasFeatures
-        ? `<div class="evac-zones">${features.map(f => 
-            `<div class="zone-chip">${f.attributes.zonename}</div>`
-          ).join('')}</div>`
+        ? `<div class="evac-zones">${features.map(f => `<div class="zone-chip">${f.attributes.zonename}</div>`).join('')}</div>`
         : `<div class="evac-zones"><div class="no-zones-chip">No ${statusCode} zones</div></div>`;
 
       const boxClass = statusCode === 'GO' ? ' evac-box-go' : statusCode === 'SET' ? ' evac-box-set' : '';
@@ -247,9 +202,9 @@
           <div class="evac-note">${data.text}</div>
         </div>
       </div>`;
-    }
+    };
 
-    function showHelp() {
+    const showHelp = () => {
       DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#f3f4f6">
         <div class="evac-title">How to use this page</div>
         <div class="evac-body">
@@ -266,14 +221,14 @@
           <div style="margin-top:8px">Append <code>?incident=YourIncidentName</code> to the URL.</div>
         </div>
       </div>`;
-    }
+    };
 
-    function showError(message) {
+    const showError = msg => {
       DOM.evacRow.innerHTML = `<div class="evac-box" style="background:#fff36a">
         <div class="evac-title">Error</div>
-        <div class="evac-body">${message}</div>
+        <div class="evac-body">${msg}</div>
       </div>`;
-    }
+    };
 
     // ========== DATA FETCHING ==========
     async function loadEvacuationZones() {
@@ -293,16 +248,17 @@
             <div class="evac-body">
               <div>No evacuation zones are currently active for <strong>${INCIDENT}</strong>.</div>
               <div style="margin-top:12px">This incident may have ended or the name may have changed.</div>
-              <div style="margin-top:12px">
-                <a href="overview.html" class="primary-pill" style="text-decoration:none;">View All Active Incidents</a>
-              </div>
+              <div style="margin-top:12px"><a href="overview.html" class="primary-pill" style="text-decoration:none;">View All Active Incidents</a></div>
             </div>
           </div>`;
           return;
         }
 
-        const setFeatures = data.features.filter(f => f.attributes.STATUS === CONFIG.statusValues.SET);
-        const goFeatures = data.features.filter(f => f.attributes.STATUS === CONFIG.statusValues.GO);
+        const setFeatures = [], goFeatures = [];
+        for (const f of data.features) {
+          if (f.attributes.STATUS === CONFIG.statusValues.SET) setFeatures.push(f);
+          else if (f.attributes.STATUS === CONFIG.statusValues.GO) goFeatures.push(f);
+        }
         DOM.evacRow.innerHTML = buildBox('SET', setFeatures) + buildBox('GO', goFeatures);
       } catch (err) {
         console.error('Error loading evacuation zones:', err);
@@ -338,11 +294,8 @@
       }
 
       require([
-        'esri/WebMap',
-        'esri/views/MapView',
-        'esri/layers/FeatureLayer',
-        'esri/widgets/Search',
-        'esri/widgets/Fullscreen'
+        'esri/WebMap', 'esri/views/MapView', 'esri/layers/FeatureLayer',
+        'esri/widgets/Search', 'esri/widgets/Fullscreen'
       ], (WebMap, MapView, FeatureLayer, Search, Fullscreen) => {
 
         DOM.infoButton?.addEventListener('click', () => location.href = 'info.html');
@@ -351,12 +304,10 @@
         const webmap = new WebMap({ portalItem: { id: CONFIG.webmapId } });
         const view = new MapView({ container: 'viewDiv', map: webmap });
 
-        // Disable scroll zoom on mobile for better UX
+        // Disable scroll zoom on mobile
         if (window.innerWidth < 700 && view.navigation) {
           view.navigation.mouseWheelZoomEnabled = false;
-          if ('browserTouchPanEnabled' in view.navigation) {
-            view.navigation.browserTouchPanEnabled = false;
-          }
+          view.navigation.browserTouchPanEnabled = false;
         }
 
         const incidentLayer = new FeatureLayer({
@@ -368,8 +319,7 @@
         webmap.add(incidentLayer);
 
         const zoomToIncident = name => {
-          const where = `${CONFIG.incidentField} = '${escapeQuery(name)}'`;
-          return incidentLayer.queryExtent({ where })
+          incidentLayer.queryExtent({ where: `${CONFIG.incidentField} = '${escapeQuery(name)}'` })
             .then(res => res.extent && view.goTo(res.extent.expand(1.2)))
             .catch(console.error);
         };
@@ -392,39 +342,20 @@
               .filter(Boolean);
 
             DOM.countBadge.textContent = names.length;
-            if (names.length > 0) {
-              DOM.countBadge.classList.add('has-incidents');
-            }
-
-            if (!names.length) {
-              DOM.noIncidentsMsg.style.display = 'block';
-              return;
-            }
+            if (names.length) DOM.countBadge.classList.add('has-incidents');
+            else { DOM.noIncidentsMsg.style.display = 'block'; return; }
             DOM.noIncidentsMsg.style.display = 'none';
 
-            const target = INCIDENT?.toLowerCase();
-            names.sort((a, b) => {
-              const al = a.toLowerCase(), bl = b.toLowerCase();
-              if (target) {
-                if (al === target && bl !== target) return -1;
-                if (bl === target && al !== target) return 1;
-              }
-              return al.localeCompare(bl);
-            });
+            sortIncidents(names, INCIDENT);
 
             const frag = document.createDocumentFragment();
-            names.forEach(name => {
-              const chip = document.createElement('button');
-              chip.className = 'incident-chip';
-              chip.dataset.incident = name;
-              chip.innerHTML = `<span class="incident-chip-icon">!</span><span>${name}</span>`;
-              chip.addEventListener('click', () => {
+            for (const name of names) {
+              frag.appendChild(createChip(name, () => {
                 const url = new URL(location.href);
                 url.searchParams.set('incident', name);
                 location.href = url;
-              });
-              frag.appendChild(chip);
-            });
+              }));
+            }
             DOM.chipsEl.appendChild(frag);
 
             if (INCIDENT) {
@@ -442,41 +373,37 @@
       });
     }
 
-    // ========== CODERED OVERLAY INIT ==========
+    // ========== CODERED OVERLAY ==========
     function initCoderedOverlay() {
-      if (!DOM.coderedButton || !DOM.coderedOverlay) return;
+      const overlay = DOM.coderedOverlay;
+      if (!DOM.coderedButton || !overlay) return;
 
-      const open = () => {
-        DOM.coderedOverlay.classList.add('is-open');
-        DOM.coderedOverlay.setAttribute('aria-hidden', 'false');
+      const toggle = open => {
+        overlay.classList.toggle('is-open', open);
+        overlay.setAttribute('aria-hidden', String(!open));
       };
 
-      const close = () => {
-        DOM.coderedOverlay.classList.remove('is-open');
-        DOM.coderedOverlay.setAttribute('aria-hidden', 'true');
-      };
-
-      DOM.coderedButton.addEventListener('click', open);
-      DOM.coderedClose?.addEventListener('click', close);
-      
-      // Link in "no incidents" message
-      DOM.noIncidentCodered?.addEventListener('click', (e) => {
-        e.preventDefault();
-        open();
-      });
-
-      DOM.coderedOverlay.addEventListener('click', (e) => {
-        if (e.target === DOM.coderedOverlay) close();
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && DOM.coderedOverlay.classList.contains('is-open')) close();
-      });
+      DOM.coderedButton.addEventListener('click', () => toggle(true));
+      DOM.coderedClose?.addEventListener('click', () => toggle(false));
+      DOM.noIncidentCodered?.addEventListener('click', e => { e.preventDefault(); toggle(true); });
+      overlay.addEventListener('click', e => { if (e.target === overlay) toggle(false); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('is-open')) toggle(false); });
     }
 
     // ========== INIT ==========
     function init() {
-      cacheDOM();
+      DOM.evacRow = $('evacRow');
+      DOM.incidentPanel = $('incidentPanel');
+      DOM.chipsEl = $('incidentChips');
+      DOM.countBadge = $('incidentCountBadge');
+      DOM.noIncidentsMsg = $('noIncidentsMsg');
+      DOM.noIncidentCodered = $('noIncidentCodered');
+      DOM.infoButton = $('infoButton');
+      DOM.overviewButton = $('overviewButton');
+      DOM.coderedButton = $('coderedButton');
+      DOM.coderedOverlay = $('coderedOverlay');
+      DOM.coderedClose = $('coderedClose');
+
       initCoderedOverlay();
       loadEvacuationZones();
       loadIncidentStatus();

@@ -167,11 +167,23 @@ ReadyLaPlata is the official evacuation information viewer for La Plata County O
 
 ---
 
-## Security
+## Privacy & Security
 
+This application is **public-facing** and **read-only**.
+
+### Privacy
+
+- **No user accounts or login** — All information is publicly accessible
+- **No personal information collected** — No forms, no user input stored
+- **Public data only** — Evacuation zones and incident resources are public record
+- **Future:** Google Analytics may be added for usage metrics (page views, device types)
+
+### Security
+
+- **Read-only** — The application only displays data; it cannot modify ArcGIS or Google Sheets
 - All external links use `rel="noopener noreferrer"`
-- No inline event handlers (CSP-friendly)
 - HTML escaping for all user-provided content
+- SQL injection prevention in ArcGIS queries
 - HTTPS enforced for all external resources
 
 ---

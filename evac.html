@@ -45,16 +45,26 @@
     <div class="map-wrapper">
       <div class="map-card">
 
-        <div class="card-brand">
-          <img src="https://cms9files.revize.com/laplata/_assets_/images/logo.png" alt="La Plata County Logo" class="header-logo" width="260" height="auto" loading="eager" fetchpriority="high" decoding="async">
-          <div class="site-title">ReadyLaPlata — La Plata County Evacuation Viewer</div>
+        <div class="alert-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Official La Plata County Emergency Information
+        </div>
+
+        <div class="brand-banner">
+          <div class="brand-left">
+            <img src="https://cms9files.revize.com/laplata/_assets_/images/logo.png" alt="La Plata County Logo" class="header-logo" width="44" height="auto" loading="eager" fetchpriority="high" decoding="async">
+            <div class="brand-text">
+              <div class="site-name">ReadyLaPlata</div>
+              <div class="site-subtitle">La Plata County Evacuation Viewer</div>
+            </div>
+          </div>
           <div class="call-center">
             <strong>Call Center</strong>
             <a href="tel:9703858700">970-385-8700</a>
           </div>
         </div>
 
-        <div class="incident-nav-centered">
+        <div class="incident-nav-centered nav-3-buttons">
           <button id="infoButton" class="info-link" type="button" aria-label="Home">
             <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             <span class="info-label-full">Home</span>
@@ -133,8 +143,14 @@
         <p>Choose one of the options below to enroll or confirm your subscription:</p>
       </div>
       <div class="codered-actions">
-        <a href="https://public.coderedweb.com/CNE/en-US/" class="primary-pill" target="_blank" rel="noopener noreferrer">Sign up on CodeRED website</a>
-        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">Text "LPCOEM" to 99411</a>
+        <a href="https://public.coderedweb.com/CNE/en-US/" class="primary-pill" target="_blank" rel="noopener noreferrer">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Sign up on CodeRED
+        </a>
+        <a href="sms:99411?&body=LPCOEM" class="secondary-pill">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Text "LPCOEM" to 99411
+        </a>
       </div>
     </div>
   </div>

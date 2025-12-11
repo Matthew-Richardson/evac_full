@@ -87,11 +87,12 @@ html, body {
 
 .brand-banner {
   background: linear-gradient(135deg, #0b4da2 0%, #1565c0 100%);
-  padding: 18px 18px 14px;
+  padding: 18px 18px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  border-radius: 0 0 24px 24px;
 }
 
 .brand-center {
@@ -101,17 +102,14 @@ html, body {
   gap: 8px;
 }
 
-.logo-container {
-  background: #fff;
-  border-radius: 16px;
-  padding: 14px 18px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-}
-
 .header-logo {
-  width: 160px;
+  width: 180px;
   height: auto;
   display: block;
+  filter: 
+    drop-shadow(0 0 12px rgba(255,255,255,0.5))
+    drop-shadow(0 0 6px rgba(255,255,255,0.4))
+    drop-shadow(0 4px 10px rgba(0,0,0,0.25));
 }
 
 .brand-text {
@@ -246,20 +244,27 @@ html, body {
   height: 16px;
 }
 
+/* Content overlap for smooth transition */
+.content-overlap {
+  background: #fff;
+  margin-top: -24px;
+  border-radius: 16px 16px 0 0;
+  padding-top: 20px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  position: relative;
+  z-index: 1;
+}
+
 /* Mobile styles */
 @media (max-width: 600px) {
   .brand-banner {
-    padding: 14px 12px 12px;
+    padding: 14px 12px 36px;
     gap: 12px;
-  }
-  
-  .logo-container {
-    padding: 10px 14px;
-    border-radius: 12px;
+    border-radius: 0 0 20px 20px;
   }
   
   .header-logo {
-    width: 120px;
+    width: 140px;
   }
   
   .site-name {
@@ -306,6 +311,12 @@ html, body {
   .banner-nav.nav-3-buttons .nav-btn {
     font-size: 11px;
     padding: 6px 10px;
+  }
+  
+  .content-overlap {
+    margin-top: -20px;
+    border-radius: 14px 14px 0 0;
+    padding-top: 16px;
   }
 }
 

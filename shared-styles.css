@@ -977,7 +977,7 @@ main {
   padding: 12px;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 12px auto;
+  margin: 6px auto 18px;
 }
 
 .evac-box {
@@ -1119,7 +1119,7 @@ main {
 
 .home-wrapper {
   max-width: 900px;
-  margin: 16px auto 0;
+  margin: 8px auto 0;
   padding: 0;
 }
 
@@ -1353,7 +1353,7 @@ main {
 .preview-container {
   max-width: 100%;
   width: 100%;
-  margin: 16px 0 24px;
+  margin: 0 0 16px;
   padding: 0;
 }
 

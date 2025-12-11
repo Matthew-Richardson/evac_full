@@ -87,40 +87,31 @@ html, body {
 
 .brand-banner {
   background: linear-gradient(135deg, #0b4da2 0%, #1565c0 100%);
-  padding: 14px 18px 12px;
+  padding: 18px 18px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.banner-top {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  min-height: 90px;
+  gap: 14px;
 }
 
 .brand-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .logo-container {
   background: #fff;
-  border-radius: 12px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
 .header-logo {
-  width: 80px;
+  width: 160px;
   height: auto;
+  display: block;
 }
 
 .brand-text {
@@ -129,61 +120,37 @@ html, body {
 }
 
 .site-name {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 800;
   line-height: 1.2;
 }
 
 .site-subtitle {
-  font-size: 11px;
-  opacity: 0.85;
+  font-size: 12px;
+  opacity: 0.8;
   font-weight: 500;
+  margin-top: 2px;
 }
 
-.call-center {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(4px);
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  color: #fff;
-  flex-shrink: 0;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.call-center strong {
+.official-badge {
+  background: rgba(0,0,0,0.2);
+  color: rgba(255,255,255,0.9);
+  padding: 4px 12px;
+  border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.9;
 }
 
-.call-center a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 17px;
-}
-
-.call-center a:hover {
-  text-decoration: underline;
-}
-
-/* Nav inside banner */
+/* Nav row with call center */
 .banner-nav {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.15);
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .banner-nav .nav-btn {
@@ -193,14 +160,13 @@ html, body {
   border: none;
   background: rgba(255,255,255,0.95);
   color: #0b4da2;
+  font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  font-weight: 700;
-  transition: all 0.2s;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: all 0.2s;
 }
 
 .banner-nav .nav-btn:hover {
@@ -214,14 +180,50 @@ html, body {
   height: 16px;
 }
 
-/* 3-button variant for evac page */
-.banner-nav.nav-3-buttons {
-  gap: 8px;
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.3);
+  margin: 0 4px;
 }
 
+.call-center-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.call-center-inline .call-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.call-center-inline .phone-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.9;
+}
+
+.call-center-inline a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.call-center-inline a:hover {
+  text-decoration: underline;
+}
+
+/* 3-button variant */
 .banner-nav.nav-3-buttons .nav-btn {
   font-size: 12px;
   padding: 7px 12px;
+  gap: 5px;
 }
 
 .banner-nav.nav-3-buttons .nav-icon {
@@ -229,62 +231,76 @@ html, body {
   height: 14px;
 }
 
+.banner-nav.nav-3-buttons .nav-divider {
+  height: 22px;
+  margin: 0 2px;
+}
+
+.banner-nav.nav-3-buttons .call-center-inline {
+  font-size: 13px;
+  gap: 6px;
+}
+
+.banner-nav.nav-3-buttons .call-center-inline .phone-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Mobile styles */
 @media (max-width: 600px) {
   .brand-banner {
-    padding: 12px 14px 10px;
-  }
-  
-  .banner-top {
-    flex-direction: column;
-    gap: 10px;
-    min-height: auto;
-  }
-  
-  .call-center {
-    position: static;
-    transform: none;
+    padding: 14px 12px 12px;
+    gap: 12px;
   }
   
   .logo-container {
-    padding: 8px 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
   }
   
   .header-logo {
-    width: 70px;
+    width: 120px;
   }
   
   .site-name {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .site-subtitle {
-    font-size: 10px;
+    font-size: 11px;
+  }
+  
+  .official-badge {
+    font-size: 9px;
+    padding: 3px 10px;
   }
   
   .banner-nav {
-    padding-top: 6px;
     gap: 8px;
-  }
-  
-  .banner-nav .nav-btn {
-    font-size: 12px;
-    padding: 7px 12px;
-  }
-  
-  .banner-nav .nav-icon {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .banner-nav {
-    flex-wrap: wrap;
   }
   
   .banner-nav .nav-btn {
     font-size: 11px;
     padding: 6px 10px;
+    gap: 4px;
+  }
+  
+  .banner-nav .nav-icon {
+    width: 13px;
+    height: 13px;
+  }
+  
+  .nav-divider {
+    display: none;
+  }
+  
+  .call-center-inline {
+    width: 100%;
+    justify-content: center;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    margin-top: 4px;
+    font-size: 13px;
   }
   
   .banner-nav.nav-3-buttons .nav-btn {
